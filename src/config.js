@@ -1,3 +1,5 @@
+import MenuScene from './scenes/MenuScene.js';
+
 // * Configuration Phaser. La résolution est celle de la borne d'arcade : 1280 x 720 (16:9).
 
 
@@ -13,4 +15,6 @@ export default {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
+  // * La première scène de la liste est celle qui démarre
+  scene: [MenuScene],
 };
