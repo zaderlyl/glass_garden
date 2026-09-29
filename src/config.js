@@ -1,4 +1,5 @@
 import MenuScene from './scenes/MenuScene.js';
+import HubScene from './scenes/HubScene.js';
 
 // * Configuration Phaser. La résolution est celle de la borne d'arcade : 1280 x 720 (16:9).
 
@@ -16,5 +17,6 @@ export default {
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
   // * La première scène de la liste est celle qui démarre
-  scene: [MenuScene],
+  // ? HubScene est en premier le temps de développer le joueur. Le menu redeviendra la première scène.
+  scene: [HubScene, MenuScene],
 };
