@@ -75,7 +75,7 @@ git pull
 git checkout -b feature/xxx
 # ... on code ...
 git add <fichiers>
-git commit -m "Ajoute le déplacement du joueur"
+git commit -m "feat: Ajoute le déplacement du joueur"
 git push -u origin feature/xxx
 ```
 
@@ -108,13 +108,33 @@ new ShootingSystem(scene, { speed: 300, cooldown: 500, onHit: (boite) => boite.o
 
 ### Messages de commit
 
-**En français**, à l'indicatif, court, à la première personne implicite (« Ajoute… », « Corrige… »).
+On suit le format **Conventional Commits** :
+
+```
+type: Description courte
+```
+
+La description est **en français**, à l'indicatif (« Ajoute… », « Corrige… »), sans point final.
+
+| Type | Quand l'utiliser | Exemple |
+|---|---|---|
+| `feat` | Nouvelle fonctionnalité | `feat: Ajoute la téléportation par les miroirs` |
+| `fix` | Correction d'un **bug** (quelque chose était cassé) | `fix: Corrige le joueur bloqué dans les murs` |
+| `assets` | Ajout ou modification de sprites, sons, maps | `assets: Ajoute les sprites du joueur 1` |
+| `docs` | Documentation, GDD, journal | `docs: Met à jour le journal du jour` |
+| `refactor` | Réorganiser le code sans changer son comportement | `refactor: Déplace les touches dans InputManager` |
+| `style` | Mise en forme uniquement (indentation, espaces) | `style: Corrige l'indentation de HubScene` |
+| `chore` | Configuration, outillage, fichiers annexes | `chore: Ajoute la config VS Code` |
+
+**Attention à `feat` et `fix` :** `fix` sert uniquement à corriger un bug. Ajouter quelque chose de nouveau, c'est `feat`.
+
+Le type correspond au préfixe de la branche : `feature/...` donne des `feat:`, `fix/...` des `fix:`, `assets/...` des `assets:`.
 
 | Bien | À éviter |
 |---|---|
-| `Ajoute la téléportation par les miroirs` | `modifs` |
-| `Corrige le joueur bloqué dans les murs` | `fix` |
-| `Déplace la logique de tir dans un système` | `truc du monde 2 + autre chose` |
+| `feat: Ajoute l'écran de base Phaser en 1280x720` | `modifs` |
+| `fix: Corrige le joueur bloqué dans les murs` | `fix` |
+| `refactor: Déplace la logique de tir dans un système` | `truc du monde 2 + autre chose` |
 
 Un commit = **une idée**. Ça compte aussi pour la note individuelle : des commits clairs, ça se voit.
 
