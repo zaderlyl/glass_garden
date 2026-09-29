@@ -1,14 +1,12 @@
 <div align="center">
 
-# 🪞 GLASS GARDEN
-
-### *Un jardin, mille reflets.*
+# GLASS GARDEN
 
 **Dossier de Game Design**
 
 `SAE — Thème : Monde onirique`
 
-**Équipe :** `[Membre 1]` · `[Membre 2]` · `[Membre 3]`
+**Équipe :** `Lilian` · `Lea` · `Hina`
 
 *Version 0.1 — document vivant, à compléter au fil du développement*
 
@@ -16,7 +14,7 @@
 
 ---
 
-## 📑 Sommaire
+## Sommaire
 
 1. [Concept](#1--concept)
 2. [Univers et ambiance](#2--univers-et-ambiance)
@@ -35,8 +33,8 @@
 ## 1 · Concept
 
 > **Glass Garden** est un jeu d'aventure 2D en vue du dessus, en pixel art.
-> Au centre d'un jardin paisible se dressent des miroirs. Chacun ouvre sur une **version alternée de la réalité** : la nuit, un rêve, un automne, un monde en ruines, un jardin magique.
-> Dans chaque reflet se cache **une étoile**. Il faut toutes les récupérer, puis revenir dans le monde normal, **le plus vite possible**.
+> Au centre d'un jardin paisible se trouvent des miroirs. Chacun ouvre sur une **version alternée de la maps** : la nuit, un rêve, un automne, un monde en ruines, un jardin magique.
+> Dans chaque miroir se cache **une étoile**. Il faut toutes les récupérer, puis revenir dans le monde normal, **le plus vite possible**.
 
 | | |
 |---|---|
@@ -87,7 +85,7 @@ JARDIN  ──►  choisir un miroir  ──►  MONDE X      │
    │                        relever le défi       │
    │                                 │            │
    │                                 ▼            │
-   └──────────  retour par le miroir  ◄── ⭐      │
+   └──────────  retour par le miroir  ◄──       │
                                                   │
    Les 5 étoiles récoltées  ─────────────►  VICTOIRE
 ```
@@ -108,14 +106,14 @@ Chaque monde est bâti sur une base commune (déplacement, collisions, étoile, 
 
 ---
 
-### 🌙 Monde 1 · La Nuit
+### Monde 1 · La Nuit
 
 | | |
 |---|---|
 | **Ambiance** | Jardin plongé dans l'obscurité |
 | **Mécanique** | Exploration à la lueur d'une lampe / bougie |
 | **Objectif** | Trouver l'étoile |
-| **Difficulté** | ★☆☆☆☆ |
+| **Difficulté** |  |
 
 Le monde d'introduction. On y apprend à se déplacer dans un lieu sombre, uniquement éclairé par un halo autour du joueur. L'étoile est simplement posée quelque part dans le jardin, il suffit de la trouver et de la ramasser.
 
@@ -123,7 +121,7 @@ Le monde d'introduction. On y apprend à se déplacer dans un lieu sombre, uniqu
 
 ---
 
-### ☁️ Monde 2 · Le Rêve
+### Monde 2 · Le Rêve
 
 | | |
 |---|---|
@@ -131,7 +129,7 @@ Le monde d'introduction. On y apprend à se déplacer dans un lieu sombre, uniqu
 | **Mécanique** | Combat à distance contre les monstres de cauchemar |
 | **Ennemis** | Squelettes |
 | **Objectif** | Vaincre les monstres pour obtenir l'étoile |
-| **Difficulté** | ★★★☆☆ |
+| **Difficulté** |  |
 
 Le joueur **tire** sur des squelettes. Un seul contact avec un ennemi ou un projectile suffit à le faire **mourir : le monde recommence**. La précision et le placement sont donc essentiels.
 
@@ -139,48 +137,48 @@ Le joueur **tire** sur des squelettes. Un seul contact avec un ennemi ou un proj
 
 ---
 
-### 🍂 Monde 3 · L'Automne
+### Monde 3 · L'Automne
 
 | | |
 |---|---|
 | **Ambiance** | Le même jardin, décliné en automne |
 | **Mécanique** | Énigme posée par un petit monstre |
 | **Objectif** | Résoudre l'énigme pour recevoir l'étoile |
-| **Difficulté** | ★★☆☆☆ |
+| **Difficulté** |  |
 
 Le joueur dialogue avec un **petit monstre** qui détient l'étoile. Bien répondre à son énigme la lui fait céder.
 
-> ❓ **Énigme à définir.** Pistes : une devinette à choix multiples · trois objets à retrouver dans le jardin · des feuilles à ranger dans le bon ordre.
+>  **Énigme à définir.** Pistes : une devinette à choix multiples · trois objets à retrouver dans le jardin · des feuilles à ranger dans le bon ordre.
 
 **À faire :** système de dialogue · énigme · objet(s) interactif(s).
 
 ---
 
-### ☢️ Monde 4 · L'Apocalypse
+### Monde 4 · L'Apocalypse
 
 | | |
 |---|---|
 | **Ambiance** | Jardin dévasté, post-apocalyptique |
 | **Mécanique** | Tir sur des boîtes |
 | **Objectif** | Trouver l'étoile cachée dans l'une des boîtes |
-| **Difficulté** | ★★★☆☆ |
+| **Difficulté** |  |
 
 Le joueur doit d'abord **trouver l'arme**, placée plus loin sur la map. Il peut ensuite tirer sur les boîtes pour découvrir laquelle cache l'étoile.
 
-> ❓ **À préciser :** cherche-t-on l'étoile au hasard, ou un indice désigne-t-il la bonne boîte ?
+>  **À préciser :** cherche-t-on l'étoile au hasard, ou un indice désigne-t-il la bonne boîte ?
 
 **À faire :** ramassage de l'arme · boîtes destructibles · réutilisation du système de tir du monde 2.
 
 ---
 
-### ✨ Monde 5 · La Magie
+### Monde 5 · La Magie
 
 | | |
 |---|---|
 | **Ambiance** | Jardin magique, un sorcier veille |
 | **Mécanique** | Collecte chronométrée |
 | **Objectif** | Rapporter des diamants à un PNJ avant la fin du temps imparti |
-| **Difficulté** | ★★★★☆ |
+| **Difficulté** |  |
 
 Un **sorcier** demande des diamants. Le joueur doit les rassembler avant la fin d'un **compte à rebours**. En cas d'échec, le monde recommence.
 
@@ -192,11 +190,11 @@ Un **sorcier** demande des diamants. Le joueur doit les rassembler avant la fin 
 
 | # | Monde | Mécanique | Système clé |
 |---|---|---|---|
-| 1 | 🌙 Nuit | Exploration dans le noir | Lumière / halo |
-| 2 | ☁️ Rêve | Tir sur des squelettes | Tir + ennemis + mort |
-| 3 | 🍂 Automne | Énigme d'un monstre | Dialogues |
-| 4 | ☢️ Apocalypse | Tir sur des boîtes | Tir + objets |
-| 5 | ✨ Magie | Diamants à temps | Compte à rebours + PNJ |
+| 1 |  Nuit | Exploration dans le noir | Lumière / halo |
+| 2 |  Rêve | Tir sur des squelettes | Tir + ennemis + mort |
+| 3 |  Automne | Énigme d'un monstre | Dialogues |
+| 4 |  Apocalypse | Tir sur des boîtes | Tir + objets |
+| 5 |  Magie | Diamants à temps | Compte à rebours + PNJ |
 
 ---
 
@@ -223,9 +221,9 @@ La borne est prévue pour **deux joueurs** : chacun dispose d'**un joystick et d
 
 | Mode | Description | Statut |
 |---|---|---|
-| **Solo** | Un joueur récupère les 5 étoiles contre le chronomètre | 🎯 Prioritaire |
-| **Coopération** | Deux joueurs relèvent les épreuves ensemble | ⏳ Prévu |
-| **Compétition** | Deux joueurs se disputent le meilleur temps | 💭 Si le temps le permet |
+| **Solo** | Un joueur récupère les 5 étoiles contre le chronomètre | Prioritaire |
+| **Coopération** | Deux joueurs relèvent les épreuves ensemble | Prévu |
+| **Compétition** | Deux joueurs se disputent le meilleur temps | Si le temps le permet |
 
 ### Split screen
 
@@ -354,7 +352,7 @@ Trois développeurs, qui travaillent **tous sur le code** et en parallèle sur l
 
 ### Règles de collaboration
 
-- Une branche par fonctionnalité (`feature/nom`), fusionnée dans `main` via pull request.
+- Une branche par fonctionnalité (`feature/nom`), fusionnée dans `main` via pull request **avant la fin de la journée**.
 - On ne travaille jamais directement sur `main`.
 - `git pull` avant de commencer une session.
 - Le code doit rester **simple et commenté** : chacun doit pouvoir **expliquer n'importe quelle partie** lors de la démonstration.
