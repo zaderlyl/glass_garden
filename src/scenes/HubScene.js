@@ -2,6 +2,9 @@
 // TODO(équipe): la déplacer dans constants.js quand ce fichier existera
 const PLAYER_SPEED = 300;
 
+// Numéro de l'image du spritesheet pour chaque direction
+const FRAMES = { UP: 0, RIGHT: 1, LEFT: 2, DOWN: 3 };
+
 /**
  * * Le jardin du spawn : le monde normal, d'où partiront les miroirs.
  * Pour l'instant : on y affiche seulement le joueur 1.
@@ -23,8 +26,8 @@ export default class HubScene extends Phaser.Scene {
   create() {
     const { width, height } = this.scale;
 
-    // * On affiche la première image (frame 0) du spritesheet, au centre de l'écran
-    this.player = this.add.sprite(width / 2, height / 2, 'player_1', 0);
+    // * Le joueur commence de face (vers le bas), au centre de l'écran
+    this.player = this.add.sprite(width / 2, height / 2, 'player_1', FRAMES.DOWN);
 
     // * Le sprite est petit : on l'agrandit dans le jeu (x3), pas dans le fichier
     this.player.setScale(3);
@@ -51,6 +54,13 @@ export default class HubScene extends Phaser.Scene {
       x *= Math.SQRT1_2;
       y *= Math.SQRT1_2;
     }
+
+    // * On change l'image selon la direction. À l'arrêt, on garde la dernière image.
+    // En diagonale, la direction horizontale est prioritaire.
+    if (x > 0) this.player.setFrame(FRAMES.RIGHT);
+    else if (x < 0) this.player.setFrame(FRAMES.LEFT);
+    else if (y < 0) this.player.setFrame(FRAMES.UP);
+    else if (y > 0) this.player.setFrame(FRAMES.DOWN);
 
     // * distance = vitesse x temps : le déplacement est le même quelle que soit la fréquence d'images
     const distance = PLAYER_SPEED * (delta / 1000);
