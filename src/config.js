@@ -16,6 +16,14 @@ export default {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
+  // * La physique « arcade » gère les collisions. Pas de gravité : on joue en vue du dessus.
+  physics: {
+    default: 'arcade',
+    arcade: {
+      gravity: { x: 0, y: 0 },
+      debug: false, // passer à true pour voir les boîtes de collision pendant le développement
+    },
+  },
   // * La première scène de la liste est celle qui démarre
   // ? HubScene est en premier le temps de développer le joueur. Le menu redeviendra la première scène.
   scene: [HubScene, MenuScene],

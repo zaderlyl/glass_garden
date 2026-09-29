@@ -38,13 +38,27 @@ export default class HubScene extends Phaser.Scene {
     map.createLayer('background', tileset);
     map.createLayer('ground', tileset);
     map.createLayer('decor_below', tileset);
-    map.createLayer('walls', tileset);
+    const walls = map.createLayer('walls', tileset);
+
+    // * Toute tuile posée dans le calque « walls » devient un obstacle (-1 = case vide)
+    walls.setCollisionByExclusion([-1]);
 
     // * Le point de départ du joueur est un objet « spawn » placé dans Tiled
     const spawn = map.findObject('objects', (object) => object.name === 'spawn');
 
-    // * Le joueur commence de face (vers le bas), sur le point de départ
-    this.player = this.add.sprite(spawn.x, spawn.y, 'player_1', FRAMES.DOWN);
+    // * Le joueur est un sprite « physique » : c'est ce qui permet de le faire entrer en collision
+    // Il commence de face (vers le bas), sur le point de départ
+    this.player = this.physics.add.sprite(spawn.x, spawn.y, 'player_1', FRAMES.DOWN);
+    this.player.setCollideWorldBounds(true);
+
+    // * La boîte de collision est plus petite que l'image et placée au niveau des pieds :
+    // le joueur peut passer « devant » un mur sans que sa tête ne le bloque
+    // ? Taille et décalage à ajuster à l'oeil (activer debug dans config.js)
+    this.player.body.setSize(20, 16);
+    this.player.body.setOffset(6, 16);
+
+    // * On dit à Phaser : le joueur ne traverse pas les murs
+    this.physics.add.collider(this.player, walls);
 
     // * decor_above passe devant le joueur : on le crée après lui avec une profondeur plus grande
     map.createLayer('decor_above', tileset).setDepth(10);
@@ -61,7 +75,7 @@ export default class HubScene extends Phaser.Scene {
 
   // update() est appelée à chaque image (environ 60 fois par seconde)
   // `delta` est le temps écoulé depuis l'image précédente, en millisecondes
-  update(time, delta) {
+  update() {
     // Direction : -1, 0 ou 1 sur chaque axe
     let x = Number(this.keys.right.isDown) - Number(this.keys.left.isDown);
     let y = Number(this.keys.down.isDown) - Number(this.keys.up.isDown);
@@ -79,15 +93,8 @@ export default class HubScene extends Phaser.Scene {
     else if (y < 0) this.player.setFrame(FRAMES.UP);
     else if (y > 0) this.player.setFrame(FRAMES.DOWN);
 
-    // * distance = vitesse x temps : le déplacement est le même quelle que soit la fréquence d'images
-    const distance = PLAYER_SPEED * (delta / 1000);
-    this.player.x += x * distance;
-    this.player.y += y * distance;
-
-    // On garde le joueur à l'intérieur de l'écran (displayWidth tient compte de l'agrandissement)
-    const halfWidth = this.player.displayWidth / 2;
-    const halfHeight = this.player.displayHeight / 2;
-    this.player.x = Phaser.Math.Clamp(this.player.x, halfWidth, this.scale.width - halfWidth);
-    this.player.y = Phaser.Math.Clamp(this.player.y, halfHeight, this.scale.height - halfHeight);
+    // * On donne une vitesse (en pixels par seconde) : c'est la physique Phaser qui déplace
+    // le joueur et qui l'arrête contre les murs
+    this.player.setVelocity(x * PLAYER_SPEED, y * PLAYER_SPEED);
   }
 }
