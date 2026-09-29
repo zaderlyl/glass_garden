@@ -7,7 +7,7 @@ const FRAMES = { UP: 0, RIGHT: 1, LEFT: 2, DOWN: 3 };
 
 /**
  * * Le jardin du spawn : le monde normal, d'où partiront les miroirs.
- * Pour l'instant : on y affiche seulement le joueur 1.
+ * Pour l'instant : la carte de test et le joueur 1, placé au point de départ.
  */
 export default class HubScene extends Phaser.Scene {
   constructor() {
@@ -21,16 +21,33 @@ export default class HubScene extends Phaser.Scene {
       frameWidth: 32,
       frameHeight: 32,
     });
+
+    // * La carte (JSON exporté de Tiled) et l'image de son tileset
+    this.load.tilemapTiledJSON('hub_map', 'assets/maps/hub_test.json');
+    this.load.image('tileset_garden', 'assets/images/tilesets/tileset_garden.png');
   }
 
   create() {
-    const { width, height } = this.scale;
+    // * On construit la carte à partir du JSON Tiled
+    const map = this.make.tilemap({ key: 'hub_map' });
 
-    // * Le joueur commence de face (vers le bas), au centre de l'écran
-    this.player = this.add.sprite(width / 2, height / 2, 'player_1', FRAMES.DOWN);
+    // ! Le 1er nom est celui du tileset DANS Tiled, le 2e est la clé de l'image chargée ci-dessus
+    const tileset = map.addTilesetImage('tileset_garden', 'tileset_garden');
 
-    // * Le sprite est petit : on l'agrandit dans le jeu (x3), pas dans le fichier
-    this.player.setScale(3);
+    // * Les calques sont créés du dessous vers le dessus, dans le même ordre que dans Tiled
+    map.createLayer('background', tileset);
+    map.createLayer('ground', tileset);
+    map.createLayer('decor_below', tileset);
+    map.createLayer('walls', tileset);
+
+    // * Le point de départ du joueur est un objet « spawn » placé dans Tiled
+    const spawn = map.findObject('objects', (object) => object.name === 'spawn');
+
+    // * Le joueur commence de face (vers le bas), sur le point de départ
+    this.player = this.add.sprite(spawn.x, spawn.y, 'player_1', FRAMES.DOWN);
+
+    // * decor_above passe devant le joueur : on le crée après lui avec une profondeur plus grande
+    map.createLayer('decor_above', tileset).setDepth(10);
 
     // * Les touches de déplacement (clavier AZERTY : Z Q S D)
     // TODO(équipe): déplacer les touches dans un InputManager (étape suivante)
