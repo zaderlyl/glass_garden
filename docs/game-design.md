@@ -75,20 +75,39 @@ Le principe narratif est simple : **un même lieu, plusieurs réalités**. Un pe
 
 ## 3 · Boucle de jeu
 
+```mermaid
+flowchart TD
+    START([Début de partie<br/>le chronomètre démarre]) --> HUB
+
+    HUB[Jardin du spawn<br/>monde normal]
+    HUB -->|entre dans un miroir| WORLD
+
+    subgraph WORLD [Un monde, dans l'ordre libre]
+        direction TB
+        W1[Explorer et comprendre<br/>la mécanique du monde] --> W2[Relever le défi]
+        W2 -->|réussite| W3[Récupérer l'étoile]
+        W2 -->|mort ou temps écoulé| W4[Le monde recommence]
+        W4 --> W1
+    end
+
+    W3 --> BACK[Retour au jardin<br/>par le miroir]
+    BACK --> CHECK{Les 5 étoiles<br/>sont récupérées ?}
+    CHECK -->|non| HUB
+    CHECK -->|oui| END([Victoire<br/>temps enregistré au high score])
+
+    TIMER[/Chronomètre global<br/>ne s'arrête jamais/]
+    TIMER -.-> START
+    TIMER -.-> END
+
+    classDef hub fill:#e8f5e9,stroke:#2e7d32,color:#1b3a1e
+    classDef fail fill:#ffebee,stroke:#c62828,color:#4a1414
+    classDef ok fill:#fff8e1,stroke:#f9a825,color:#4a3600
+    class HUB,BACK hub
+    class W4 fail
+    class W3,END ok
 ```
-   ┌──────────────────────────────────────────────┐
-   │                                              │
-   ▼                                              │
-JARDIN  ──►  choisir un miroir  ──►  MONDE X      │
-(spawn)                              │            │
-   ▲                                 ▼            │
-   │                        relever le défi       │
-   │                                 │            │
-   │                                 ▼            │
-   └──────────  retour par le miroir  ◄──       │
-                                                  │
-   Les 5 étoiles récoltées  ─────────────►  VICTOIRE
-```
+
+*Si le diagramme ne s'affiche pas dans votre éditeur, il se lit ainsi : jardin, miroir, monde, défi, étoile, retour au jardin, et on recommence jusqu'à la cinquième étoile. En cas d'échec, seul le monde en cours recommence.*
 
 ### Règles générales
 
