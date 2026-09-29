@@ -210,6 +210,22 @@ music_hub.ogg
 sfx_star.ogg
 ```
 
+### Assets : où ranger quoi
+
+| Type | Dossier | Nom | Exemple |
+|---|---|---|---|
+| Sprites (personnages, objets) | `assets/images/sprites/` | `<sujet>_<numéro>_<usage>.png` | `player_1_spritesheet.png` |
+| Tilesets (planches de tuiles) | `assets/images/tilesets/` | `tileset_<thème>.png` | `tileset_garden.png` |
+| Cartes Tiled | `assets/maps/` | `<lieu>.tmx` + `<lieu>.json` (même nom) | `hub_test.tmx`, `hub_test.json` |
+| Musiques | `assets/audio/music/` | `music_<lieu>.ogg` | `music_hub.ogg` |
+| Effets sonores | `assets/audio/sfx/` | `sfx_<action>.ogg` | `sfx_star.ogg` |
+| Polices | `assets/fonts/` | `snake_case` | |
+
+- Le `.tmx` est le fichier de travail de Tiled, le `.json` est celui que lit le jeu. **Les deux portent le même nom** et restent côte à côte.
+- **Toute modification de la carte se termine par un export** du `.json` (`Ctrl+E` dans Tiled).
+- **Les chemins dans le code sont relatifs à `index.html`** : `assets/images/sprites/player_1_spritesheet.png`, sans `/` au début ni `../`.
+- Renommer un fichier utilisé par une carte casse les chemins **dans le `.tmx` et le `.json`** : on renomme toujours depuis Tiled, ou on corrige les deux fichiers.
+
 ### Style
 
 - **JavaScript moderne** : `const` / `let` (jamais `var`), classes, `import` / `export`.

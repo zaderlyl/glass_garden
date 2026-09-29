@@ -17,7 +17,7 @@ export default class HubScene extends Phaser.Scene {
   // preload() charge les images avant que create() ne démarre
   preload() {
     // * Le spritesheet est découpé en images de 32 x 32 pixels (4 images côte à côte)
-    this.load.spritesheet('player_1', 'assets/images/player_1_spritesheet.png', {
+    this.load.spritesheet('player_1', 'assets/images/sprites/player_1_spritesheet.png', {
       frameWidth: 32,
       frameHeight: 32,
     });

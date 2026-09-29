@@ -206,11 +206,11 @@
         {
          "columns":8,
          "firstgid":1,
-         "image":"..\/images\/map-44.png",
+         "image":"..\/images\/tilesets\/tileset_garden.png",
          "imageheight":96,
          "imagewidth":256,
          "margin":0,
-         "name":"map-44",
+         "name":"tileset_garden",
          "spacing":0,
          "tilecount":24,
          "tileheight":32,

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.10" tiledversion="1.12.0" orientation="orthogonal" renderorder="right-down" width="40" height="23" tilewidth="32" tileheight="32" infinite="0" nextlayerid="7" nextobjectid="3">
  <editorsettings>
-  <export target="maps_test.json" format="json"/>
+  <export target="hub_test.json" format="json"/>
  </editorsettings>
- <tileset firstgid="1" name="map-44" tilewidth="32" tileheight="32" tilecount="24" columns="8">
-  <image source="../images/map-44.png" width="256" height="96"/>
+ <tileset firstgid="1" name="tileset_garden" tilewidth="32" tileheight="32" tilecount="24" columns="8">
+  <image source="../images/tilesets/tileset_garden.png" width="256" height="96"/>
  </tileset>
  <layer id="5" name="background" width="40" height="23">
   <data encoding="csv">
