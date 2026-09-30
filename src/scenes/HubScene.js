@@ -133,6 +133,7 @@ export default class HubScene extends Phaser.Scene {
     );
 
     // On ne réécrit pas le texte pendant l'affichage du message d'interaction
+    // ? La touche affichée (E) est provisoire : à changer avec les boutons de la borne
     if (!this.messageActive) {
       this.hint.setText(nearMirror ? 'E : entrer dans le miroir' : '');
     }

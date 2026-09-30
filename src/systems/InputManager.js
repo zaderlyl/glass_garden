@@ -33,6 +33,7 @@
 
 // * Association action -> touche (noms de touches Phaser), pour chaque joueur.
 // ? Les touches du joueur 2 sont provisoires : à valider avec l'équipe et la borne.
+// ? La touche E (interagir) n'est PAS définitive : elle dépendra des boutons de la borne d'arcade.
 const BINDINGS = {
   1: { up: 'Z', down: 'S', left: 'Q', right: 'D', interact: 'E' },
   2: { up: 'UP', down: 'DOWN', left: 'LEFT', right: 'RIGHT', interact: 'ENTER' },
