@@ -16,26 +16,26 @@
 // - Le joueur 2 : un deuxième InputManager avec d'autres touches, sans dupliquer de code.
 // - La diagonale (diviser par racine de 2) est écrite une seule fois, ici.
 //
-// ! OPTIONNEL POUR LE MOMENT
-// Ce fichier n'est PAS encore utilisé : HubScene lit encore ses touches elle-même.
-// On l'utilisera dès qu'on aura un deuxième joueur, une deuxième scène qui bouge,
-// ou d'autres actions (interagir, tirer, lampe).
+// * UTILISÉ PAR : HubScene (déplacement et interaction avec les miroirs)
 //
-// * COMMENT L'UTILISER (quand on le branchera)
+// * COMMENT L'UTILISER
 //   import InputManager from '../systems/InputManager.js';
 //
 //   create() { this.input1 = new InputManager(this, 1); }
-//   update() { const move = this.input1.getMove(); }   // { x: -1..1, y: -1..1 }
+//   update() {
+//     const move = this.input1.getMove();              // { x: -1..1, y: -1..1 }
+//     if (this.input1.justPressed('interact')) { ... } // une seule fois par appui
+//   }
 //
-// TODO(équipe): ajouter les actions interagir, courir, tirer, lampe, pause
+// TODO(équipe): ajouter les actions courir, tirer, lampe, pause
 // TODO(équipe): brancher les boutons de la borne (joystick + 6 boutons par joueur)
 // =====================================================================================
 
 // * Association action -> touche (noms de touches Phaser), pour chaque joueur.
 // ? Les touches du joueur 2 sont provisoires : à valider avec l'équipe et la borne.
 const BINDINGS = {
-  1: { up: 'Z', down: 'S', left: 'Q', right: 'D' },
-  2: { up: 'UP', down: 'DOWN', left: 'LEFT', right: 'RIGHT' },
+  1: { up: 'Z', down: 'S', left: 'Q', right: 'D', interact: 'E' },
+  2: { up: 'UP', down: 'DOWN', left: 'LEFT', right: 'RIGHT', interact: 'ENTER' },
 };
 
 export default class InputManager {
@@ -48,6 +48,15 @@ export default class InputManager {
 
     // addKeys crée un objet { action: touche } à partir de { action: 'NOM_DE_TOUCHE' }
     this.keys = scene.input.keyboard.addKeys(BINDINGS[playerId]);
+  }
+
+  /**
+   * Vrai uniquement à l'image où l'action vient d'être appuyée (un seul déclenchement).
+   * Différent d'isDown, qui reste vrai tant que la touche est maintenue.
+   * @param {string} action  Nom de l'action (ex. 'interact')
+   */
+  justPressed(action) {
+    return Phaser.Input.Keyboard.JustDown(this.keys[action]);
   }
 
   /**

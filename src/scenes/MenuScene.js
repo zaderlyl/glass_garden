@@ -1,6 +1,6 @@
 /**
  * * Première scène du jeu : pour l'instant elle affiche seulement le titre.
- * Elle deviendra l'écran d'accueil (jouer, contrôles...).
+ * ? Elle deviendra l'écran d'accueil (jouer, contrôles...).
  */
 export default class MenuScene extends Phaser.Scene {
   constructor() {
@@ -18,5 +18,5 @@ export default class MenuScene extends Phaser.Scene {
         color: '#f4f1e8',
       })
       .setOrigin(0.5); // * on centre le texte sur son point de placement
-  }
+  } // TODO : Remplacer le texte par les UI
 }
