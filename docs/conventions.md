@@ -55,6 +55,8 @@ Les couleurs de nos étiquettes sont déjà définies dans `.vscode/settings.jso
 | `feature/<nom>` | Une fonctionnalité (`feature/deplacement-joueur`) |
 | `fix/<nom>` | Correction d'un bug (`fix/collision-miroir`) |
 | `assets/<nom>` | Ajout de sprites, sons, maps (`assets/sprites-monde-3`) |
+| `refactor/<nom>` | Réorganiser le code sans changer son comportement (`refactor/constantes`) |
+| `docs/<nom>` | Documentation, GDD, journal, conventions (`docs/audit-conventions`) |
 
 Noms de branche : minuscules, tirets, pas d'accents.
 
@@ -104,7 +106,7 @@ new ShootingSystem(scene, { speed: 300, cooldown: 500, onHit: (boite) => boite.o
 
 - On **ne copie jamais** du code d'un monde à l'autre.
 - Un comportement propre à un monde va **dans le monde**, pas dans le système partagé.
-- Un système partagé a **un responsable**, indiqué dans `docs/roadmap.md`. Les autres proposent, il intègre.
+- Un système partagé a **un responsable**, indiqué dans la section « Planning et organisation » de `docs/game-design.md`. Les autres proposent, il intègre.
 
 ### Messages de commit
 
@@ -128,7 +130,14 @@ La description est **en français**, à l'indicatif (« Ajoute… », « Corrige
 
 **Attention à `feat` et `fix` :** `fix` sert uniquement à corriger un bug. Ajouter quelque chose de nouveau, c'est `feat`.
 
-Le type correspond au préfixe de la branche : `feature/...` donne des `feat:`, `fix/...` des `fix:`, `assets/...` des `assets:`.
+Le type correspond au préfixe de la branche : `feature/...` donne des `feat:`, `fix/...` des `fix:`, `assets/...` des `assets:`, `refactor/...` des `refactor:`, `docs/...` des `docs:`.
+
+**Écriture exacte :** le type est collé au deux-points, **sans espace avant** et avec **un espace après**.
+
+| Bien | À éviter |
+|---|---|
+| `feat: Ajoute le miroir` | `feat : Ajoute le miroir` |
+| `docs: Met à jour le journal` | `docs:Met à jour le journal` |
 
 | Bien | À éviter |
 |---|---|
@@ -168,7 +177,7 @@ Un modèle est disponible dans `docs/journal/_modele.md`.
 
 - **Chacun a ses fichiers.** Deux personnes ne modifient pas le même fichier en même temps.
 - Un fichier commun (`constants.js`, `config.js`) ? On **prévient les autres** avant, et on fait une petite PR rapide.
-- Qui fait quoi est écrit dans `docs/roadmap.md`, à jour.
+- Qui fait quoi est écrit dans la section « Planning et organisation » de `docs/game-design.md`, à jour.
 - Une PR est **relue par au moins une autre personne** avant fusion. On garde les PR **petites**.
 
 ---
@@ -282,7 +291,7 @@ Le principe : **on commente le pourquoi, pas le quoi**, avec une **étiquette** 
 | `// * ...` | Vert | **Explication importante** : le pourquoi, un choix technique |
 | `// ! ...` | Rouge | **Attention** : piège, danger, ne pas toucher sans comprendre |
 | `// ? ...` | Bleu | **Question** : à valider ou à discuter avec l'équipe |
-| `// TODO(nom): ...` | Orange | **Reste à faire**, avec le nom de la personne qui s'en charge |
+| `// TODO(nom): ...` | Orange | **Reste à faire**, avec le nom de la personne qui s'en charge. Tant que personne n'est désigné : `TODO(équipe)` |
 | `// FIXME(nom): ...` | Rose | **Bug connu** à corriger |
 | `// // ...` | Gris barré | Code volontairement désactivé, **temporaire** |
 
@@ -308,7 +317,7 @@ this.spawnEnemies();
 - **Chaque classe et chaque système** commence par un commentaire `// *` ou `/** * ... */` qui explique son rôle.
 - Les passages un peu subtils (maths, astuces Phaser) sont expliqués : on doit pouvoir les défendre à l'oral.
 - On ne commente pas l'évident (`i++; // on ajoute 1`).
-- Les `TODO` et `FIXME` ont **un nom** et sont **traités avant le rendu** : on les retrouve avec une recherche globale (`TODO(`).
+- Les `TODO` et `FIXME` ont **un nom** (ou `équipe` tant que personne n'est désigné, à remplacer dès qu'on prend la tâche) et sont **traités avant le rendu** : on les retrouve avec une recherche globale (`TODO(`).
 - Les commentaires sont en **français**.
 
 ---
