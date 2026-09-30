@@ -193,8 +193,11 @@ export default class WorldScene extends Phaser.Scene {
       const targetScene = WORLDS[nearMirror.world];
 
       if (targetScene) {
-        // TODO(équipe): SFX et VFX du passage par le miroir (son, effet visuel), à ajouter au plus vite
+        // TODO(équipe): SFX du passage par le miroir, à ajouter au plus vite
         // TODO(équipe): timer global et score, à ajouter au plus vite (ils doivent survivre au changement de scène)
+        // TODO(équipe): VFX du passage par le miroir (fondu, effet visuel), à ajouter plus tard
+        // TODO(équipe): bloquer les touches pendant le changement de monde, à ajouter plus tard
+        // (sans ça, un double appui rapide sur E peut relancer la scène)
         // * On quitte cette scène et on lance celle du monde visé, en lui disant d'où l'on vient.
         // Le nom de ce monde est la clé de WORLDS dont la valeur est notre scène.
         const currentWorld = Object.keys(WORLDS).find((name) => WORLDS[name] === this.scene.key);
