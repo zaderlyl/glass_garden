@@ -9,12 +9,14 @@ export const GAME_HEIGHT = 720;
 export const SCENES = {
   MENU: 'MenuScene',
   HUB: 'HubScene',
+  WORLD_1: 'World1Scene',
 };
 
 // * Clés des assets : le nom sous lequel Phaser retrouve un fichier chargé
 export const ASSETS = {
   PLAYER_1: 'player_1',
   HUB_MAP: 'hub_map',
+  WORLD_1_MAP: 'world_1_map',
   TILESET_GARDEN: 'tileset_garden',
 };
 
