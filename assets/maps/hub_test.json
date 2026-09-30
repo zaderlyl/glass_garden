@@ -85,8 +85,26 @@
                  "type":"spawn",
                  "visible":true,
                  "width":0,
-                 "x":621.685327047731,
-                 "y":374.189746611668
+                 "x":621.685,
+                 "y":374.19
+                }, 
+                {
+                 "height":64,
+                 "id":2,
+                 "name":"world_1",
+                 "opacity":1,
+                 "properties":[
+                        {
+                         "name":"type",
+                         "type":"string",
+                         "value":""
+                        }],
+                 "rotation":0,
+                 "type":"mirror",
+                 "visible":true,
+                 "width":32,
+                 "x":352.485474499677,
+                 "y":255.648805681085
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -197,7 +215,7 @@
          "y":0
         }],
  "nextlayerid":7,
- "nextobjectid":2,
+ "nextobjectid":4,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.0",

@@ -1,9 +1,14 @@
+import InputManager from '../systems/InputManager.js';
+
 // Vitesse du joueur, en pixels par seconde
 // TODO(équipe): la déplacer dans constants.js quand ce fichier existera
 const PLAYER_SPEED = 300;
 
 // Numéro de l'image du spritesheet pour chaque direction
 const FRAMES = { UP: 0, RIGHT: 1, LEFT: 2, DOWN: 3 };
+
+// Distance (en pixels) à laquelle le joueur peut interagir avec un miroir
+const INTERACT_DISTANCE = 64; // * Détéction en unité pixels
 
 /**
  * * Le jardin du spawn : le monde normal, d'où partiront les miroirs.
@@ -60,31 +65,54 @@ export default class HubScene extends Phaser.Scene {
     // * On dit à Phaser : le joueur ne traverse pas les murs
     this.physics.add.collider(this.player, walls);
 
+    // * Les miroirs sont les objets de classe « mirror » placés dans Tiled.
+    // Leur nom donne le monde qu'ils ouvrent (ex. « world_1 »).
+    // ? Ancien Tiled : la classe s'appelle « type ». On lit les deux.
+    this.mirrors = [];
+    map
+      .getObjectLayer('objects')
+      .objects.filter((object) => (object.class || object.type) === 'mirror')
+      .forEach((object) => {
+        // ! Placeholder : un rectangle bleu clair, à remplacer par le vrai sprite du miroir
+        // Un rectangle est centré sur son point de placement, d'où le « + width / 2 »
+        const mirror = this.add.rectangle(
+          object.x + object.width / 2,
+          object.y + object.height / 2,
+          object.width,
+          object.height,
+          0xbfe9ff,
+        );
+        mirror.setStrokeStyle(2, 0xffffff);
+        mirror.world = object.name; // le monde de destination
+
+        // * Un corps « statique » ne bouge jamais : le miroir bloque le joueur comme un mur
+        this.physics.add.existing(mirror, true);
+        this.physics.add.collider(this.player, mirror);
+
+        this.mirrors.push(mirror);
+      });
+
+    // * Texte d'aide, affiché en haut de l'écran quand on est près d'un miroir
+    this.hint = this.add
+      .text(this.scale.width / 2, 40, '', {
+        fontFamily: 'Georgia, serif',
+        fontSize: '28px',
+        color: '#f4f1e8',
+      })
+      .setOrigin(0.5)
+      .setDepth(20);
+
     // * decor_above passe devant le joueur : on le crée après lui avec une profondeur plus grande
     map.createLayer('decor_above', tileset).setDepth(10);
 
-    // * Les touches de déplacement (clavier AZERTY : Z Q S D)
-    // TODO(équipe): déplacer les touches dans un InputManager (étape suivante)
-    this.keys = this.input.keyboard.addKeys({
-      up: 'Z',
-      down: 'S',
-      left: 'Q',
-      right: 'D',
-    });
+    // * Les touches passent par l'InputManager : la scène ne connaît aucune touche
+    this.input1 = new InputManager(this, 1);
   }
 
   // update() est appelée à chaque image (environ 60 fois par seconde)
-  // `delta` est le temps écoulé depuis l'image précédente, en millisecondes
   update() {
-    // Direction : -1, 0 ou 1 sur chaque axe
-    let x = Number(this.keys.right.isDown) - Number(this.keys.left.isDown);
-    let y = Number(this.keys.down.isDown) - Number(this.keys.up.isDown);
-
-    // * En diagonale, on divise par racine de 2, sinon on irait plus vite qu'en ligne droite
-    if (x !== 0 && y !== 0) {
-      x *= Math.SQRT1_2;
-      y *= Math.SQRT1_2;
-    }
+    // * Direction souhaitée, déjà normalisée en diagonale par l'InputManager
+    const { x, y } = this.input1.getMove();
 
     // * On change l'image selon la direction. À l'arrêt, on garde la dernière image.
     // En diagonale, la direction horizontale est prioritaire.
@@ -96,5 +124,28 @@ export default class HubScene extends Phaser.Scene {
     // * On donne une vitesse (en pixels par seconde) : c'est la physique Phaser qui déplace
     // le joueur et qui l'arrête contre les murs
     this.player.setVelocity(x * PLAYER_SPEED, y * PLAYER_SPEED);
+
+    // * Y a-t-il un miroir assez proche pour interagir ?
+    const nearMirror = this.mirrors.find(
+      (mirror) =>
+        Phaser.Math.Distance.Between(this.player.x, this.player.y, mirror.x, mirror.y) <
+        INTERACT_DISTANCE,
+    );
+
+    // On ne réécrit pas le texte pendant l'affichage du message d'interaction
+    // ? La touche affichée (E) est provisoire : à changer avec les boutons de la borne
+    // TODO(équipe): message d'intéraction a changer ( utilisation d'un UI touche au dessus des miroirs )
+    if (!this.messageActive) {
+      this.hint.setText(nearMirror ? 'E : entrer dans le miroir' : '');
+    }
+
+    if (nearMirror && this.input1.justPressed('interact')) {
+      // TODO(équipe): téléporter le joueur vers la scène du monde (nearMirror.world)
+      this.hint.setText(`Ce miroir mène vers : ${nearMirror.world}`);
+      this.messageActive = true;
+      this.time.delayedCall(2000, () => {
+        this.messageActive = false;
+      });
+    }
   }
 }
