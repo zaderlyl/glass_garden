@@ -26,7 +26,21 @@ export const ASSETS = {
   HUB_MAP: 'hub_map',
   WORLD_1_MAP: 'world_1_map',
   TILESET_GARDEN: 'tileset_garden',
+  WATER: 'water',
 };
+
+// Taille d'une tuile, en pixels (la même dans Tiled et dans les spritesheets de tuiles animées)
+export const TILE_SIZE = 32;
+
+// * Animations des tuiles animées, toutes tirées du spritesheet de l'eau (water_spritesheet.png).
+// start et end sont des numéros d'images, comptés ligne par ligne depuis 0 (8 images par ligne).
+// L'image 0 (état neutre) et les images vierges (7 et 17) ne sont jamais utilisées.
+// ? La vitesse (frameRate, en images par seconde) est à régler à l'oeil.
+export const TILE_ANIMATIONS = [
+  { key: 'water_1', sheet: ASSETS.WATER, start: 1, end: 6, frameRate: 6 },
+  { key: 'water_2', sheet: ASSETS.WATER, start: 8, end: 16, frameRate: 6 },
+  { key: 'water_3', sheet: ASSETS.WATER, start: 18, end: 26, frameRate: 6 },
+];
 
 // Joueur
 export const PLAYER = {
