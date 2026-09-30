@@ -94,7 +94,14 @@ export default class WorldScene extends Phaser.Scene {
       if (!animation) return; // tuile vide ou tuile normale : on ne touche à rien
 
       // * Le sprite prend la place exacte de la tuile (son centre), puis joue son animation
-      this.add.sprite(tile.getCenterX(), tile.getCenterY(), ASSETS.WATER).play(animation);
+      const sprite = this.add.sprite(tile.getCenterX(), tile.getCenterY(), ASSETS.WATER);
+      sprite.play(animation);
+
+      // * On reporte l'orientation de la tuile (posée dans Tiled avec les touches Z, X, Y) sur le sprite.
+      // Phaser a converti les retournements de Tiled en un miroir horizontal (flipX) et une rotation :
+      // le miroir est appliqué d'abord, puis la rotation. L'animation de base est orientée « vers le haut ».
+      sprite.setFlipX(tile.flipX);
+      sprite.setRotation(tile.rotation);
 
       // * On retire la tuile « repère » pour qu'elle ne reste pas visible sous l'animation
       layer.removeTileAt(tile.x, tile.y);
