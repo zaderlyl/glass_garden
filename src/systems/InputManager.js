@@ -16,7 +16,7 @@
 // - Le joueur 2 : un deuxième InputManager avec d'autres touches, sans dupliquer de code.
 // - La diagonale (diviser par racine de 2) est écrite une seule fois, ici.
 //
-// * UTILISÉ PAR : HubScene (déplacement et interaction avec les miroirs)
+// * UTILISÉ PAR : les scènes où le joueur agit (voir src/scenes/)
 //
 // * COMMENT L'UTILISER
 //   import InputManager from '../systems/InputManager.js';

@@ -67,7 +67,7 @@ export default class HubScene extends Phaser.Scene {
 
     // * Les miroirs sont les objets de classe « mirror » placés dans Tiled.
     // Leur nom donne le monde qu'ils ouvrent (ex. « world_1 »).
-    // ? Ancien Tiled : la classe s'appelle « type ». On lit les deux.
+    // * Selon la version de Tiled, la classe s'appelle « class » ou « type » : on lit les deux.
     this.mirrors = [];
     map
       .getObjectLayer('objects')
@@ -134,7 +134,7 @@ export default class HubScene extends Phaser.Scene {
 
     // On ne réécrit pas le texte pendant l'affichage du message d'interaction
     // ? La touche affichée (E) est provisoire : à changer avec les boutons de la borne
-    // TODO(équipe): message d'intéraction a changer ( utilisation d'un UI touche au dessus des miroirs )
+    // TODO(équipe): changer le message d'interaction (utiliser une icône de touche au-dessus des miroirs)
     if (!this.messageActive) {
       this.hint.setText(nearMirror ? 'E : entrer dans le miroir' : '');
     }

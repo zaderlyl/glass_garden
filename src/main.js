@@ -1,4 +1,4 @@
-// * Systems d'import de fonction : "import {fonction} from {chemin}"
+// * Nos fichiers sont des modules : on récupère ce dont on a besoin avec « import ... from '...' ».
 
 import config from './config.js';
 
