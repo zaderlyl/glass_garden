@@ -45,10 +45,10 @@ export const TILE_ANIMATIONS = [
 // * Tuiles « repères » du tileset (posées dans le calque animated_tiles de Tiled) -> animation qui les remplace.
 // 26 = bord (flèche vers le haut), 27 = angle (haut droite). La 25 (eau fixe) n'est pas ici : elle reste telle quelle.
 // L'orientation de chaque tuile (rotation, miroir) est reprise par son sprite : les animations de base sont orientées vers le haut.
-// TODO(équipe): varier les bords (water_1 ou water_2)
+// Chaque tuile a une LISTE d'animations possibles : s'il y en a plusieurs, l'une est choisie selon la position de la tuile.
 export const ANIMATED_TILES = {
-  26: 'water_1',
-  27: 'water_3',
+  26: ['water_1', 'water_2'],
+  27: ['water_3'],
 };
 
 // Joueur

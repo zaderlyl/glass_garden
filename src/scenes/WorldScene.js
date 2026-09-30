@@ -1,5 +1,6 @@
 import InputManager from '../systems/InputManager.js';
 import timer from '../systems/TimerSystem.js';
+import { pickVariant } from '../utils/helpers.js';
 import {
   SCENES,
   ASSETS,
@@ -90,8 +91,11 @@ export default class WorldScene extends Phaser.Scene {
     const layer = map.createLayer('animated_tiles', tileset);
 
     layer.forEachTile((tile) => {
-      const animation = ANIMATED_TILES[tile.index];
-      if (!animation) return; // tuile vide ou tuile normale : on ne touche à rien
+      const variants = ANIMATED_TILES[tile.index];
+      if (!variants) return; // tuile vide ou tuile normale : on ne touche à rien
+
+      // * S'il y a plusieurs animations possibles, on en choisit une selon la position de la tuile
+      const animation = variants[pickVariant(tile.x, tile.y, variants.length)];
 
       // * Le sprite prend la place exacte de la tuile (son centre), puis joue son animation
       const sprite = this.add.sprite(tile.getCenterX(), tile.getCenterY(), ASSETS.WATER);
