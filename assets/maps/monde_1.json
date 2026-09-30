@@ -85,8 +85,8 @@
                  "type":"spawn",
                  "visible":true,
                  "width":0,
-                 "x":496.948527758257,
-                 "y":280.198432888264
+                 "x":496.949,
+                 "y":280.198
                 }, 
                 {
                  "height":64,
@@ -103,8 +103,8 @@
                  "type":"mirror",
                  "visible":true,
                  "width":32,
-                 "x":608.106925509487,
-                 "y":159.90058116655
+                 "x":608.107,
+                 "y":159.901
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -225,12 +225,12 @@
          "columns":8,
          "firstgid":1,
          "image":"..\/images\/tilesets\/tileset_garden.png",
-         "imageheight":96,
+         "imageheight":128,
          "imagewidth":256,
          "margin":0,
          "name":"tileset_garden",
          "spacing":0,
-         "tilecount":24,
+         "tilecount":32,
          "tileheight":32,
          "tilewidth":32
         }],
