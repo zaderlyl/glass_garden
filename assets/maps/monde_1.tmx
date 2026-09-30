@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.10" tiledversion="1.12.0" orientation="orthogonal" renderorder="right-down" width="40" height="23" tilewidth="32" tileheight="32" infinite="0" nextlayerid="7" nextobjectid="4">
  <editorsettings>
-  <export target="hub_test.json" format="json"/>
+  <export target="monde_1.json" format="json"/>
  </editorsettings>
  <tileset firstgid="1" name="tileset_garden" tilewidth="32" tileheight="32" tilecount="24" columns="8">
   <image source="../images/tilesets/tileset_garden.png" width="256" height="96"/>
@@ -64,7 +64,7 @@
   <object id="1" name="spawn" type="spawn" x="496.949" y="280.198">
    <point/>
   </object>
-  <object id="2" name="world_1" type="mirror" x="608.107" y="159.901" width="32" height="64">
+  <object id="2" name="hub" type="mirror" x="608.107" y="159.901" width="32" height="64">
    <properties>
     <property name="type" value=""/>
    </properties>
