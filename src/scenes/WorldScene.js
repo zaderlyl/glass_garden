@@ -5,6 +5,7 @@ import {
   ASSETS,
   TILE_SIZE,
   TILE_ANIMATIONS,
+  ANIMATED_TILES,
   WORLDS,
   MIRROR_SPAWN_OFFSET,
   PLAYER,
@@ -76,6 +77,30 @@ export default class WorldScene extends Phaser.Scene {
     });
   }
 
+  /**
+   * * Remplace les tuiles « repères » du calque animated_tiles par des sprites qui jouent
+   * leur animation en boucle (voir ANIMATED_TILES dans constants.js).
+   * Les tuiles qui ne sont pas dans cette table (l'eau fixe du centre) restent affichées telles quelles.
+   * Une carte sans ce calque est simplement ignorée.
+   */
+  createAnimatedTiles(map, tileset) {
+    // ! On teste d'abord l'existence du calque : createLayer afficherait un avertissement sinon
+    if (!map.getLayer('animated_tiles')) return;
+
+    const layer = map.createLayer('animated_tiles', tileset);
+
+    layer.forEachTile((tile) => {
+      const animation = ANIMATED_TILES[tile.index];
+      if (!animation) return; // tuile vide ou tuile normale : on ne touche à rien
+
+      // * Le sprite prend la place exacte de la tuile (son centre), puis joue son animation
+      this.add.sprite(tile.getCenterX(), tile.getCenterY(), ASSETS.WATER).play(animation);
+
+      // * On retire la tuile « repère » pour qu'elle ne reste pas visible sous l'animation
+      layer.removeTileAt(tile.x, tile.y);
+    });
+  }
+
   create() {
     // * Une même scène est réutilisée à chaque visite : on remet l'état à zéro
     // ! Sinon un message encore affiché au moment de partir bloquerait le texte d'aide au retour
@@ -102,6 +127,9 @@ export default class WorldScene extends Phaser.Scene {
     map.createLayer('background', tileset);
     map.createLayer('ground', tileset);
     map.createLayer('decor_below', tileset);
+
+    // * L'eau : créée ici, entre le décor du dessous et les murs, pour passer sous le joueur
+    this.createAnimatedTiles(map, tileset);
     const walls = map.createLayer('walls', tileset);
 
     // * Toute tuile posée dans le calque « walls » devient un obstacle (-1 = case vide)

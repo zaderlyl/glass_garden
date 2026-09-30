@@ -42,6 +42,14 @@ export const TILE_ANIMATIONS = [
   { key: 'water_3', sheet: ASSETS.WATER, start: 18, end: 26, frameRate: 6 },
 ];
 
+// * Tuiles « repères » du tileset (posées dans le calque animated_tiles de Tiled) -> animation qui les remplace.
+// 26 = bord (flèche vers le haut), 27 = angle (haut droite). La 25 (eau fixe) n'est pas ici : elle reste telle quelle.
+// TODO(équipe): orienter les animations comme les tuiles (rotation), et varier les bords (water_1 ou water_2)
+export const ANIMATED_TILES = {
+  26: 'water_1',
+  27: 'water_3',
+};
+
 // Joueur
 export const PLAYER = {
   SPEED: 300, // pixels par seconde
