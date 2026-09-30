@@ -9,12 +9,21 @@ export const GAME_HEIGHT = 720;
 export const SCENES = {
   MENU: 'MenuScene',
   HUB: 'HubScene',
+  WORLD_1: 'World1Scene',
+};
+
+// * Table des mondes : le nom d'un miroir dans Tiled -> la scène qu'il ouvre.
+// Pour ajouter un monde : créer sa scène, puis ajouter une ligne ici.
+export const WORLDS = {
+  hub: SCENES.HUB,
+  world_1: SCENES.WORLD_1,
 };
 
 // * Clés des assets : le nom sous lequel Phaser retrouve un fichier chargé
 export const ASSETS = {
   PLAYER_1: 'player_1',
   HUB_MAP: 'hub_map',
+  WORLD_1_MAP: 'world_1_map',
   TILESET_GARDEN: 'tileset_garden',
 };
 
@@ -31,6 +40,12 @@ export const PLAYER = {
 
 // Distance (en pixels) à laquelle le joueur peut interagir avec un miroir
 export const INTERACT_DISTANCE = 64;
+
+// * Où apparaît le joueur quand il arrive par un miroir : à droite du miroir, en pixels.
+// X est mesuré depuis le bord droit du miroir, Y depuis son milieu.
+// ? Valeurs à ajuster : 32 px = une tuile. À changer si un miroir est contre un mur à sa droite.
+// ? Le placement des miroirs n'est pas encore officiel : les cartes actuelles sont des cartes de test.
+export const MIRROR_SPAWN_OFFSET = { X: 32, Y: 0 };
 
 // Durée d'affichage d'un message d'interaction, en millisecondes
 export const MESSAGE_DURATION_MS = 2000;
