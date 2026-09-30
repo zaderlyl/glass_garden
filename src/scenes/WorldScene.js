@@ -3,6 +3,8 @@ import timer from '../systems/TimerSystem.js';
 import {
   SCENES,
   ASSETS,
+  TILE_SIZE,
+  TILE_ANIMATIONS,
   WORLDS,
   MIRROR_SPAWN_OFFSET,
   PLAYER,
@@ -48,6 +50,30 @@ export default class WorldScene extends Phaser.Scene {
     // * La carte (JSON exporté de Tiled) et l'image de son tileset
     this.load.tilemapTiledJSON(this.mapKey, this.mapPath);
     this.load.image(ASSETS.TILESET_GARDEN, 'assets/images/tilesets/tileset_garden.png');
+
+    // * Le spritesheet des tuiles animées (l'eau), découpé en images de 32 x 32 pixels
+    this.load.spritesheet(ASSETS.WATER, 'assets/images/sprites/water_spritesheet.png', {
+      frameWidth: TILE_SIZE,
+      frameHeight: TILE_SIZE,
+    });
+  }
+
+  /**
+   * * Définit les animations des tuiles animées (voir TILE_ANIMATIONS dans constants.js).
+   * Les animations sont globales à tout le jeu : on ne les crée qu'une fois,
+   * même si plusieurs mondes appellent cette méthode.
+   */
+  createTileAnimations() {
+    TILE_ANIMATIONS.forEach(({ key, sheet, start, end, frameRate }) => {
+      if (this.anims.exists(key)) return;
+
+      this.anims.create({
+        key,
+        frames: this.anims.generateFrameNumbers(sheet, { start, end }),
+        frameRate,
+        repeat: -1, // -1 = en boucle, sans fin
+      });
+    });
   }
 
   create() {
@@ -63,6 +89,8 @@ export default class WorldScene extends Phaser.Scene {
     }
     this.scene.bringToTop(SCENES.UI);
     timer.start(); // sans effet s'il tourne déjà
+
+    this.createTileAnimations();
 
     // * On construit la carte à partir du JSON Tiled
     const map = this.make.tilemap({ key: this.mapKey });
