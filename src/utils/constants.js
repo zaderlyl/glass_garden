@@ -41,6 +41,12 @@ export const PLAYER = {
 // Distance (en pixels) à laquelle le joueur peut interagir avec un miroir
 export const INTERACT_DISTANCE = 64;
 
+// * Où apparaît le joueur quand il arrive par un miroir : à droite du miroir, en pixels.
+// X est mesuré depuis le bord droit du miroir, Y depuis son milieu.
+// ? Valeurs à ajuster : 32 px = une tuile. À changer si un miroir est contre un mur à sa droite.
+// ? Le placement des miroirs n'est pas encore officiel : les cartes actuelles sont des cartes de test.
+export const MIRROR_SPAWN_OFFSET = { X: 32, Y: 0 };
+
 // Durée d'affichage d'un message d'interaction, en millisecondes
 export const MESSAGE_DURATION_MS = 2000;
 

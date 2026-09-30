@@ -2,6 +2,7 @@ import InputManager from '../systems/InputManager.js';
 import {
   ASSETS,
   WORLDS,
+  MIRROR_SPAWN_OFFSET,
   PLAYER,
   INTERACT_DISTANCE,
   MESSAGE_DURATION_MS,
@@ -26,6 +27,12 @@ export default class WorldScene extends Phaser.Scene {
     super(sceneKey);
     this.mapKey = mapKey;
     this.mapPath = mapPath;
+  }
+
+  // * init() reçoit les données passées par this.scene.start(scène, données)
+  // Ici : le nom du monde d'où vient le joueur (vide au premier lancement du jeu)
+  init(data) {
+    this.fromWorld = data?.from;
   }
 
   // preload() charge les images avant que create() ne démarre
@@ -61,8 +68,8 @@ export default class WorldScene extends Phaser.Scene {
     // * Toute tuile posée dans le calque « walls » devient un obstacle (-1 = case vide)
     walls.setCollisionByExclusion([-1]);
 
-    // * Le point de départ du joueur est un objet « spawn » placé dans Tiled
-    const spawn = map.findObject('objects', (object) => object.name === 'spawn');
+    // * Où faire apparaître le joueur ? (voir getSpawnPosition)
+    const spawn = this.getSpawnPosition(map);
 
     // * Le joueur est un sprite « physique » : c'est ce qui permet de le faire entrer en collision
     // Il commence de face (vers le bas), sur le point de départ
@@ -121,6 +128,36 @@ export default class WorldScene extends Phaser.Scene {
     this.input1 = new InputManager(this, 1);
   }
 
+  /**
+   * * Position d'apparition du joueur.
+   * - S'il arrive par un miroir : à côté du miroir qui mène au monde d'où il vient
+   *   (dans Tiled, ce miroir porte le nom de ce monde, ex. « hub »).
+   * - Sinon (premier lancement du jeu) : au point « spawn » de la carte.
+   * ? Le placement des miroirs n'est pas encore officiel (cartes de test) : la position d'apparition
+   * pourra changer avec les cartes définitives.
+   * TODO(équipe): faire disparaître le miroir par lequel le joueur arrive, mais seulement
+   * quand il revient dans le monde normal (le jardin)
+   * @returns {{x: number, y: number}}
+   */
+  getSpawnPosition(map) {
+    if (this.fromWorld) {
+      const mirror = map.findObject(
+        'objects',
+        (object) => object.name === this.fromWorld && (object.class || object.type) === 'mirror',
+      );
+
+      if (mirror) {
+        return {
+          x: mirror.x + mirror.width + MIRROR_SPAWN_OFFSET.X,
+          y: mirror.y + mirror.height / 2 + MIRROR_SPAWN_OFFSET.Y,
+        };
+      }
+    }
+
+    const spawn = map.findObject('objects', (object) => object.name === 'spawn');
+    return { x: spawn.x, y: spawn.y };
+  }
+
   // update() est appelée à chaque image (environ 60 fois par seconde)
   update() {
     // * Direction souhaitée, déjà normalisée en diagonale par l'InputManager
@@ -156,8 +193,12 @@ export default class WorldScene extends Phaser.Scene {
       const targetScene = WORLDS[nearMirror.world];
 
       if (targetScene) {
-        // On quitte cette scène et on lance celle du monde : le joueur apparaît à son spawn
-        this.scene.start(targetScene);
+        // TODO(équipe): SFX et VFX du passage par le miroir (son, effet visuel), à ajouter au plus vite
+        // TODO(équipe): timer global et score, à ajouter au plus vite (ils doivent survivre au changement de scène)
+        // * On quitte cette scène et on lance celle du monde visé, en lui disant d'où l'on vient.
+        // Le nom de ce monde est la clé de WORLDS dont la valeur est notre scène.
+        const currentWorld = Object.keys(WORLDS).find((name) => WORLDS[name] === this.scene.key);
+        this.scene.start(targetScene, { from: currentWorld });
       } else {
         // Le miroir existe dans Tiled mais son monde n'est pas encore créé
         this.hint.setText(`Ce monde n'existe pas encore : ${nearMirror.world}`);
