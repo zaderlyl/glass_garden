@@ -11,8 +11,9 @@ import {
 } from '../utils/constants.js';
 
 /**
- * * Le jardin du spawn : le monde normal, d'où partiront les miroirs.
- * Pour l'instant : la carte de test et le joueur 1, placé au point de départ.
+ * * Scène de base de tous les mondes (jardin compris) : elle charge une carte Tiled,
+ * y place le joueur au point de départ, gère les collisions et les miroirs.
+ * Chaque monde en hérite et lui indique sa carte ; il n'ajoute que sa mécanique propre.
  */
 export default class WorldScene extends Phaser.Scene {
   /**
