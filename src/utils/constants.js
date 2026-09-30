@@ -32,14 +32,19 @@ export const ASSETS = {
 // Taille d'une tuile, en pixels (la même dans Tiled et dans les spritesheets de tuiles animées)
 export const TILE_SIZE = 32;
 
+// * VITESSE DES ANIMATIONS DE TUILES, en images par seconde : c'est ICI qu'on la règle.
+// Plus la valeur est petite, plus l'eau est lente et douce (4 = une image toutes les 0,25 s).
+// Elle s'applique à toutes les animations ci-dessous. Pour une seule animation, remplacer
+// sa ligne par un nombre (ex. frameRate: 2).
+export const TILE_ANIMATION_FRAME_RATE = 4;
+
 // * Animations des tuiles animées, toutes tirées du spritesheet de l'eau (water_spritesheet.png).
 // start et end sont des numéros d'images, comptés ligne par ligne depuis 0 (8 images par ligne).
 // L'image 0 (état neutre) et les images vierges (7 et 17) ne sont jamais utilisées.
-// ? La vitesse (frameRate, en images par seconde) est à régler à l'oeil.
 export const TILE_ANIMATIONS = [
-  { key: 'water_1', sheet: ASSETS.WATER, start: 1, end: 6, frameRate: 6 },
-  { key: 'water_2', sheet: ASSETS.WATER, start: 8, end: 16, frameRate: 6 },
-  { key: 'water_3', sheet: ASSETS.WATER, start: 18, end: 26, frameRate: 6 },
+  { key: 'water_1', sheet: ASSETS.WATER, start: 1, end: 6, frameRate: TILE_ANIMATION_FRAME_RATE },
+  { key: 'water_2', sheet: ASSETS.WATER, start: 8, end: 16, frameRate: TILE_ANIMATION_FRAME_RATE },
+  { key: 'water_3', sheet: ASSETS.WATER, start: 18, end: 26, frameRate: TILE_ANIMATION_FRAME_RATE },
 ];
 
 // * Tuiles « repères » du tileset (posées dans le calque animated_tiles de Tiled) -> animation qui les remplace.
