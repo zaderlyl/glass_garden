@@ -10,6 +10,7 @@ export const SCENES = {
   MENU: 'MenuScene',
   HUB: 'HubScene',
   WORLD_1: 'World1Scene',
+  UI: 'UIScene',
 };
 
 // * Table des mondes : le nom d'un miroir dans Tiled -> la scène qu'il ouvre.
@@ -69,4 +70,8 @@ export const FONT_FAMILY = 'Georgia, serif';
 export const FONT_SIZE = {
   TITLE: '96px',
   HINT: '28px',
+  TIMER: '36px',
 };
+
+// Marge (en pixels) entre les éléments d'interface et le bord de l'écran
+export const UI_MARGIN = 24;
