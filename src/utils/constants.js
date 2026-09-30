@@ -47,6 +47,10 @@ export const TILE_ANIMATIONS = [
   { key: 'water_3', sheet: ASSETS.WATER, start: 18, end: 26, frameRate: TILE_ANIMATION_FRAME_RATE },
 ];
 
+// * Est-ce que le joueur est bloqué par les tuiles du calque animated_tiles (l'eau) ?
+// true : il ne peut pas marcher dessus. false : il passe par-dessus.
+export const ANIMATED_TILES_BLOCK_PLAYER = true;
+
 // * Tuiles « repères » du tileset (posées dans le calque animated_tiles de Tiled) -> animation qui les remplace.
 // 26 = bord (flèche vers le haut), 27 = angle (haut droite). La 25 (eau fixe) n'est pas ici : elle reste telle quelle.
 // L'orientation de chaque tuile (rotation, miroir) est reprise par son sprite : les animations de base sont orientées vers le haut.

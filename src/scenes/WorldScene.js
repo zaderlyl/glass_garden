@@ -7,6 +7,7 @@ import {
   TILE_SIZE,
   TILE_ANIMATIONS,
   ANIMATED_TILES,
+  ANIMATED_TILES_BLOCK_PLAYER,
   WORLDS,
   MIRROR_SPAWN_OFFSET,
   PLAYER,
@@ -83,14 +84,26 @@ export default class WorldScene extends Phaser.Scene {
    * leur animation en boucle (voir ANIMATED_TILES dans constants.js).
    * Les tuiles qui ne sont pas dans cette table (l'eau fixe du centre) restent affichées telles quelles.
    * Une carte sans ce calque est simplement ignorée.
+   * @returns {Phaser.Physics.Arcade.StaticGroup|null} les blocs qui bloquent le joueur, ou null
    */
   createAnimatedTiles(map, tileset) {
     // ! On teste d'abord l'existence du calque : createLayer afficherait un avertissement sinon
-    if (!map.getLayer('animated_tiles')) return;
+    if (!map.getLayer('animated_tiles')) return null;
 
     const layer = map.createLayer('animated_tiles', tileset);
 
+    // * Les tuiles repères sont retirées de la carte plus bas, donc elles ne bloquent plus le joueur.
+    // On crée à la place un bloc invisible de la taille d'une tuile (« zone ») sous chaque case d'eau.
+    // Un groupe « statique » ne bouge jamais : c'est ce qu'il faut pour un obstacle.
+    const blockers = this.physics.add.staticGroup();
+
     layer.forEachTile((tile) => {
+      if (tile.index === -1) return; // case vide
+
+      if (ANIMATED_TILES_BLOCK_PLAYER) {
+        blockers.add(this.add.zone(tile.getCenterX(), tile.getCenterY(), TILE_SIZE, TILE_SIZE));
+      }
+
       const variants = ANIMATED_TILES[tile.index];
       if (!variants) return; // tuile vide ou tuile normale : on ne touche à rien
 
@@ -110,6 +123,8 @@ export default class WorldScene extends Phaser.Scene {
       // * On retire la tuile « repère » pour qu'elle ne reste pas visible sous l'animation
       layer.removeTileAt(tile.x, tile.y);
     });
+
+    return blockers;
   }
 
   create() {
@@ -140,7 +155,7 @@ export default class WorldScene extends Phaser.Scene {
     map.createLayer('decor_below', tileset);
 
     // * L'eau : créée ici, entre le décor du dessous et les murs, pour passer sous le joueur
-    this.createAnimatedTiles(map, tileset);
+    const waterBlockers = this.createAnimatedTiles(map, tileset);
     const walls = map.createLayer('walls', tileset);
 
     // * Toute tuile posée dans le calque « walls » devient un obstacle (-1 = case vide)
@@ -161,6 +176,11 @@ export default class WorldScene extends Phaser.Scene {
 
     // * On dit à Phaser : le joueur ne traverse pas les murs
     this.physics.add.collider(this.player, walls);
+
+    // * Et il ne traverse pas l'eau (si ANIMATED_TILES_BLOCK_PLAYER est à true dans constants.js)
+    if (waterBlockers) {
+      this.physics.add.collider(this.player, waterBlockers);
+    }
 
     // * Les miroirs sont les objets de classe « mirror » placés dans Tiled.
     // Leur nom donne le monde qu'ils ouvrent (ex. « world_1 »).
