@@ -1,5 +1,7 @@
 import InputManager from '../systems/InputManager.js';
+import timer from '../systems/TimerSystem.js';
 import {
+  SCENES,
   ASSETS,
   WORLDS,
   MIRROR_SPAWN_OFFSET,
@@ -52,6 +54,15 @@ export default class WorldScene extends Phaser.Scene {
     // * Une même scène est réutilisée à chaque visite : on remet l'état à zéro
     // ! Sinon un message encore affiché au moment de partir bloquerait le texte d'aide au retour
     this.messageActive = false;
+
+    // * Le chronomètre et son affichage sont globaux : ils ne dépendent pas du monde.
+    // On lance l'interface une seule fois, puis on la garde au premier plan à chaque monde.
+    // ? Le chronomètre démarre ici pour l'instant. À déplacer au lancement de la partie quand le menu existera.
+    if (!this.scene.isActive(SCENES.UI)) {
+      this.scene.launch(SCENES.UI);
+    }
+    this.scene.bringToTop(SCENES.UI);
+    timer.start(); // sans effet s'il tourne déjà
 
     // * On construit la carte à partir du JSON Tiled
     const map = this.make.tilemap({ key: this.mapKey });
