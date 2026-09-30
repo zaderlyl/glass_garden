@@ -304,10 +304,11 @@ Une **musique d'ambiance par monde**, en boucle, et quelques effets sonores (mir
 |---|---|
 | **Résolution** | **1280 × 720** px (HD, 16:9) |
 | **Cible** | Borne d'arcade |
-| **Moteur** | Phaser, en JavaScript |
-| **Build** | Aucun : Phaser chargé directement dans `index.html` |
+| **Moteur** | Phaser 3.90, en JavaScript (modules ES) |
+| **Build** | Aucun : Phaser est chargé depuis un CDN (jsDelivr) dans `index.html`, une connexion internet est donc nécessaire au lancement |
 | **Serveur** | Petit serveur local pour le développement (Live Server ou `python3 -m http.server`) |
-| **Cartes** | Niveaux dessinés avec Tiled, exportés en JSON |
+| **Physique** | Phaser Arcade, sans gravité (vue du dessus) |
+| **Cartes** | Niveaux dessinés avec Tiled (tuiles de 32 px), exportés en JSON |
 | **Sauvegarde** | `localStorage` du navigateur (high scores) |
 
 ---
@@ -316,28 +317,51 @@ Une **musique d'ambiance par monde**, en boucle, et quelques effets sonores (mir
 
 ```
 glass_garden/
-├── index.html
-├── lib/                 Phaser
+├── index.html            charge Phaser (CDN) puis src/main.js
+├── README.md
 ├── assets/
-│   ├── images/          sprites, tilesets, ui, backgrounds
-│   ├── audio/           music, sfx
-│   ├── maps/            niveaux Tiled (JSON)
-│   └── fonts/
+│   ├── images/
+│   │   ├── sprites/      player_1_spritesheet.png
+│   │   └── tilesets/     tileset_garden.png
+│   ├── maps/             hub_test.tmx (source Tiled) et hub_test.json (lu par le jeu)
+│   ├── audio/            music/, sfx/                          (prévu)
+│   └── fonts/                                                  (prévu)
 ├── src/
-│   ├── main.js          point d'entrée
-│   ├── config.js        configuration Phaser
-│   ├── scenes/          Boot, Preload, Menu, Hub, World, UI…
-│   ├── entities/        Player, Enemy, Collectible…
-│   ├── systems/         Input, Audio, Save, Timer, Dialogue…
-│   ├── ui/              boutons, barres, HUD
-│   ├── data/            données de jeu (JSON)
-│   └── utils/           constantes et fonctions utilitaires
-└── docs/                documents de conception
+│   ├── main.js           point d'entrée
+│   ├── config.js         configuration Phaser (1280 x 720, physique)
+│   ├── scenes/           MenuScene, HubScene
+│   │                     prévu : Preload, WorldScene, UI…
+│   ├── systems/          InputManager
+│   │                     prévu : Timer, Save, Audio, Dialogue…
+│   ├── entities/         Player, Enemy, Collectible…            (prévu)
+│   ├── ui/               boutons, barres, HUD                   (prévu)
+│   ├── data/             données de jeu (JSON)                  (prévu)
+│   └── utils/            constants.js (valeurs partagées)
+└── docs/                 game-design, conventions, journal/
 ```
+
+Les éléments marqués « prévu » n'existent pas encore : on les crée au moment où on en a besoin, pas avant.
 
 ### Principe clé : une base commune pour les mondes
 
 Les cinq mondes partagent une **scène de base** (déplacement, collisions, étoile, sortie par le miroir). Chaque monde ne développe que sa **mécanique propre**. C'est ce qui rend cinq mondes réalisables dans le temps imparti.
+
+**État actuel :** cette logique est pour l'instant dans `HubScene` (le jardin). Elle sera extraite dans une scène de base `WorldScene` dès la création du deuxième monde, pour ne rien copier-coller.
+
+### Comment un monde est construit
+
+Un monde est une **carte Tiled** avec toujours les mêmes calques, du dessous vers le dessus :
+
+| Calque | Rôle |
+|---|---|
+| `background` | Fond noir sur toute la carte |
+| `ground` | Le sol |
+| `decor_below` | Décor sous le joueur |
+| `walls` | Obstacles : toute tuile posée ici bloque le joueur |
+| `decor_above` | Décor qui passe devant le joueur |
+| `objects` | Éléments placés à la main : point de départ (`spawn`), miroirs (classe `mirror`, dont le **nom** est le monde visé, par exemple `world_1`) |
+
+Ajouter un miroir ou déplacer le point de départ se fait donc dans Tiled, sans toucher au code.
 
 ### Systèmes à écrire une seule fois
 

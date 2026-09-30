@@ -1,0 +1,57 @@
+// * Toutes les valeurs partagées du jeu sont ici : noms de scènes, clés d'assets, vitesses, tailles, couleurs.
+// * Aucune valeur « magique » ailleurs dans le code (voir docs/conventions.md).
+
+// Résolution imposée par la borne d'arcade (16:9)
+export const GAME_WIDTH = 1280;
+export const GAME_HEIGHT = 720;
+
+// Noms des scènes
+export const SCENES = {
+  MENU: 'MenuScene',
+  HUB: 'HubScene',
+};
+
+// * Clés des assets : le nom sous lequel Phaser retrouve un fichier chargé
+export const ASSETS = {
+  PLAYER_1: 'player_1',
+  HUB_MAP: 'hub_map',
+  TILESET_GARDEN: 'tileset_garden',
+};
+
+// Joueur
+export const PLAYER = {
+  SPEED: 300, // pixels par seconde
+  FRAME_SIZE: 32, // taille d'une image du spritesheet, en pixels
+  // * Numéro de l'image du spritesheet pour chaque direction
+  FRAMES: { UP: 0, RIGHT: 1, LEFT: 2, DOWN: 3 },
+  // * Boîte de collision : plus petite que l'image, placée au niveau des pieds
+  // ? À ajuster à l'oeil (activer debug dans config.js)
+  HITBOX: { WIDTH: 20, HEIGHT: 16, OFFSET_X: 6, OFFSET_Y: 16 },
+};
+
+// Distance (en pixels) à laquelle le joueur peut interagir avec un miroir
+export const INTERACT_DISTANCE = 64;
+
+// Durée d'affichage d'un message d'interaction, en millisecondes
+export const MESSAGE_DURATION_MS = 2000;
+
+// * Ordre d'affichage : plus la valeur est grande, plus l'élément est devant
+export const DEPTH = {
+  ABOVE_PLAYER: 10, // calque decor_above
+  UI: 20,
+};
+
+// Couleurs
+export const COLORS = {
+  BACKGROUND: '#2f6b3a',
+  TEXT: '#f4f1e8',
+  MIRROR: 0xbfe9ff,
+  MIRROR_BORDER: 0xffffff,
+};
+
+// Textes
+export const FONT_FAMILY = 'Georgia, serif';
+export const FONT_SIZE = {
+  TITLE: '96px',
+  HINT: '28px',
+};

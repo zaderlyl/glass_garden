@@ -1,15 +1,14 @@
 import MenuScene from './scenes/MenuScene.js';
 import HubScene from './scenes/HubScene.js';
+import { GAME_WIDTH, GAME_HEIGHT, COLORS } from './utils/constants.js';
 
 // * Configuration Phaser. La résolution est celle de la borne d'arcade : 1280 x 720 (16:9).
-
-
 export default {
   type: Phaser.AUTO,
   parent: 'game',
-  width: 1280,
-  height: 720,
-  backgroundColor: '#2f6b3a',
+  width: GAME_WIDTH,
+  height: GAME_HEIGHT,
+  backgroundColor: COLORS.BACKGROUND,
   pixelArt: true, // pas de lissage : on veut des pixels nets
   scale: {
     // * FIT adapte le jeu à la taille de la fenêtre en gardant le ratio 16:9
