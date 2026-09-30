@@ -73,5 +73,16 @@ export const FONT_SIZE = {
   TIMER: '36px',
 };
 
+// * Modes de jeu : chacun a son propre meilleur temps
+export const GAME_MODES = {
+  SOLO: 'solo',
+  MULTI: 'multi',
+};
+
+// * Noms sous lesquels les données sont rangées dans le navigateur (localStorage)
+export const STORAGE_KEYS = {
+  BEST_TIME_PREFIX: 'glass_garden_best_time_', // suivi du mode : « ..._solo », « ..._multi »
+};
+
 // Marge (en pixels) entre les éléments d'interface et le bord de l'écran
 export const UI_MARGIN = 24;
