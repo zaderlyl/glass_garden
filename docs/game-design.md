@@ -279,6 +279,7 @@ Le temps total est sauvegardé pour chaque mode (solo et multijoueur), afin de p
 - [x] Tuile de sol
 - [x] Tuile de mur
 - [x] Sprite de miroir
+- [x] Spritesheet de l'eau animée (2 bords et 1 angle)
 - [ ] Écran d'accueil
 - [ ] Écran des contrôles
 - [ ] Éléments de décor
@@ -321,22 +322,22 @@ glass_garden/
 ├── README.md
 ├── assets/
 │   ├── images/
-│   │   ├── sprites/      player_1_spritesheet.png
+│   │   ├── sprites/      player_1_spritesheet.png, water_spritesheet.png
 │   │   └── tilesets/     tileset_garden.png
-│   ├── maps/             hub_test.tmx (source Tiled) et hub_test.json (lu par le jeu)
+│   ├── maps/             hub_test et monde_1 : .tmx (source Tiled) et .json (lu par le jeu)
 │   ├── audio/            music/, sfx/                          (prévu)
 │   └── fonts/                                                  (prévu)
 ├── src/
 │   ├── main.js           point d'entrée
 │   ├── config.js         configuration Phaser (1280 x 720, physique)
-│   ├── scenes/           MenuScene, HubScene
-│   │                     prévu : Preload, WorldScene, UI…
-│   ├── systems/          InputManager
-│   │                     prévu : Timer, Save, Audio, Dialogue…
+│   ├── scenes/           MenuScene, WorldScene (base des mondes), HubScene, World1Scene, UIScene
+│   │                     prévu : Preload, mondes 2 à 5…
+│   ├── systems/          InputManager, TimerSystem, SaveSystem
+│   │                     prévu : Audio, Dialogue, tir, étoiles…
 │   ├── entities/         Player, Enemy, Collectible…            (prévu)
 │   ├── ui/               boutons, barres, HUD                   (prévu)
 │   ├── data/             données de jeu (JSON)                  (prévu)
-│   └── utils/            constants.js (valeurs partagées)
+│   └── utils/            constants.js (valeurs partagées), helpers.js (fonctions utilitaires)
 └── docs/                 game-design, conventions, journal/
 ```
 
@@ -357,11 +358,35 @@ Un monde est une **carte Tiled** avec toujours les mêmes calques, du dessous ve
 | `background` | Fond noir sur toute la carte |
 | `ground` | Le sol |
 | `decor_below` | Décor sous le joueur |
+| `animated_tiles` | Tuiles animées (l'eau) : des tuiles repères que le code remplace par des animations (voir plus bas). Facultatif : une carte sans ce calque fonctionne |
 | `walls` | Obstacles : toute tuile posée ici bloque le joueur |
 | `decor_above` | Décor qui passe devant le joueur |
 | `objects` | Éléments placés à la main : point de départ (`spawn`), miroirs (classe `mirror`, dont le **nom** est le monde visé, par exemple `world_1`) |
 
 Ajouter un miroir ou déplacer le point de départ se fait donc dans Tiled, sans toucher au code.
+
+### Les tuiles animées (l'eau)
+
+Une tuile animée se place dans Tiled comme une tuile normale, dans le calque `animated_tiles`. Elle est posée sous forme de **tuile repère** (une tuile du tileset qui ne sert qu'à indiquer « ici, il y a une animation »). Au chargement du monde, le code remplace chaque tuile repère par un **sprite qui joue son animation en boucle**, à la même place et avec la même orientation.
+
+| Tuile du tileset | Rôle | Remplacée par |
+|---|---|---|
+| **25** | Eau fixe (le centre du bassin) | rien : elle reste telle quelle |
+| **26** | Bord, repère avec une flèche vers le haut | `water_1` ou `water_2` (l'une des deux, choisie selon la position) |
+| **27** | Angle, repère avec un coin noir en haut à droite | `water_3` |
+
+**Pour poser de l'eau dans un monde :**
+1. Sélectionner le calque `animated_tiles`.
+2. Poser les tuiles : l'eau fixe (25) au centre, les bords (26) sur les côtés, les angles (27) aux coins.
+3. **Orienter** chaque tuile avec les touches `Z` (rotation), `X` et `Y` (miroirs) de Tiled, jusqu'à ce que la flèche ou le coin noir pointe du bon côté : les animations sont dessinées « vers le haut » (bord) et « en haut à droite » (angle), et le code reprend l'orientation de chaque tuile.
+4. Enregistrer (`Cmd+S`) puis **exporter le JSON** (`Cmd+E`).
+
+**Réglages (dans `src/utils/constants.js`) :**
+- `TILE_ANIMATION_FRAME_RATE` : la vitesse de toutes les animations, en images par seconde. Plus la valeur est petite, plus l'eau est lente et douce.
+- `ANIMATED_TILES` : quelle animation remplace quelle tuile (une liste par tuile : s'il y en a plusieurs, le code en choisit une selon la position).
+- `ANIMATED_TILES_BLOCK_PLAYER` : `true` si le joueur ne peut pas marcher sur l'eau, `false` s'il la traverse.
+
+**Ajouter une nouvelle animation :** ajouter ses images au spritesheet, une entrée dans `TILE_ANIMATIONS` (images de début et de fin), une tuile repère dans le tileset, et une ligne dans `ANIMATED_TILES`.
 
 ### Systèmes à écrire une seule fois
 

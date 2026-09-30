@@ -1,8 +1,13 @@
 import InputManager from '../systems/InputManager.js';
 import timer from '../systems/TimerSystem.js';
+import { pickVariant } from '../utils/helpers.js';
 import {
   SCENES,
   ASSETS,
+  TILE_SIZE,
+  TILE_ANIMATIONS,
+  ANIMATED_TILES,
+  ANIMATED_TILES_BLOCK_PLAYER,
   WORLDS,
   MIRROR_SPAWN_OFFSET,
   PLAYER,
@@ -48,6 +53,78 @@ export default class WorldScene extends Phaser.Scene {
     // * La carte (JSON exporté de Tiled) et l'image de son tileset
     this.load.tilemapTiledJSON(this.mapKey, this.mapPath);
     this.load.image(ASSETS.TILESET_GARDEN, 'assets/images/tilesets/tileset_garden.png');
+
+    // * Le spritesheet des tuiles animées (l'eau), découpé en images de 32 x 32 pixels
+    this.load.spritesheet(ASSETS.WATER, 'assets/images/sprites/water_spritesheet.png', {
+      frameWidth: TILE_SIZE,
+      frameHeight: TILE_SIZE,
+    });
+  }
+
+  /**
+   * * Définit les animations des tuiles animées (voir TILE_ANIMATIONS dans constants.js).
+   * Les animations sont globales à tout le jeu : on ne les crée qu'une fois,
+   * même si plusieurs mondes appellent cette méthode.
+   */
+  createTileAnimations() {
+    TILE_ANIMATIONS.forEach(({ key, sheet, start, end, frameRate }) => {
+      if (this.anims.exists(key)) return;
+
+      this.anims.create({
+        key,
+        frames: this.anims.generateFrameNumbers(sheet, { start, end }),
+        frameRate,
+        repeat: -1, // -1 = en boucle, sans fin
+      });
+    });
+  }
+
+  /**
+   * * Remplace les tuiles « repères » du calque animated_tiles par des sprites qui jouent
+   * leur animation en boucle (voir ANIMATED_TILES dans constants.js).
+   * Les tuiles qui ne sont pas dans cette table (l'eau fixe du centre) restent affichées telles quelles.
+   * Une carte sans ce calque est simplement ignorée.
+   * @returns {Phaser.Physics.Arcade.StaticGroup|null} les blocs qui bloquent le joueur, ou null
+   */
+  createAnimatedTiles(map, tileset) {
+    // ! On teste d'abord l'existence du calque : createLayer afficherait un avertissement sinon
+    if (!map.getLayer('animated_tiles')) return null;
+
+    const layer = map.createLayer('animated_tiles', tileset);
+
+    // * Les tuiles repères sont retirées de la carte plus bas, donc elles ne bloquent plus le joueur.
+    // On crée à la place un bloc invisible de la taille d'une tuile (« zone ») sous chaque case d'eau.
+    // Un groupe « statique » ne bouge jamais : c'est ce qu'il faut pour un obstacle.
+    const blockers = this.physics.add.staticGroup();
+
+    layer.forEachTile((tile) => {
+      if (tile.index === -1) return; // case vide
+
+      if (ANIMATED_TILES_BLOCK_PLAYER) {
+        blockers.add(this.add.zone(tile.getCenterX(), tile.getCenterY(), TILE_SIZE, TILE_SIZE));
+      }
+
+      const variants = ANIMATED_TILES[tile.index];
+      if (!variants) return; // tuile vide ou tuile normale : on ne touche à rien
+
+      // * S'il y a plusieurs animations possibles, on en choisit une selon la position de la tuile
+      const animation = variants[pickVariant(tile.x, tile.y, variants.length)];
+
+      // * Le sprite prend la place exacte de la tuile (son centre), puis joue son animation
+      const sprite = this.add.sprite(tile.getCenterX(), tile.getCenterY(), ASSETS.WATER);
+      sprite.play(animation);
+
+      // * On reporte l'orientation de la tuile (posée dans Tiled avec les touches Z, X, Y) sur le sprite.
+      // Phaser a converti les retournements de Tiled en un miroir horizontal (flipX) et une rotation :
+      // le miroir est appliqué d'abord, puis la rotation. L'animation de base est orientée « vers le haut ».
+      sprite.setFlipX(tile.flipX);
+      sprite.setRotation(tile.rotation);
+
+      // * On retire la tuile « repère » pour qu'elle ne reste pas visible sous l'animation
+      layer.removeTileAt(tile.x, tile.y);
+    });
+
+    return blockers;
   }
 
   create() {
@@ -64,6 +141,8 @@ export default class WorldScene extends Phaser.Scene {
     this.scene.bringToTop(SCENES.UI);
     timer.start(); // sans effet s'il tourne déjà
 
+    this.createTileAnimations();
+
     // * On construit la carte à partir du JSON Tiled
     const map = this.make.tilemap({ key: this.mapKey });
 
@@ -74,6 +153,9 @@ export default class WorldScene extends Phaser.Scene {
     map.createLayer('background', tileset);
     map.createLayer('ground', tileset);
     map.createLayer('decor_below', tileset);
+
+    // * L'eau : créée ici, entre le décor du dessous et les murs, pour passer sous le joueur
+    const waterBlockers = this.createAnimatedTiles(map, tileset);
     const walls = map.createLayer('walls', tileset);
 
     // * Toute tuile posée dans le calque « walls » devient un obstacle (-1 = case vide)
@@ -94,6 +176,11 @@ export default class WorldScene extends Phaser.Scene {
 
     // * On dit à Phaser : le joueur ne traverse pas les murs
     this.physics.add.collider(this.player, walls);
+
+    // * Et il ne traverse pas l'eau (si ANIMATED_TILES_BLOCK_PLAYER est à true dans constants.js)
+    if (waterBlockers) {
+      this.physics.add.collider(this.player, waterBlockers);
+    }
 
     // * Les miroirs sont les objets de classe « mirror » placés dans Tiled.
     // Leur nom donne le monde qu'ils ouvrent (ex. « world_1 »).

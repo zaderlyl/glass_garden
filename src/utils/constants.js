@@ -26,6 +26,38 @@ export const ASSETS = {
   HUB_MAP: 'hub_map',
   WORLD_1_MAP: 'world_1_map',
   TILESET_GARDEN: 'tileset_garden',
+  WATER: 'water',
+};
+
+// Taille d'une tuile, en pixels (la même dans Tiled et dans les spritesheets de tuiles animées)
+export const TILE_SIZE = 32;
+
+// * VITESSE DES ANIMATIONS DE TUILES, en images par seconde : c'est ICI qu'on la règle.
+// Plus la valeur est petite, plus l'eau est lente et douce (4 = une image toutes les 0,25 s).
+// Elle s'applique à toutes les animations ci-dessous. Pour une seule animation, remplacer
+// sa ligne par un nombre (ex. frameRate: 2).
+export const TILE_ANIMATION_FRAME_RATE = 4;
+
+// * Animations des tuiles animées, toutes tirées du spritesheet de l'eau (water_spritesheet.png).
+// start et end sont des numéros d'images, comptés ligne par ligne depuis 0 (8 images par ligne).
+// L'image 0 (état neutre) et les images vierges (7 et 17) ne sont jamais utilisées.
+export const TILE_ANIMATIONS = [
+  { key: 'water_1', sheet: ASSETS.WATER, start: 1, end: 6, frameRate: TILE_ANIMATION_FRAME_RATE },
+  { key: 'water_2', sheet: ASSETS.WATER, start: 8, end: 16, frameRate: TILE_ANIMATION_FRAME_RATE },
+  { key: 'water_3', sheet: ASSETS.WATER, start: 18, end: 26, frameRate: TILE_ANIMATION_FRAME_RATE },
+];
+
+// * Est-ce que le joueur est bloqué par les tuiles du calque animated_tiles (l'eau) ?
+// true : il ne peut pas marcher dessus. false : il passe par-dessus.
+export const ANIMATED_TILES_BLOCK_PLAYER = true;
+
+// * Tuiles « repères » du tileset (posées dans le calque animated_tiles de Tiled) -> animation qui les remplace.
+// 26 = bord (flèche vers le haut), 27 = angle (haut droite). La 25 (eau fixe) n'est pas ici : elle reste telle quelle.
+// L'orientation de chaque tuile (rotation, miroir) est reprise par son sprite : les animations de base sont orientées vers le haut.
+// Chaque tuile a une LISTE d'animations possibles : s'il y en a plusieurs, l'une est choisie selon la position de la tuile.
+export const ANIMATED_TILES = {
+  26: ['water_1', 'water_2'],
+  27: ['water_3'],
 };
 
 // Joueur
