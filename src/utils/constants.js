@@ -12,6 +12,13 @@ export const SCENES = {
   WORLD_1: 'World1Scene',
 };
 
+// * Table des mondes : le nom d'un miroir dans Tiled -> la scène qu'il ouvre.
+// Pour ajouter un monde : créer sa scène, puis ajouter une ligne ici.
+export const WORLDS = {
+  hub: SCENES.HUB,
+  world_1: SCENES.WORLD_1,
+};
+
 // * Clés des assets : le nom sous lequel Phaser retrouve un fichier chargé
 export const ASSETS = {
   PLAYER_1: 'player_1',

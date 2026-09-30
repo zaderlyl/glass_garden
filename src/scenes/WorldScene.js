@@ -1,6 +1,7 @@
 import InputManager from '../systems/InputManager.js';
 import {
   ASSETS,
+  WORLDS,
   PLAYER,
   INTERACT_DISTANCE,
   MESSAGE_DURATION_MS,
@@ -41,6 +42,10 @@ export default class WorldScene extends Phaser.Scene {
   }
 
   create() {
+    // * Une même scène est réutilisée à chaque visite : on remet l'état à zéro
+    // ! Sinon un message encore affiché au moment de partir bloquerait le texte d'aide au retour
+    this.messageActive = false;
+
     // * On construit la carte à partir du JSON Tiled
     const map = this.make.tilemap({ key: this.mapKey });
 
@@ -147,12 +152,20 @@ export default class WorldScene extends Phaser.Scene {
     }
 
     if (nearMirror && this.input1.justPressed('interact')) {
-      // TODO(équipe): téléporter le joueur vers la scène du monde (nearMirror.world)
-      this.hint.setText(`Ce miroir mène vers : ${nearMirror.world}`);
-      this.messageActive = true;
-      this.time.delayedCall(MESSAGE_DURATION_MS, () => {
-        this.messageActive = false;
-      });
+      // * Le nom du miroir dans Tiled donne le monde visé, la table WORLDS donne sa scène
+      const targetScene = WORLDS[nearMirror.world];
+
+      if (targetScene) {
+        // On quitte cette scène et on lance celle du monde : le joueur apparaît à son spawn
+        this.scene.start(targetScene);
+      } else {
+        // Le miroir existe dans Tiled mais son monde n'est pas encore créé
+        this.hint.setText(`Ce monde n'existe pas encore : ${nearMirror.world}`);
+        this.messageActive = true;
+        this.time.delayedCall(MESSAGE_DURATION_MS, () => {
+          this.messageActive = false;
+        });
+      }
     }
   }
 }
