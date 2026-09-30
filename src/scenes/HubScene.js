@@ -8,7 +8,7 @@ const PLAYER_SPEED = 300;
 const FRAMES = { UP: 0, RIGHT: 1, LEFT: 2, DOWN: 3 };
 
 // Distance (en pixels) à laquelle le joueur peut interagir avec un miroir
-const INTERACT_DISTANCE = 64;
+const INTERACT_DISTANCE = 64; // * Détéction en unité pixels
 
 /**
  * * Le jardin du spawn : le monde normal, d'où partiront les miroirs.
@@ -134,6 +134,7 @@ export default class HubScene extends Phaser.Scene {
 
     // On ne réécrit pas le texte pendant l'affichage du message d'interaction
     // ? La touche affichée (E) est provisoire : à changer avec les boutons de la borne
+    // TODO(équipe): message d'intéraction a changer ( utilisation d'un UI touche au dessus des miroirs )
     if (!this.messageActive) {
       this.hint.setText(nearMirror ? 'E : entrer dans le miroir' : '');
     }
