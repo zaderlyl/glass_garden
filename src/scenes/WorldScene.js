@@ -56,6 +56,10 @@ export default class WorldScene extends Phaser.Scene {
     this.load.tilemapTiledJSON(this.mapKey, this.mapPath);
     this.load.image(ASSETS.TILESET_GARDEN, 'assets/images/tilesets/tileset_garden.png');
 
+    // * L'image du miroir (32 x 32 pixels)
+    // ? Le fichier est rangé dans tilesets/ : nos conventions le voudraient dans sprites/
+    this.load.image(ASSETS.MIRROR, 'assets/images/tilesets/mirror.png');
+
     // * Le spritesheet des tuiles animées (l'eau), découpé en images de 32 x 32 pixels
     this.load.spritesheet(ASSETS.WATER, 'assets/images/sprites/water_spritesheet.png', {
       frameWidth: TILE_SIZE,
@@ -199,20 +203,17 @@ export default class WorldScene extends Phaser.Scene {
         // Un miroir utilisé n'est plus créé : il a disparu (voir isMirrorAvailable)
         if (!this.isMirrorAvailable(object.name)) return;
 
-        // ! Placeholder : un rectangle bleu clair, à remplacer par le vrai sprite du miroir
-        // Un rectangle est centré sur son point de placement, d'où le « + width / 2 »
-        const mirror = this.add.rectangle(
+        // * Le miroir est une image, centrée sur l'objet Tiled (un sprite est centré sur son point de placement,
+        // d'où le « + width / 2 »). Elle garde sa taille d'origine, quelle que soit celle de l'objet dans Tiled.
+        // « Statique » : le corps ne bouge jamais, et sa zone de blocage a la taille de l'image.
+        const mirror = this.physics.add.staticSprite(
           object.x + object.width / 2,
           object.y + object.height / 2,
-          object.width,
-          object.height,
-          COLORS.MIRROR,
+          ASSETS.MIRROR,
         );
-        mirror.setStrokeStyle(2, COLORS.MIRROR_BORDER);
         mirror.world = object.name; // le monde de destination
 
-        // * Un corps « statique » ne bouge jamais : le miroir bloque le joueur comme un mur
-        this.physics.add.existing(mirror, true);
+        // * Le miroir bloque le joueur comme un mur
         this.physics.add.collider(this.player, mirror);
 
         this.mirrors.push(mirror);

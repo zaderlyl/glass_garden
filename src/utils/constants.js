@@ -31,6 +31,7 @@ export const ASSETS = {
   WORLD_1_MAP: 'world_1_map',
   TILESET_GARDEN: 'tileset_garden',
   WATER: 'water',
+  MIRROR: 'mirror',
 };
 
 // Taille d'une tuile, en pixels (la même dans Tiled et dans les spritesheets de tuiles animées)
@@ -97,8 +98,6 @@ export const DEPTH = {
 export const COLORS = {
   BACKGROUND: '#2f6b3a',
   TEXT: '#f4f1e8',
-  MIRROR: 0xbfe9ff,
-  MIRROR_BORDER: 0xffffff,
 };
 
 // Textes
