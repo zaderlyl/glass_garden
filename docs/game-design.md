@@ -334,10 +334,11 @@ glass_garden/
 ├── src/
 │   ├── main.js           point d'entrée
 │   ├── config.js         configuration Phaser (1280 x 720, physique)
-│   ├── scenes/           MenuScene, WorldScene (base des mondes), HubScene, World1Scene, UIScene
-│   │                     prévu : Preload, mondes 2 à 5…
-│   ├── systems/          InputManager, TimerSystem, SaveSystem, MirrorSystem, PaletteSystem
-│   │                     prévu : Audio, Dialogue, tir, étoiles…
+│   ├── scenes/           PreloadScene, MenuScene, WorldScene (base des mondes), HubScene, World1Scene, UIScene
+│   │                     prévu : mondes 2 à 5…
+│   ├── systems/          InputManager, TimerSystem, SaveSystem, MirrorSystem, PaletteSystem,
+│   │                     StarSystem, RecolteEtoiles
+│   │                     prévu : Audio, Dialogue, tir…
 │   ├── entities/         Player, Enemy, Collectible…            (prévu)
 │   ├── ui/               boutons, barres, HUD                   (prévu)
 │   ├── data/             données de jeu (JSON)                  (prévu)
@@ -352,7 +353,7 @@ Les éléments marqués « prévu » n'existent pas encore : on les crée au mom
 
 Les cinq mondes partagent une **scène de base** (déplacement, collisions, étoile, sortie par le miroir). Chaque monde ne développe que sa **mécanique propre**. C'est ce qui rend cinq mondes réalisables dans le temps imparti.
 
-**État actuel :** cette logique est dans `WorldScene`. `HubScene` (le jardin) et `World1Scene` en héritent et n'indiquent que leur carte. Il manque encore, dans la scène de base, la récolte de l'étoile (en cours sur une autre branche).
+**État actuel :** cette logique est dans `WorldScene`. `HubScene` (le jardin) et `World1Scene` en héritent et n'indiquent que leur carte. La récolte des étoiles (`RecolteEtoiles`) et la victoire y sont aussi.
 
 ### Comment un monde est construit
 
@@ -366,9 +367,9 @@ Un monde est une **carte Tiled** avec toujours les mêmes calques, du dessous ve
 | `animated_tiles` | Tuiles animées (l'eau) : des tuiles repères que le code remplace par des animations (voir plus bas). Facultatif : une carte sans ce calque fonctionne |
 | `walls` | Obstacles : toute tuile posée ici bloque le joueur |
 | `decor_above` | Décor qui passe devant le joueur |
-| `objects` | Éléments placés à la main : point de départ (`spawn`), miroirs (classe `mirror`, dont le **nom** est le monde visé, par exemple `world_1`) |
+| `objects` | Éléments placés à la main : point de départ (`spawn`), miroirs (classe `mirror`, dont le **nom** est le monde visé, par exemple `world_1`), étoiles (classe `star`) |
 
-Ajouter un miroir ou déplacer le point de départ se fait donc dans Tiled, sans toucher au code.
+Ajouter un miroir, une étoile ou déplacer le point de départ se fait donc dans Tiled, sans toucher au code.
 
 ### Les tuiles animées (l'eau)
 
@@ -451,9 +452,29 @@ Une palette dit, **pour chaque famille**, comment la recolorer. **Les nuances so
 - La **fabrication d'une copie** prend quelques millisecondes sur un ordinateur ordinaire ; **à vérifier sur la borne**.
 - En magie, l'eau rose bonbon et la pierre rose peuvent se confondre là où elles se touchent.
 
+### Les étoiles et la victoire
+
+**Le nombre d'étoiles n'est écrit nulle part : il est calculé.** Au démarrage, le jeu compte les objets `star` de toutes les cartes. Ajouter ou retirer une étoile dans Tiled change donc le total tout seul, sans toucher au code.
+
+**Comment ça marche dans le code :**
+- `WORLD_MAPS` (`constants.js`) liste la carte de chaque monde (clé Phaser et fichier). Elle sert à connaître **toutes** les cartes dès le départ, même celles des mondes pas encore visités. `WORLDS` donne la scène de chaque monde, `WORLD_MAPS` sa carte : **un monde ajouté dans l'un doit l'être dans l'autre** (la console avertit en cas d'oubli).
+- `PreloadScene` (première scène) charge toutes les cartes de `WORLD_MAPS`, demande le comptage, puis lance le jardin.
+- `StarSystem` compte les étoiles (`countStarsInMap`, sans Phaser), garde le total et le nombre d'étoiles ramassées. Une étoile ramassée deux fois ne compte qu'une fois. Comme pour le chronomètre, ces valeurs vivent dans un module, parce que les scènes sont recréées à chaque téléportation.
+- `RecolteEtoiles` (sprite, ramassage, étoile déjà prise) signale chaque ramassage à `StarSystem`.
+- `UIScene` affiche **« Étoiles : x / N »** sous le chronomètre.
+
+**Victoire :** quand toutes les étoiles sont ramassées **et** que le joueur est de retour dans le jardin, `WorldScene.winGame()` arrête le chronomètre, fige le joueur et la physique, et l'interface affiche « Toutes les étoiles sont récupérées ».
+
+**Limites à connaître :**
+- L'écran de fin n'est qu'un message : pas de temps final affiché, pas de record enregistré (`saveBestTime` n'est pas encore appelé), pas de rejouer.
+- Les cartes actuelles sont des cartes de test : le jardin et `monde_1` ont chacun une étoile de test (total actuel : 2). Les étoiles définitives seront placées dans les vrais mondes.
+- Le miroir d'un monde disparaît encore à chaque retour, étoile prise ou non (`shouldMirrorDisappear`, à relier à « l'étoile de ce monde est ramassée »).
+- Une étoile est retenue par `carte_x_y` : la déplacer dans Tiled en cours de partie la ferait réapparaître (sans effet pour le joueur, la carte étant chargée au démarrage).
+
 ### Systèmes à écrire une seule fois
 
-Entrées (clavier et borne) · Chronomètre global · High score · Compteur d'étoiles · Dialogues · Lumière · Tir · Compte à rebours.
+Entrées (clavier et borne) · Chronomètre global · High score · Dialogues · Lumière · Tir · Compte à rebours.
+*Déjà faits : entrées, chronomètre, high score, compteur d'étoiles.*
 
 ---
 
@@ -507,6 +528,7 @@ Trois développeurs, qui travaillent **tous sur le code** et en parallèle sur l
 - [ ] **Musique :** choisir ou composer une piste par monde.
 - [ ] **Multijoueur :** décider du périmètre (coopération seule ou aussi compétition).
 - [ ] **Palettes :** définir celles de la nuit (monde 1), du rêve (monde 2) et du post-apocalyptique (monde 4), et retirer la palette de test du monde 1.
+- [ ] **Étoiles :** relier la disparition du miroir à l'étoile du monde, afficher le temps final et enregistrer le record à la victoire, placer une étoile dans chaque monde.
 - [ ] **Plantes :** les retirer de `tileset_garden.png` pour qu'elles ne soient pas recolorées.
 - [ ] **Noms de l'équipe :** remplacer les `[Membre n]`.
 

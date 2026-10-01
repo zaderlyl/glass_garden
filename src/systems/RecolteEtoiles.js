@@ -1,3 +1,5 @@
+import { markStarCollected } from './StarSystem.js';
+
 var nombreEtoiles = 0;
 var etoilesPrises = [];
 
@@ -17,6 +19,7 @@ export function RecolteEtoiles(player, scene, x, y) {
 
     etoilesPrises.push(id);
     nombreEtoiles += 1;
+    markStarCollected(scene.getWorldName(), id); // compteur global du jeu (StarSystem)
     etoile.disableBody(true, true);
   });
 }

@@ -7,6 +7,7 @@ export const GAME_HEIGHT = 720;
 
 // Noms des scènes
 export const SCENES = {
+  PRELOAD: 'PreloadScene',
   MENU: 'MenuScene',
   HUB: 'HubScene',
   WORLD_1: 'World1Scene',
@@ -67,6 +68,14 @@ export const ASSETS = {
   TILESET_DECO: 'tileset_deco', // les décors
   WATER: 'water',
   MIRROR: 'mirror',
+};
+
+// * Les cartes de chaque monde : la clé Phaser et le fichier JSON exporté de Tiled. Le nom du monde est celui de WORLDS.
+// Elles sont listées ici pour que le jeu connaisse TOUTES les cartes dès le démarrage (par exemple pour compter les étoiles).
+// ! Un monde ajouté dans WORLDS doit aussi l'être ici, et inversement.
+export const WORLD_MAPS = {
+  hub: { key: ASSETS.HUB_MAP, path: 'assets/maps/hub_test.json' },
+  world_1: { key: ASSETS.WORLD_1_MAP, path: 'assets/maps/monde_1.json' },
 };
 
 // Taille d'une tuile, en pixels (la même dans Tiled et dans les spritesheets de tuiles animées)
@@ -138,14 +147,18 @@ export const DEPTH = {
 export const COLORS = {
   BACKGROUND: '#2f6b3a',
   TEXT: '#f4f1e8',
+  VICTORY_BACKGROUND: '#000000cc', // fond noir semi-transparent derrière le message de fin
 };
 
 // Textes
+export const VICTORY_MESSAGE = 'Toutes les étoiles sont récupérées';
 export const FONT_FAMILY = 'Georgia, serif';
 export const FONT_SIZE = {
   TITLE: '96px',
   HINT: '28px',
   TIMER: '36px',
+  STARS: '28px',
+  VICTORY: '48px',
 };
 
 // * Modes de jeu : chacun a son propre meilleur temps
