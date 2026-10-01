@@ -11,6 +11,7 @@
 // * 5. Victoire et arrêt du chrono (relire docs/game-design.md : 5 étoiles suffisent-elles ?)
 
 function RecolteEtoiles(player, scene, y,x){
+  var RecolteEtoile;
 
   // ? Pas 1 : 'Etoile.png' est une clé de chargement, pas un nom de fichier. Où est-elle chargée ?
   // ? Pas 2 : d'où viennent x et y ? (voir comment WorldScene.js place les miroirs)
@@ -23,7 +24,10 @@ function RecolteEtoiles(player, scene, y,x){
 
      etoile.disableBody(true, true);
   });
-}
+
+
+  }
+
 
 
 // * CE QUE TON CODE FAIT ACTUELLEMENT
