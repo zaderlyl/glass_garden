@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.0" orientation="orthogonal" renderorder="right-down" width="40" height="23" tilewidth="32" tileheight="32" infinite="0" nextlayerid="8" nextobjectid="6">
+<map version="1.10" tiledversion="1.12.0" orientation="orthogonal" renderorder="right-down" width="40" height="23" tilewidth="32" tileheight="32" infinite="0" nextlayerid="8" nextobjectid="7">
  <editorsettings>
   <export target="hub_test.json" format="json"/>
  </editorsettings>
@@ -71,6 +71,9 @@
    <properties>
     <property name="type" value=""/>
    </properties>
+  </object>
+  <object id="6" name="star" type="star" x="798.618" y="316.759">
+   <point/>
   </object>
  </objectgroup>
  <layer id="3" name="decor_below" width="40" height="23">
