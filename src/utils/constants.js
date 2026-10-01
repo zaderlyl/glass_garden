@@ -147,15 +147,18 @@ export const DEPTH = {
 export const COLORS = {
   BACKGROUND: '#2f6b3a',
   TEXT: '#f4f1e8',
+  VICTORY_BACKGROUND: '#000000cc', // fond noir semi-transparent derrière le message de fin
 };
 
 // Textes
+export const VICTORY_MESSAGE = 'Toutes les étoiles sont récupérées';
 export const FONT_FAMILY = 'Georgia, serif';
 export const FONT_SIZE = {
   TITLE: '96px',
   HINT: '28px',
   TIMER: '36px',
   STARS: '28px',
+  VICTORY: '48px',
 };
 
 // * Modes de jeu : chacun a son propre meilleur temps

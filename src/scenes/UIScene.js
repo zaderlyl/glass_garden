@@ -1,7 +1,7 @@
 import timer from '../systems/TimerSystem.js';
 import { getCollectedStars, getTotalStars } from '../systems/StarSystem.js';
 import { formatTime } from '../utils/helpers.js';
-import { SCENES, COLORS, FONT_FAMILY, FONT_SIZE, UI_MARGIN } from '../utils/constants.js';
+import { SCENES, COLORS, FONT_FAMILY, FONT_SIZE, UI_MARGIN, VICTORY_MESSAGE } from '../utils/constants.js';
 
 /**
  * * Scène d'interface : affiche le chronomètre et le compteur d'étoiles par-dessus le monde en cours.
@@ -33,6 +33,20 @@ export default class UIScene extends Phaser.Scene {
         color: COLORS.TEXT,
       })
       .setOrigin(1, 0);
+  }
+
+  // * Fin de partie : un message au milieu de l'écran (appelé par WorldScene.winGame)
+  // TODO(équipe): remplacer par un vrai écran de fin
+  showVictory() {
+    this.add
+      .text(this.scale.width / 2, this.scale.height / 2, VICTORY_MESSAGE, {
+        fontFamily: FONT_FAMILY,
+        fontSize: FONT_SIZE.VICTORY,
+        color: COLORS.TEXT,
+        backgroundColor: COLORS.VICTORY_BACKGROUND,
+        padding: { x: 32, y: 20 },
+      })
+      .setOrigin(0.5);
   }
 
   // Le texte du compteur : « Étoiles : 2 / 5 »

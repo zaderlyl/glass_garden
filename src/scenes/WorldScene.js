@@ -1,6 +1,7 @@
 import InputManager from '../systems/InputManager.js';
 import timer from '../systems/TimerSystem.js';
 import { RecolteEtoiles } from '../systems/RecolteEtoiles.js';
+import { areAllStarsCollected } from '../systems/StarSystem.js';
 import { isMirrorUsed, markMirrorUsed, shouldMirrorDisappear } from '../systems/MirrorSystem.js';
 import { getPaletteTexture } from '../systems/PaletteSystem.js';
 import { pickVariant } from '../utils/helpers.js';
@@ -171,6 +172,7 @@ export default class WorldScene extends Phaser.Scene {
     // * Une même scène est réutilisée à chaque visite : on remet l'état à zéro
     // ! Sinon un message encore affiché au moment de partir bloquerait le texte d'aide au retour
     this.messageActive = false;
+    this.gameWon = false;
 
     // * Le chronomètre et son affichage sont globaux : ils ne dépendent pas du monde.
     // On lance l'interface une seule fois, puis on la garde au premier plan à chaque monde.
@@ -380,8 +382,29 @@ export default class WorldScene extends Phaser.Scene {
     return { x: spawn.x, y: spawn.y };
   }
 
+  /**
+   * * Fin de la partie : on arrête le chronomètre, on fige le joueur et la physique, et l'interface affiche le message.
+   * TODO(équipe): écran de fin (temps final, record via saveBestTime, rejouer), à la place du simple message
+   */
+  winGame() {
+    this.gameWon = true;
+    timer.stop(); // le temps final est celui de cet instant
+    this.player.setVelocity(0, 0);
+    this.physics.pause();
+    this.scene.get(SCENES.UI).showVictory();
+  }
+
   // update() est appelée à chaque image (environ 60 fois par seconde)
   update() {
+    // * Partie gagnée : tout est figé, on ne lit plus les touches
+    if (this.gameWon) return;
+
+    // * Victoire : toutes les étoiles du jeu sont ramassées ET le joueur est de retour dans le jardin
+    if (this.isNormalWorld() && areAllStarsCollected()) {
+      this.winGame();
+      return;
+    }
+
     // * Direction souhaitée, déjà normalisée en diagonale par l'InputManager
     const { x, y } = this.input1.getMove();
 
