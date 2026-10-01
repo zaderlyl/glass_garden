@@ -78,6 +78,15 @@ export const WORLD_MAPS = {
   world_1: { key: ASSETS.WORLD_1_MAP, path: 'assets/maps/monde_1.json' },
 };
 
+// * Les deux façons de jouer : « arcade » (joystick et boutons de la borne) ou « pc » (clavier).
+// Les touches de chaque mode sont dans InputManager.js. Le mode de départ est arcade : sur la borne,
+// il n'y a pas de clavier pour changer de mode.
+export const CONTROL_MODES = {
+  ARCADE: 'arcade',
+  PC: 'pc',
+};
+export const DEFAULT_CONTROL_MODE = CONTROL_MODES.ARCADE;
+
 // Taille d'une tuile, en pixels (la même dans Tiled et dans les spritesheets de tuiles animées)
 export const TILE_SIZE = 32;
 
