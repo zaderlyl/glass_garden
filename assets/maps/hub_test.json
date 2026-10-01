@@ -267,6 +267,19 @@
          "tilecount":32,
          "tileheight":32,
          "tilewidth":32
+        }, 
+        {
+         "columns":4,
+         "firstgid":33,
+         "image":"..\/images\/tilesets\/tileset_deco.png",
+         "imageheight":336,
+         "imagewidth":128,
+         "margin":0,
+         "name":"tileset_deco",
+         "spacing":0,
+         "tilecount":40,
+         "tileheight":32,
+         "tilewidth":32
         }],
  "tilewidth":32,
  "type":"map",
