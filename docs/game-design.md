@@ -221,18 +221,39 @@ Un **sorcier** demande des diamants. Le joueur doit les rassembler avant la fin 
 
 ### Actions du jeu
 
-| Action | Clavier J1 | Clavier J2 | Borne d'arcade |
+Le jeu a **deux modes de contrôle** (voir plus bas) : le mode **arcade** (celui de la borne, mode de départ) et le mode **pc** (le clavier d'un ordinateur, pour tester).
+
+| Action | Mode arcade, J1 | Mode pc, J1 | Joueur 2 (provisoire, les deux modes) |
 |---|---|---|---|
-| Se déplacer | `Z` `Q` `S` `D` | Flèches | Joystick |
-| Courir | `Maj` *(à définir)* | *(à définir)* | Bouton *(à définir)* |
-| Interagir (miroir, objet, PNJ) | `E` *(à définir)* | *(à définir)* | Bouton *(à définir)* |
-| Tirer | *(à définir)* | *(à définir)* | Bouton *(à définir)* |
-| Lampe / bougie | *(à définir)* | *(à définir)* | Bouton *(à définir)* |
-| Pause | `Échap` | — | Bouton *(à définir)* |
+| Se déplacer | Joystick (flèches *supposées*) | `Z` `Q` `S` `D` | Flèches |
+| Interagir (miroir, objet, PNJ) | Bouton `I` | `E` *(à définir)* | `Entrée` |
+| Courir | *(à définir)* | `Maj` *(à définir)* | *(à définir)* |
+| Tirer | *(à définir)* | *(à définir)* | *(à définir)* |
+| Lampe / bougie | *(à définir)* | *(à définir)* | *(à définir)* |
+| Pause | *(à définir)* | `Échap` | — |
+
+**Les six boutons du joueur 1** sont les touches `I O P` (rangée du haut) et `K L M` (rangée du bas). Seul `I` sert pour l'instant ; les cinq autres sont réservés aux actions à venir.
+
+### Les deux modes de contrôle
+
+La borne n'a pas de clavier : on ne peut pas y utiliser de raccourci. Le jeu **démarre donc en mode arcade**, avec les touches de la borne. Sur un ordinateur, on bascule en mode pc pour tester :
+
+| Raccourci | Effet |
+|---|---|
+| `Ctrl + C` (ou `Cmd + C` sur Mac) | Passe de arcade à pc, ou de pc à arcade |
+
+Cliquer d'abord sur le jeu pour qu'il reçoive le clavier. Le mode actuel s'affiche en bas à gauche de l'écran (« Mode : arcade » ou « Mode : pc »).
+
+**Comment ça marche dans le code :**
+- `InputManager` contient les touches de **chaque mode** et branche les deux jeux dès le début ; il lit celui du mode actuel à chaque image. Changer de mode est donc immédiat, sans recréer la scène.
+- `ControlMode` (dans `systems/`) garde le mode actuel dans un module, car les scènes sont recréées à chaque téléportation.
+- Le raccourci est branché dans `UIScene`, la seule scène qui n'est jamais détruite : dans une scène de monde, il se déclencherait plusieurs fois après des téléportations.
+
+**À vérifier sur la borne :** le joystick est **supposé** envoyer les flèches. Le template fourni par les enseignants utilise les flèches et aucune manette (Gamepad), mais rien ne le dit explicitement. Si la borne envoie autre chose, seule la ligne « arcade » de `BINDINGS` change.
 
 ### La borne d'arcade
 
-La borne est prévue pour **deux joueurs** : chacun dispose d'**un joystick et de six boutons**. Toutes les touches sont centralisées dans un seul module (`InputManager`) : le jeu ne parle que d'**actions** (« interagir », « tirer »…), jamais de touches. Brancher la borne consiste donc à associer ses boutons à ces actions, sans toucher au reste du code.
+La borne est prévue pour **deux joueurs** : chacun dispose d'**un joystick et de six boutons**. Toutes les touches sont centralisées dans un seul module (`InputManager`) : le jeu ne parle que d'**actions** (« interagir », « tirer »…), jamais de touches. Brancher la borne consiste donc à associer ses boutons à ces actions, dans la partie « arcade » de ce module, sans toucher au reste du code.
 
 ---
 
@@ -336,7 +357,7 @@ glass_garden/
 │   ├── config.js         configuration Phaser (1280 x 720, physique)
 │   ├── scenes/           PreloadScene, MenuScene, WorldScene (base des mondes), HubScene, World1Scene, UIScene
 │   │                     prévu : mondes 2 à 5…
-│   ├── systems/          InputManager, TimerSystem, SaveSystem, MirrorSystem, PaletteSystem,
+│   ├── systems/          InputManager, ControlMode, TimerSystem, SaveSystem, MirrorSystem, PaletteSystem,
 │   │                     StarSystem, RecolteEtoiles
 │   │                     prévu : Audio, Dialogue, tir…
 │   ├── entities/         Player, Enemy, Collectible…            (prévu)
@@ -525,7 +546,7 @@ Trois développeurs, qui travaillent **tous sur le code** et en parallèle sur l
 
 - [ ] **Monde 3 :** définir l'énigme du petit monstre.
 - [ ] **Monde 4 :** préciser comment trouver la bonne boîte.
-- [ ] **Contrôles :** attribuer les boutons de la borne à chaque action.
+- [ ] **Contrôles :** vérifier sur la borne les touches envoyées par le joystick (flèches supposées), puis attribuer les cinq autres boutons (`O P K L M`) et les touches du joueur 2.
 - [ ] **Histoire :** écrire un fil narratif court (elle est évaluée).
 - [ ] **Musique :** choisir ou composer une piste par monde.
 - [ ] **Multijoueur :** décider du périmètre (coopération seule ou aussi compétition).
