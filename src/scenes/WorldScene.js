@@ -1,5 +1,6 @@
 import InputManager from '../systems/InputManager.js';
 import timer from '../systems/TimerSystem.js';
+import { RecolteEtoiles } from '../systems/RecolteEtoiles.js';
 import { isMirrorUsed, markMirrorUsed, shouldMirrorDisappear } from '../systems/MirrorSystem.js';
 import { getPaletteTexture } from '../systems/PaletteSystem.js';
 import { pickVariant } from '../utils/helpers.js';
@@ -59,6 +60,7 @@ export default class WorldScene extends Phaser.Scene {
     // la construction (sol, murs, eau) et les décors
     this.load.tilemapTiledJSON(this.mapKey, this.mapPath);
     this.load.image(ASSETS.TILESET_GARDEN, 'assets/images/tilesets/tileset_garden.png');
+    this.load.image('etoile', 'assets/images/sprites/Etoile.png');
     this.load.image(ASSETS.TILESET_DECO, 'assets/images/tilesets/tileset_deco.png');
 
     // * Le spritesheet du miroir, découpé en images de 32 x 32 pixels.
@@ -299,6 +301,13 @@ export default class WorldScene extends Phaser.Scene {
 
     // * Les touches passent par l'InputManager : la scène ne connaît aucune touche
     this.input1 = new InputManager(this, 1);
+
+    // TODO(équipe): appeler la récolte d'étoiles ici (voir src/systems/RecolteEtoiles.js)
+    // ! Le joueur existe déjà (this.player, créé plus haut) : ne pas le recréer.
+    // Une fonction écrite dans un autre fichier doit être exportée là-bas, puis importée ici.
+    RecolteEtoiles(this.player, this, 500, 500);
+
+
   }
 
   // Le nom de ce monde, comme dans la table WORLDS (ex. « hub », « world_1 »)
