@@ -1,6 +1,7 @@
 import InputManager from '../systems/InputManager.js';
 import timer from '../systems/TimerSystem.js';
 import { isMirrorUsed, markMirrorUsed, shouldMirrorDisappear } from '../systems/MirrorSystem.js';
+import { getPaletteTexture } from '../systems/PaletteSystem.js';
 import { pickVariant } from '../utils/helpers.js';
 import {
   SCENES,
@@ -10,6 +11,7 @@ import {
   ANIMATED_TILES,
   ANIMATED_TILES_BLOCK_PLAYER,
   WORLDS,
+  WORLD_PALETTES,
   NORMAL_WORLD,
   MIRROR_SPAWN_OFFSET,
   MIRROR_VANISH,
@@ -53,9 +55,11 @@ export default class WorldScene extends Phaser.Scene {
       frameHeight: PLAYER.FRAME_SIZE,
     });
 
-    // * La carte (JSON exporté de Tiled) et l'image de son tileset
+    // * La carte (JSON exporté de Tiled) et les images de ses deux tilesets :
+    // la construction (sol, murs, eau) et les décors
     this.load.tilemapTiledJSON(this.mapKey, this.mapPath);
     this.load.image(ASSETS.TILESET_GARDEN, 'assets/images/tilesets/tileset_garden.png');
+    this.load.image(ASSETS.TILESET_DECO, 'assets/images/tilesets/tileset_deco.png');
 
     // * Le spritesheet du miroir, découpé en images de 32 x 32 pixels.
     // Un sprite créé sans préciser l'image affiche la première (le miroir entier).
@@ -95,13 +99,17 @@ export default class WorldScene extends Phaser.Scene {
    * Les animations sont globales à tout le jeu : on ne les crée qu'une fois,
    * même si plusieurs mondes appellent cette méthode.
    */
-  createTileAnimations() {
+  createTileAnimations(waterTexture, suffix) {
     TILE_ANIMATIONS.forEach(({ key, sheet, start, end, frameRate }) => {
-      if (this.anims.exists(key)) return;
+      // * Une animation est liée à UNE texture : l'eau recolorée d'un monde a donc ses propres animations,
+      // reconnaissables à leur suffixe (« water_1@magic »). Celles de l'eau d'origine n'ont pas de suffixe.
+      const animationKey = key + suffix;
+      if (this.anims.exists(animationKey)) return;
 
       this.anims.create({
-        key,
-        frames: this.anims.generateFrameNumbers(sheet, { start, end }),
+        key: animationKey,
+        // L'eau utilise la texture de ce monde (une copie recolorée, ou l'original) ; les autres images gardent la leur
+        frames: this.anims.generateFrameNumbers(sheet === ASSETS.WATER ? waterTexture : sheet, { start, end }),
         frameRate,
         repeat: -1, // -1 = en boucle, sans fin
       });
@@ -115,11 +123,11 @@ export default class WorldScene extends Phaser.Scene {
    * Une carte sans ce calque est simplement ignorée.
    * @returns {Phaser.Physics.Arcade.StaticGroup|null} les blocs qui bloquent le joueur, ou null
    */
-  createAnimatedTiles(map, tileset) {
+  createAnimatedTiles(map, tilesets, waterTexture, animationSuffix) {
     // ! On teste d'abord l'existence du calque : createLayer afficherait un avertissement sinon
     if (!map.getLayer('animated_tiles')) return null;
 
-    const layer = map.createLayer('animated_tiles', tileset);
+    const layer = map.createLayer('animated_tiles', tilesets);
 
     // * Les tuiles repères sont retirées de la carte plus bas, donc elles ne bloquent plus le joueur.
     // On crée à la place un bloc invisible de la taille d'une tuile (« zone ») sous chaque case d'eau.
@@ -139,9 +147,10 @@ export default class WorldScene extends Phaser.Scene {
       // * S'il y a plusieurs animations possibles, on en choisit une selon la position de la tuile
       const animation = variants[pickVariant(tile.x, tile.y, variants.length)];
 
-      // * Le sprite prend la place exacte de la tuile (son centre), puis joue son animation
-      const sprite = this.add.sprite(tile.getCenterX(), tile.getCenterY(), ASSETS.WATER);
-      sprite.play(animation);
+      // * Le sprite prend la place exacte de la tuile (son centre), puis joue son animation.
+      // Il utilise la texture d'eau de ce monde et l'animation qui lui correspond (voir createTileAnimations).
+      const sprite = this.add.sprite(tile.getCenterX(), tile.getCenterY(), waterTexture);
+      sprite.play(animation + animationSuffix);
 
       // * On reporte l'orientation de la tuile (posée dans Tiled avec les touches Z, X, Y) sur le sprite.
       // Phaser a converti les retournements de Tiled en un miroir horizontal (flipX) et une rotation :
@@ -170,23 +179,41 @@ export default class WorldScene extends Phaser.Scene {
     this.scene.bringToTop(SCENES.UI);
     timer.start(); // sans effet s'il tourne déjà
 
-    this.createTileAnimations();
+    // * La palette de couleurs de ce monde (voir WORLD_PALETTES dans constants.js). Sans palette (le jardin),
+    // on garde les textures d'origine ; avec une palette, on utilise des copies recolorées.
+    const paletteName = WORLD_PALETTES[this.getWorldName()];
+
+    // * L'eau : une copie recolorée du spritesheet (avec ses images numérotées de 32 x 32), ou l'original.
+    // Les images numérotées doivent exister AVANT de créer les animations, sinon Phaser les ignore sans erreur.
+    const waterTexture = getPaletteTexture(this, ASSETS.WATER, paletteName, { width: TILE_SIZE, height: TILE_SIZE });
+    const animationSuffix = waterTexture === ASSETS.WATER ? '' : `@${paletteName}`;
+
+    this.createTileAnimations(waterTexture, animationSuffix);
     this.createMirrorAnimation();
 
     // * On construit la carte à partir du JSON Tiled
     const map = this.make.tilemap({ key: this.mapKey });
 
-    // ! Le 1er nom est celui du tileset DANS Tiled, le 2e est la clé de l'image chargée ci-dessus
-    const tileset = map.addTilesetImage('tileset_garden', ASSETS.TILESET_GARDEN);
+    // * Le tileset de construction (sol, murs) : une copie recolorée si ce monde a une palette (voir plus haut).
+    // Les décors (tileset_deco) ne sont jamais recolorés : ils gardent leurs couleurs.
+    const gardenTexture = getPaletteTexture(this, ASSETS.TILESET_GARDEN, paletteName);
+
+    // ! Le 1er nom est celui du tileset DANS Tiled, le 2e est la clé de l'image à utiliser.
+    // Une carte peut utiliser plusieurs tilesets : on les passe tous à chaque calque, qui prend dans chacun
+    // les tuiles qu'il utilise. Un tileset absent de la carte renvoie null : filter(Boolean) l'écarte.
+    const tilesets = [
+      map.addTilesetImage('tileset_garden', gardenTexture),
+      map.addTilesetImage('tileset_deco', ASSETS.TILESET_DECO),
+    ].filter(Boolean);
 
     // * Les calques sont créés du dessous vers le dessus, dans le même ordre que dans Tiled
-    map.createLayer('background', tileset);
-    map.createLayer('ground', tileset);
-    map.createLayer('decor_below', tileset);
+    map.createLayer('background', tilesets);
+    map.createLayer('ground', tilesets);
+    map.createLayer('decor_below', tilesets);
 
     // * L'eau : créée ici, entre le décor du dessous et les murs, pour passer sous le joueur
-    const waterBlockers = this.createAnimatedTiles(map, tileset);
-    const walls = map.createLayer('walls', tileset);
+    const waterBlockers = this.createAnimatedTiles(map, tilesets, waterTexture, animationSuffix);
+    const walls = map.createLayer('walls', tilesets);
 
     // * Toute tuile posée dans le calque « walls » devient un obstacle (-1 = case vide)
     walls.setCollisionByExclusion([-1]);
@@ -268,7 +295,7 @@ export default class WorldScene extends Phaser.Scene {
       .setDepth(DEPTH.UI);
 
     // * decor_above passe devant le joueur : on le crée après lui avec une profondeur plus grande
-    map.createLayer('decor_above', tileset).setDepth(DEPTH.ABOVE_PLAYER);
+    map.createLayer('decor_above', tilesets).setDepth(DEPTH.ABOVE_PLAYER);
 
     // * Les touches passent par l'InputManager : la scène ne connaît aucune touche
     this.input1 = new InputManager(this, 1);

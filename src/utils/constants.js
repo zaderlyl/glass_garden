@@ -24,12 +24,47 @@ export const WORLDS = {
   world_1: SCENES.WORLD_1,
 };
 
+// * La couleur d'origine de l'eau principale dans les images (elle sert de référence aux palettes ci-dessous)
+const WATER_ORIGINAL_COLOR = '#6bc2bd';
+
+// * PALETTES DE COULEURS : une par ambiance. Le détail des réglages est expliqué dans src/utils/palette.js.
+// Chaque famille de couleurs (grass = herbe, stone = pierre, water = eau) se règle de l'une de ces façons :
+//   { hue, saturation, lightness }  teinte en degrés (28 = orange, 285 = violet), saturation en multiplicateur
+//                                   (1 = inchangé), luminosité en décalage (0 = inchangé)
+//   { color, reference }            « la couleur d'origine reference devient color », les nuances suivent
+// Une famille absente d'une palette garde ses couleurs. Le joueur, le miroir et l'interface ne sont jamais recolorés.
+export const PALETTES = {
+  // Automne : herbe orange, pierre chaude, eau « thé ambré » (plus foncée que l'herbe pour rester lisible)
+  autumn: {
+    grass: { hue: 28, saturation: 1.05, lightness: -0.02 },
+    stone: { hue: 32, saturation: 1.6, lightness: -0.04 },
+    water: { color: '#a8703f', reference: WATER_ORIGINAL_COLOR },
+  },
+  // Magie : herbe violette, pierre rose, eau « rose bonbon »
+  // ? Risque : l'eau rose et la pierre rose peuvent se confondre là où elles se touchent
+  magic: {
+    grass: { hue: 285, saturation: 0.95, lightness: 0 },
+    stone: { hue: 320, saturation: 1.4, lightness: 0 },
+    water: { color: '#ff86c4', reference: WATER_ORIGINAL_COLOR },
+  },
+};
+
+// * Quelle palette pour quel monde (le nom du monde est celui de la table WORLDS).
+// Un monde absent de cette table garde ses couleurs d'origine : c'est le cas du jardin (le monde normal).
+// ! TEST : monde_1 est censé devenir la nuit (monde 1 du GDD). Il porte la palette « magic » le temps de
+// développer la recoloration, parce que c'est la seule carte qui existe en plus du jardin.
+// TODO(équipe): remplacer par la vraie palette de chaque monde quand les mondes seront créés
+export const WORLD_PALETTES = {
+  world_1: 'magic',
+};
+
 // * Clés des assets : le nom sous lequel Phaser retrouve un fichier chargé
 export const ASSETS = {
   PLAYER_1: 'player_1',
   HUB_MAP: 'hub_map',
   WORLD_1_MAP: 'world_1_map',
-  TILESET_GARDEN: 'tileset_garden',
+  TILESET_GARDEN: 'tileset_garden', // la construction : sol, murs, eau
+  TILESET_DECO: 'tileset_deco', // les décors
   WATER: 'water',
   MIRROR: 'mirror',
 };
