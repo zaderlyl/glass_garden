@@ -7,6 +7,7 @@ export const GAME_HEIGHT = 720;
 
 // Noms des scènes
 export const SCENES = {
+  PRELOAD: 'PreloadScene',
   MENU: 'MenuScene',
   HUB: 'HubScene',
   WORLD_1: 'World1Scene',
