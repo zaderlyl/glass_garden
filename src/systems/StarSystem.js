@@ -12,6 +12,9 @@
 //
 //   computeStarTotals(this.cache.tilemap);   // une fois, quand les cartes sont chargées (PreloadScene)
 //   getTotalStars();                          // le total, partout ailleurs
+//
+//   markStarCollected(monde, id);             // quand une étoile est ramassée (appelé par RecolteEtoiles)
+//   getCollectedStars();                      // combien d'étoiles sont déjà ramassées
 // =====================================================================================
 
 import { WORLD_MAPS } from '../utils/constants.js';
@@ -22,6 +25,10 @@ const STAR_CLASS = 'star';
 
 let totalStars = 0;
 const starsPerWorld = {};
+
+// * Les étoiles ramassées, retenues par monde. Un Set ne garde chaque identifiant qu'une fois :
+// ramasser deux fois la même étoile ne compte donc qu'une fois.
+const collectedStars = {};
 
 /**
  * Compte les étoiles d'une carte, à partir du JSON exporté de Tiled.
@@ -65,4 +72,34 @@ export function getTotalStars() {
 /** Le nombre d'étoiles d'un monde (nom de WORLDS). 0 si le monde est inconnu. */
 export function getStarsInWorld(world) {
   return starsPerWorld[world] ?? 0;
+}
+
+/**
+ * Note qu'une étoile est ramassée. Sans effet si cette étoile l'est déjà.
+ * @param {string} world  Le nom du monde (celui de WORLDS)
+ * @param {string} id     L'identifiant de l'étoile (unique dans le monde)
+ */
+export function markStarCollected(world, id) {
+  if (!collectedStars[world]) collectedStars[world] = new Set();
+  collectedStars[world].add(id);
+}
+
+/** Le nombre d'étoiles ramassées dans tout le jeu. */
+export function getCollectedStars() {
+  return Object.values(collectedStars).reduce((sum, ids) => sum + ids.size, 0);
+}
+
+/** Le nombre d'étoiles ramassées dans un monde. */
+export function getCollectedStarsInWorld(world) {
+  return collectedStars[world]?.size ?? 0;
+}
+
+/** Toutes les étoiles du jeu sont-elles ramassées ? Faux tant que le total n'est pas calculé. */
+export function areAllStarsCollected() {
+  return totalStars > 0 && getCollectedStars() >= totalStars;
+}
+
+/** Remet le compteur à zéro : à appeler au début d'une nouvelle partie. */
+export function resetStars() {
+  Object.keys(collectedStars).forEach((world) => delete collectedStars[world]);
 }
