@@ -1,4 +1,5 @@
 import { SCENES, WORLDS, WORLD_MAPS } from '../utils/constants.js';
+import { computeStarTotals } from '../systems/StarSystem.js';
 
 /**
  * * Première scène du jeu : elle charge les cartes de TOUS les mondes (liste WORLD_MAPS), puis lance le jardin.
@@ -24,6 +25,9 @@ export default class PreloadScene extends Phaser.Scene {
       if (!WORLDS[name]) console.warn(`[PreloadScene] La carte « ${name} » n'est pas un monde de WORLDS.`);
       if (!this.cache.tilemap.exists(key)) console.warn(`[PreloadScene] Carte introuvable pour « ${name} » : ${path}`);
     });
+
+    // * Les cartes sont chargées : on peut compter les étoiles de tout le jeu
+    computeStarTotals(this.cache.tilemap);
 
     // TODO(équipe): démarrer MenuScene à la place quand l'écran d'accueil existera
     this.scene.start(SCENES.HUB);
