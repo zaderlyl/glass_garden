@@ -261,7 +261,7 @@ Le temps total est sauvegardé pour chaque mode (solo et multijoueur), afin de p
 ### Style visuel
 
 - **Pixel art**, vue du dessus.
-- Une **palette de couleurs par monde** : c'est elle qui transmet l'ambiance, pas besoin de dessiner des décors radicalement différents.
+- Une **palette de couleurs par monde** : c'est elle qui transmet l'ambiance, pas besoin de dessiner des décors radicalement différents. Le jeu recolore automatiquement la construction (sol, murs, eau) à l'arrivée dans le monde (voir la section 9). Les décors propres à un monde sont dessinés à la main, avec leurs couleurs finales.
 - Personnages : deux sprites jouables (joueur 1 et joueur 2).
 - Éléments de base : tuile de sol, tuile de mur, miroir, éléments de décor.
 
@@ -280,10 +280,14 @@ Le temps total est sauvegardé pour chaque mode (solo et multijoueur), afin de p
 - [x] Tuile de mur
 - [x] Sprite de miroir
 - [x] Spritesheet de l'eau animée (2 bords et 1 angle)
+- [x] Spritesheet de disparition du miroir (17 images)
+- [x] Tileset des décors de départ (`tileset_deco`)
+- [x] Palettes de couleurs : automne et magie
+- [ ] Palettes de couleurs : nuit, rêve et post-apocalypse
 - [ ] Écran d'accueil
 - [ ] Écran des contrôles
-- [ ] Éléments de décor
-- [ ] Décors et assets des mondes 1 à 5
+- [ ] Décors propres à chaque monde (un tileset par monde, sans recoloration)
+- [ ] Assets des mondes 1 à 5
 
 ### Audio
 
@@ -322,8 +326,8 @@ glass_garden/
 ├── README.md
 ├── assets/
 │   ├── images/
-│   │   ├── sprites/      player_1_spritesheet.png, water_spritesheet.png
-│   │   └── tilesets/     tileset_garden.png
+│   │   ├── sprites/      player_1_spritesheet.png, water_spritesheet.png, mirror_spritesheet.png
+│   │   └── tilesets/     tileset_garden.png (construction), tileset_deco.png (décors)
 │   ├── maps/             hub_test et monde_1 : .tmx (source Tiled) et .json (lu par le jeu)
 │   ├── audio/            music/, sfx/                          (prévu)
 │   └── fonts/                                                  (prévu)
@@ -332,12 +336,13 @@ glass_garden/
 │   ├── config.js         configuration Phaser (1280 x 720, physique)
 │   ├── scenes/           MenuScene, WorldScene (base des mondes), HubScene, World1Scene, UIScene
 │   │                     prévu : Preload, mondes 2 à 5…
-│   ├── systems/          InputManager, TimerSystem, SaveSystem
+│   ├── systems/          InputManager, TimerSystem, SaveSystem, MirrorSystem, PaletteSystem
 │   │                     prévu : Audio, Dialogue, tir, étoiles…
 │   ├── entities/         Player, Enemy, Collectible…            (prévu)
 │   ├── ui/               boutons, barres, HUD                   (prévu)
 │   ├── data/             données de jeu (JSON)                  (prévu)
-│   └── utils/            constants.js (valeurs partagées), helpers.js (fonctions utilitaires)
+│   └── utils/            constants.js (valeurs partagées), helpers.js (fonctions utilitaires),
+│                         palette.js (calcul des couleurs, sans Phaser)
 └── docs/                 game-design, conventions, journal/
 ```
 
@@ -347,7 +352,7 @@ Les éléments marqués « prévu » n'existent pas encore : on les crée au mom
 
 Les cinq mondes partagent une **scène de base** (déplacement, collisions, étoile, sortie par le miroir). Chaque monde ne développe que sa **mécanique propre**. C'est ce qui rend cinq mondes réalisables dans le temps imparti.
 
-**État actuel :** cette logique est pour l'instant dans `HubScene` (le jardin). Elle sera extraite dans une scène de base `WorldScene` dès la création du deuxième monde, pour ne rien copier-coller.
+**État actuel :** cette logique est dans `WorldScene`. `HubScene` (le jardin) et `World1Scene` en héritent et n'indiquent que leur carte. Il manque encore, dans la scène de base, la récolte de l'étoile (en cours sur une autre branche).
 
 ### Comment un monde est construit
 
@@ -387,6 +392,64 @@ Une tuile animée se place dans Tiled comme une tuile normale, dans le calque `a
 - `ANIMATED_TILES_BLOCK_PLAYER` : `true` si le joueur ne peut pas marcher sur l'eau, `false` s'il la traverse.
 
 **Ajouter une nouvelle animation :** ajouter ses images au spritesheet, une entrée dans `TILE_ANIMATIONS` (images de début et de fin), une tuile repère dans le tileset, et une ligne dans `ANIMATED_TILES`.
+
+### Les palettes de couleurs par monde
+
+On ne redessine pas les tuiles pour chaque monde : on garde **un seul jeu de tuiles** et on **change ses couleurs à l'arrivée dans le monde**. L'ambiance de chaque monde vient de sa palette (voir la section 7).
+
+**Ce qui est recoloré, et ce qui ne l'est pas :**
+
+| Élément | Recoloré ? |
+|---|---|
+| Sol, murs, herbe, pierre (`tileset_garden`) | **Oui**, selon la palette du monde |
+| Eau animée (`water_spritesheet`) | **Oui**, avec ses propres animations |
+| Décors (`tileset_deco`) | **Non** : ils sont dessinés directement avec leurs couleurs finales |
+| Joueur, miroir, interface | **Non** : leurs couleurs ne changent jamais |
+| **Le jardin (le monde normal)** | **Non** : il garde les couleurs d'origine |
+
+**Les familles de couleurs.** Chaque couleur d'origine appartient à une famille, décidée d'après sa teinte avant tout changement :
+
+| Famille | Couleurs d'origine | Exemple |
+|---|---|---|
+| `grass` (herbe) | les verts | `#9bd36c` |
+| `stone` (pierre) | les gris-bleus, et le sable clair des veines | `#8b9bb4` |
+| `water` (eau) | les cyans | `#6bc2bd` |
+| `neutral` | noir, blanc et gris | `#000000` |
+
+Une palette dit, **pour chaque famille**, comment la recolorer. **Les nuances sont conservées** : dans une famille, la couleur la plus claire reste la plus claire. Les quatre verts de l'herbe restent donc « la même couleur avec des nuances différentes », seulement transposés (par exemple en orange). Une famille absente d'une palette garde ses couleurs.
+
+**Deux façons de décrire une famille :**
+- **Par réglages** `{ hue, saturation, lightness }` : une teinte en degrés (28 = orange, 285 = violet), un multiplicateur de saturation (1 = inchangé), un décalage de luminosité (0 = inchangé). Pour l'herbe et la pierre.
+- **Par couleur de référence** `{ color, reference }` : « la couleur d'origine `reference` devient `color` », et les autres couleurs de la famille suivent avec les mêmes écarts. Pour l'eau.
+
+**Les palettes définies** (dans `src/utils/constants.js`, `PALETTES`) :
+
+| | Herbe | Pierre | Eau |
+|---|---|---|---|
+| `autumn` | teinte 28°, saturation ×1,05, luminosité −0,02 | 32°, ×1,6, −0,04 | `#a8703f` (thé ambré : plus foncée que l'herbe pour rester lisible) |
+| `magic` | 285°, ×0,95, 0 | 320°, ×1,4, 0 | `#ff86c4` (rose bonbon) |
+
+**Quel monde utilise quelle palette :** la table `WORLD_PALETTES`. Un monde absent de la table garde ses couleurs d'origine, ce qui est le cas du jardin.
+
+> **État actuel :** seule la carte du monde 1 existe en plus du jardin. Elle porte **temporairement la palette `magic`** pour tester la recoloration, alors qu'elle doit devenir la nuit. Les palettes des autres mondes (nuit, rêve, post-apocalypse) restent à définir.
+
+**Ajouter la palette d'un monde :**
+1. Ajouter une entrée dans `PALETTES` (`constants.js`) : un réglage par famille à changer.
+2. Ajouter le monde dans `WORLD_PALETTES`, avec le nom de sa palette.
+3. Si le monde a des décors à lui, les dessiner dans un tileset à part (`tileset_deco_<monde>.png`), sans recoloration.
+
+**Deux tilesets par carte :** `tileset_garden` (la construction, recolorée) et `tileset_deco` (les décors, jamais recolorés). Une carte peut utiliser les deux, et chaque calque prend dans chacun les tuiles qu'il utilise. Attention dans Tiled : les numéros de tuiles du tileset de décors **dépendent de la taille du tileset de construction** (il commence au numéro 33) ; ne pas agrandir `tileset_garden` sans vérifier les cartes.
+
+**Comment ça marche dans le code :**
+- `src/utils/palette.js` : le calcul des couleurs, **sans Phaser**. Il reçoit des pixels et une palette. Il se teste entièrement à part.
+- `src/systems/PaletteSystem.js` : la partie Phaser. À l'arrivée dans un monde qui a une palette, il fabrique une **copie recolorée** de la texture, sous une clé propre (`tileset_garden@magic`, `water@magic`). **L'original n'est jamais modifié** : le jardin continue de l'utiliser. La copie est gardée en mémoire et réutilisée aux visites suivantes.
+- `WorldScene` demande la texture du monde à ce système, et crée pour l'eau recolorée des animations à part (`water_1@magic`…), car une animation est liée à une seule texture.
+
+**Limites à connaître :**
+- Les **plantes** sont encore dans `tileset_garden.png` (tuiles 7 et 8) : elles seraient recolorées. Elles sont aussi dans `tileset_deco`.
+- Le **noir** `#000000` sert à la fois de fond de carte, de repère (flèche, coin) et de contour d'eau : la famille `neutral` n'est pas recolorée tant qu'une palette ne la mentionne pas.
+- La **fabrication d'une copie** prend quelques millisecondes sur un ordinateur ordinaire ; **à vérifier sur la borne**.
+- En magie, l'eau rose bonbon et la pierre rose peuvent se confondre là où elles se touchent.
 
 ### Systèmes à écrire une seule fois
 
@@ -443,6 +506,8 @@ Trois développeurs, qui travaillent **tous sur le code** et en parallèle sur l
 - [ ] **Histoire :** écrire un fil narratif court (elle est évaluée).
 - [ ] **Musique :** choisir ou composer une piste par monde.
 - [ ] **Multijoueur :** décider du périmètre (coopération seule ou aussi compétition).
+- [ ] **Palettes :** définir celles de la nuit (monde 1), du rêve (monde 2) et du post-apocalyptique (monde 4), et retirer la palette de test du monde 1.
+- [ ] **Plantes :** les retirer de `tileset_garden.png` pour qu'elles ne soient pas recolorées.
 - [ ] **Noms de l'équipe :** remplacer les `[Membre n]`.
 
 ---
