@@ -155,6 +155,7 @@ export const FONT_SIZE = {
   TITLE: '96px',
   HINT: '28px',
   TIMER: '36px',
+  STARS: '28px',
 };
 
 // * Modes de jeu : chacun a son propre meilleur temps
