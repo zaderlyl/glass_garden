@@ -1,6 +1,6 @@
 import timer from '../systems/TimerSystem.js';
 import { getCollectedStars, getTotalStars } from '../systems/StarSystem.js';
-import { toggleControlMode } from '../systems/ControlMode.js';
+import { getControlMode, toggleControlMode } from '../systems/ControlMode.js';
 import { formatTime } from '../utils/helpers.js';
 import { SCENES, COLORS, FONT_FAMILY, FONT_SIZE, UI_MARGIN, VICTORY_MESSAGE, CONTROL_MODE_SHORTCUT } from '../utils/constants.js';
 
@@ -35,7 +35,23 @@ export default class UIScene extends Phaser.Scene {
       })
       .setOrigin(1, 0);
 
+    // * Le mode de contrôle actuel, en bas à gauche, discret : un repère pour les tests (arcade ou pc)
+    // TODO(équipe): le retirer (ou le cacher) pour la version finale sur la borne
+    this.controlModeText = this.add
+      .text(UI_MARGIN, this.scale.height - UI_MARGIN, this.getControlModeLabel(), {
+        fontFamily: FONT_FAMILY,
+        fontSize: FONT_SIZE.CONTROL_MODE,
+        color: COLORS.TEXT,
+      })
+      .setOrigin(0, 1)
+      .setAlpha(0.7);
+
     this.setupControlModeShortcut();
+  }
+
+  // Le texte du mode : « Mode : arcade »
+  getControlModeLabel() {
+    return `Mode : ${getControlMode()}`;
   }
 
   // * Le raccourci de test arcade <-> pc. Il est branché ICI parce que cette scène n'est jamais détruite :
@@ -73,5 +89,6 @@ export default class UIScene extends Phaser.Scene {
   update() {
     this.timerText.setText(formatTime(timer.elapsed()));
     this.starsText.setText(this.getStarsLabel());
+    this.controlModeText.setText(this.getControlModeLabel());
   }
 }

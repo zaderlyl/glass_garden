@@ -173,6 +173,7 @@ export const FONT_SIZE = {
   TIMER: '36px',
   STARS: '28px',
   VICTORY: '48px',
+  CONTROL_MODE: '20px',
 };
 
 // * Modes de jeu : chacun a son propre meilleur temps
