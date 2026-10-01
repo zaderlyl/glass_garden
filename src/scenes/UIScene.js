@@ -1,7 +1,8 @@
 import timer from '../systems/TimerSystem.js';
 import { getCollectedStars, getTotalStars } from '../systems/StarSystem.js';
+import { toggleControlMode } from '../systems/ControlMode.js';
 import { formatTime } from '../utils/helpers.js';
-import { SCENES, COLORS, FONT_FAMILY, FONT_SIZE, UI_MARGIN, VICTORY_MESSAGE } from '../utils/constants.js';
+import { SCENES, COLORS, FONT_FAMILY, FONT_SIZE, UI_MARGIN, VICTORY_MESSAGE, CONTROL_MODE_SHORTCUT } from '../utils/constants.js';
 
 /**
  * * Scène d'interface : affiche le chronomètre et le compteur d'étoiles par-dessus le monde en cours.
@@ -33,6 +34,20 @@ export default class UIScene extends Phaser.Scene {
         color: COLORS.TEXT,
       })
       .setOrigin(1, 0);
+
+    this.setupControlModeShortcut();
+  }
+
+  // * Le raccourci de test arcade <-> pc. Il est branché ICI parce que cette scène n'est jamais détruite :
+  // dans une scène de monde, il serait rebranché à chaque téléportation et se déclencherait plusieurs fois.
+  setupControlModeShortcut() {
+    this.input.keyboard.on('keydown', (event) => {
+      const withModifier = event.ctrlKey || event.metaKey; // Ctrl, ou Cmd sur Mac
+      // event.repeat : la touche maintenue renvoie des événements, on ne veut qu'un changement par appui
+      if (withModifier && event.code === CONTROL_MODE_SHORTCUT.CODE && !event.repeat) {
+        toggleControlMode();
+      }
+    });
   }
 
   // * Fin de partie : un message au milieu de l'écran (appelé par WorldScene.winGame)
