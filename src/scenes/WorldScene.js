@@ -302,12 +302,20 @@ export default class WorldScene extends Phaser.Scene {
     // * Les touches passent par l'InputManager : la scène ne connaît aucune touche
     this.input1 = new InputManager(this, 1);
 
-    // TODO(équipe): appeler la récolte d'étoiles ici (voir src/systems/RecolteEtoiles.js)
-    // ! Le joueur existe déjà (this.player, créé plus haut) : ne pas le recréer.
-    // Une fonction écrite dans un autre fichier doit être exportée là-bas, puis importée ici.
-    RecolteEtoiles(this.player, this, 500, 500);
+    // * Les étoiles de ce monde, posées dans Tiled (le joueur existe déjà : l'étoile a besoin de lui)
+    this.createStars(map);
+  }
 
-
+  /**
+   * * Crée une étoile à la position de chaque objet de classe « star » posé dans le calque « objects » de la carte.
+   * Une carte sans objet « star » (le jardin) n'a donc pas d'étoile. Changer la place d'une étoile se fait dans Tiled.
+   * Selon la version de Tiled, la classe s'appelle « class » ou « type » : on lit les deux.
+   */
+  createStars(map) {
+    map
+      .getObjectLayer('objects')
+      .objects.filter((object) => (object.class || object.type) === 'star')
+      .forEach((object) => RecolteEtoiles(this.player, this, object.x, object.y));
   }
 
   // Le nom de ce monde, comme dans la table WORLDS (ex. « hub », « world_1 »)
