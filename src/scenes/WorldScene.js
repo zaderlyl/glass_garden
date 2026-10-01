@@ -1,5 +1,6 @@
 import InputManager from '../systems/InputManager.js';
 import timer from '../systems/TimerSystem.js';
+import { RecolteEtoiles } from '../systems/RecolteEtoiles.js';
 import {
   SCENES,
   ASSETS,
@@ -48,7 +49,7 @@ export default class WorldScene extends Phaser.Scene {
     // * La carte (JSON exporté de Tiled) et l'image de son tileset
     this.load.tilemapTiledJSON(this.mapKey, this.mapPath);
     this.load.image(ASSETS.TILESET_GARDEN, 'assets/images/tilesets/tileset_garden.png');
-    this.load.image(ASSETS.TILESET_GARDEN, 'assets/images/srpites/Etoile.png');
+    this.load.image('etoile', 'assets/images/sprites/Etoile.png');
   }
 
   create() {
@@ -142,6 +143,9 @@ export default class WorldScene extends Phaser.Scene {
     // TODO(équipe): appeler la récolte d'étoiles ici (voir src/systems/RecolteEtoiles.js)
     // ! Le joueur existe déjà (this.player, créé plus haut) : ne pas le recréer.
     // Une fonction écrite dans un autre fichier doit être exportée là-bas, puis importée ici.
+    RecolteEtoiles(this.player, this, 500, 500);
+
+
   }
 
   /**
