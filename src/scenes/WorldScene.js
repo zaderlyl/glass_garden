@@ -53,9 +53,11 @@ export default class WorldScene extends Phaser.Scene {
       frameHeight: PLAYER.FRAME_SIZE,
     });
 
-    // * La carte (JSON exporté de Tiled) et l'image de son tileset
+    // * La carte (JSON exporté de Tiled) et les images de ses deux tilesets :
+    // la construction (sol, murs, eau) et les décors
     this.load.tilemapTiledJSON(this.mapKey, this.mapPath);
     this.load.image(ASSETS.TILESET_GARDEN, 'assets/images/tilesets/tileset_garden.png');
+    this.load.image(ASSETS.TILESET_DECO, 'assets/images/tilesets/tileset_deco.png');
 
     // * Le spritesheet du miroir, découpé en images de 32 x 32 pixels.
     // Un sprite créé sans préciser l'image affiche la première (le miroir entier).
@@ -115,11 +117,11 @@ export default class WorldScene extends Phaser.Scene {
    * Une carte sans ce calque est simplement ignorée.
    * @returns {Phaser.Physics.Arcade.StaticGroup|null} les blocs qui bloquent le joueur, ou null
    */
-  createAnimatedTiles(map, tileset) {
+  createAnimatedTiles(map, tilesets) {
     // ! On teste d'abord l'existence du calque : createLayer afficherait un avertissement sinon
     if (!map.getLayer('animated_tiles')) return null;
 
-    const layer = map.createLayer('animated_tiles', tileset);
+    const layer = map.createLayer('animated_tiles', tilesets);
 
     // * Les tuiles repères sont retirées de la carte plus bas, donc elles ne bloquent plus le joueur.
     // On crée à la place un bloc invisible de la taille d'une tuile (« zone ») sous chaque case d'eau.
@@ -176,17 +178,22 @@ export default class WorldScene extends Phaser.Scene {
     // * On construit la carte à partir du JSON Tiled
     const map = this.make.tilemap({ key: this.mapKey });
 
-    // ! Le 1er nom est celui du tileset DANS Tiled, le 2e est la clé de l'image chargée ci-dessus
-    const tileset = map.addTilesetImage('tileset_garden', ASSETS.TILESET_GARDEN);
+    // ! Le 1er nom est celui du tileset DANS Tiled, le 2e est la clé de l'image chargée ci-dessus.
+    // Une carte peut utiliser plusieurs tilesets : on les passe tous à chaque calque, qui prend dans chacun
+    // les tuiles qu'il utilise. Un tileset absent de la carte renvoie null : filter(Boolean) l'écarte.
+    const tilesets = [
+      map.addTilesetImage('tileset_garden', ASSETS.TILESET_GARDEN),
+      map.addTilesetImage('tileset_deco', ASSETS.TILESET_DECO),
+    ].filter(Boolean);
 
     // * Les calques sont créés du dessous vers le dessus, dans le même ordre que dans Tiled
-    map.createLayer('background', tileset);
-    map.createLayer('ground', tileset);
-    map.createLayer('decor_below', tileset);
+    map.createLayer('background', tilesets);
+    map.createLayer('ground', tilesets);
+    map.createLayer('decor_below', tilesets);
 
     // * L'eau : créée ici, entre le décor du dessous et les murs, pour passer sous le joueur
-    const waterBlockers = this.createAnimatedTiles(map, tileset);
-    const walls = map.createLayer('walls', tileset);
+    const waterBlockers = this.createAnimatedTiles(map, tilesets);
+    const walls = map.createLayer('walls', tilesets);
 
     // * Toute tuile posée dans le calque « walls » devient un obstacle (-1 = case vide)
     walls.setCollisionByExclusion([-1]);
@@ -268,7 +275,7 @@ export default class WorldScene extends Phaser.Scene {
       .setDepth(DEPTH.UI);
 
     // * decor_above passe devant le joueur : on le crée après lui avec une profondeur plus grande
-    map.createLayer('decor_above', tileset).setDepth(DEPTH.ABOVE_PLAYER);
+    map.createLayer('decor_above', tilesets).setDepth(DEPTH.ABOVE_PLAYER);
 
     // * Les touches passent par l'InputManager : la scène ne connaît aucune touche
     this.input1 = new InputManager(this, 1);
