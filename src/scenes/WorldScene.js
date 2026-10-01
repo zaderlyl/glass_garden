@@ -1,6 +1,7 @@
 import InputManager from '../systems/InputManager.js';
 import timer from '../systems/TimerSystem.js';
 import { isMirrorUsed, markMirrorUsed, shouldMirrorDisappear } from '../systems/MirrorSystem.js';
+import { getPaletteTexture } from '../systems/PaletteSystem.js';
 import { pickVariant } from '../utils/helpers.js';
 import {
   SCENES,
@@ -10,6 +11,7 @@ import {
   ANIMATED_TILES,
   ANIMATED_TILES_BLOCK_PLAYER,
   WORLDS,
+  WORLD_PALETTES,
   NORMAL_WORLD,
   MIRROR_SPAWN_OFFSET,
   MIRROR_VANISH,
@@ -178,11 +180,17 @@ export default class WorldScene extends Phaser.Scene {
     // * On construit la carte à partir du JSON Tiled
     const map = this.make.tilemap({ key: this.mapKey });
 
-    // ! Le 1er nom est celui du tileset DANS Tiled, le 2e est la clé de l'image chargée ci-dessus.
+    // * La palette de couleurs de ce monde (voir WORLD_PALETTES dans constants.js). Sans palette (le jardin),
+    // on garde le tileset d'origine ; avec une palette, on utilise une copie recolorée.
+    // Seule la construction (sol, murs) est recolorée : les décors (tileset_deco) gardent leurs couleurs.
+    const paletteName = WORLD_PALETTES[this.getWorldName()];
+    const gardenTexture = getPaletteTexture(this, ASSETS.TILESET_GARDEN, paletteName);
+
+    // ! Le 1er nom est celui du tileset DANS Tiled, le 2e est la clé de l'image à utiliser.
     // Une carte peut utiliser plusieurs tilesets : on les passe tous à chaque calque, qui prend dans chacun
     // les tuiles qu'il utilise. Un tileset absent de la carte renvoie null : filter(Boolean) l'écarte.
     const tilesets = [
-      map.addTilesetImage('tileset_garden', ASSETS.TILESET_GARDEN),
+      map.addTilesetImage('tileset_garden', gardenTexture),
       map.addTilesetImage('tileset_deco', ASSETS.TILESET_DECO),
     ].filter(Boolean);
 
