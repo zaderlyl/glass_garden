@@ -94,6 +94,21 @@ export function getCollectedStarsInWorld(world) {
   return collectedStars[world]?.size ?? 0;
 }
 
+/**
+ * Toutes les étoiles de ce monde sont-elles ramassées ?
+ * ! Un monde sans étoile dans sa carte renvoie faux (et avertit) : c'est un oubli dans Tiled, et mieux vaut
+ * un miroir qui reste qu'un monde verrouillé par erreur.
+ * @param {string} world  Le nom du monde (celui de WORLDS)
+ */
+export function isWorldStarCollected(world) {
+  const total = getStarsInWorld(world);
+  if (total === 0) {
+    console.warn(`[StarSystem] Le monde « ${world} » n'a aucune étoile dans sa carte.`);
+    return false;
+  }
+  return getCollectedStarsInWorld(world) >= total;
+}
+
 /** Toutes les étoiles du jeu sont-elles ramassées ? Faux tant que le total n'est pas calculé. */
 export function areAllStarsCollected() {
   return totalStars > 0 && getCollectedStars() >= totalStars;
