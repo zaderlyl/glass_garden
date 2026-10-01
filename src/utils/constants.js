@@ -85,6 +85,11 @@ export const INTERACT_DISTANCE = 64;
 // ? Le placement des miroirs n'est pas encore officiel : les cartes actuelles sont des cartes de test.
 export const MIRROR_SPAWN_OFFSET = { X: 32, Y: 0 };
 
+// * Animation de disparition du miroir, jouée UNE SEULE fois (mirror_spritesheet.png : 17 images de 32 x 32
+// sur une ligne). L'image 0 est le miroir entier (c'est aussi son aspect fixe), l'image 16 est vide.
+// ? La vitesse (FRAME_RATE, en images par seconde) est à régler à l'oeil : 12 donne environ 1,4 seconde.
+export const MIRROR_VANISH = { KEY: 'mirror_vanish', FIRST_FRAME: 0, LAST_FRAME: 16, FRAME_RATE: 12 };
+
 // Durée d'affichage d'un message d'interaction, en millisecondes
 export const MESSAGE_DURATION_MS = 2000;
 
