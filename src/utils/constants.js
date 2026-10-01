@@ -13,6 +13,10 @@ export const SCENES = {
   UI: 'UIScene',
 };
 
+// * Le monde normal (le jardin), tel qu'il est nommé dans la table WORLDS ci-dessous.
+// C'est là que les miroirs utilisés disparaissent.
+export const NORMAL_WORLD = 'hub';
+
 // * Table des mondes : le nom d'un miroir dans Tiled -> la scène qu'il ouvre.
 // Pour ajouter un monde : créer sa scène, puis ajouter une ligne ici.
 export const WORLDS = {
