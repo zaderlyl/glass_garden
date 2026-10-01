@@ -463,12 +463,14 @@ Une palette dit, **pour chaque famille**, comment la recolorer. **Les nuances so
 - `RecolteEtoiles` (sprite, ramassage, étoile déjà prise) signale chaque ramassage à `StarSystem`.
 - `UIScene` affiche **« Étoiles : x / N »** sous le chronomètre.
 
+**Disparition du miroir :** au retour dans le jardin, le miroir pris pour partir disparaît **seulement si l'étoile de ce monde est ramassée** (`isWorldStarCollected`, appelée par `shouldMirrorDisappear`). Sans l'étoile, le miroir reste et le joueur peut y retourner. Aucun monde n'est donc verrouillé par un retour trop rapide.
+
 **Victoire :** quand toutes les étoiles sont ramassées **et** que le joueur est de retour dans le jardin, `WorldScene.winGame()` arrête le chronomètre, fige le joueur et la physique, et l'interface affiche « Toutes les étoiles sont récupérées ».
 
 **Limites à connaître :**
 - L'écran de fin n'est qu'un message : pas de temps final affiché, pas de record enregistré (`saveBestTime` n'est pas encore appelé), pas de rejouer.
 - Les cartes actuelles sont des cartes de test : le jardin et `monde_1` ont chacun une étoile de test (total actuel : 2). Les étoiles définitives seront placées dans les vrais mondes.
-- Le miroir d'un monde disparaît encore à chaque retour, étoile prise ou non (`shouldMirrorDisappear`, à relier à « l'étoile de ce monde est ramassée »).
+- Un monde sans étoile dans sa carte ne fait jamais disparaître son miroir (la console avertit) : c'est un oubli dans Tiled, et mieux vaut un miroir qui reste qu'un monde verrouillé.
 - Une étoile est retenue par `carte_x_y` : la déplacer dans Tiled en cours de partie la ferait réapparaître (sans effet pour le joueur, la carte étant chargée au démarrage).
 
 ### Systèmes à écrire une seule fois
@@ -528,7 +530,7 @@ Trois développeurs, qui travaillent **tous sur le code** et en parallèle sur l
 - [ ] **Musique :** choisir ou composer une piste par monde.
 - [ ] **Multijoueur :** décider du périmètre (coopération seule ou aussi compétition).
 - [ ] **Palettes :** définir celles de la nuit (monde 1), du rêve (monde 2) et du post-apocalyptique (monde 4), et retirer la palette de test du monde 1.
-- [ ] **Étoiles :** relier la disparition du miroir à l'étoile du monde, afficher le temps final et enregistrer le record à la victoire, placer une étoile dans chaque monde.
+- [ ] **Étoiles :** afficher le temps final et enregistrer le record à la victoire, placer une étoile dans chaque monde.
 - [ ] **Plantes :** les retirer de `tileset_garden.png` pour qu'elles ne soient pas recolorées.
 - [ ] **Noms de l'équipe :** remplacer les `[Membre n]`.
 
