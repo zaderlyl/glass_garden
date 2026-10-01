@@ -105,19 +105,6 @@
                  "width":32,
                  "x":352.485,
                  "y":255.649
-                }, 
-                {
-                 "height":0,
-                 "id":4,
-                 "name":"star",
-                 "opacity":1,
-                 "point":true,
-                 "rotation":0,
-                 "type":"star",
-                 "visible":true,
-                 "width":0,
-                 "x":747.744288731042,
-                 "y":370.512574390478
                 }],
          "opacity":1,
          "type":"objectgroup",

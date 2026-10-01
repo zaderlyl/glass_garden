@@ -72,9 +72,6 @@
     <property name="type" value=""/>
    </properties>
   </object>
-  <object id="4" name="star" type="star" x="747.744" y="370.513">
-   <point/>
-  </object>
  </objectgroup>
  <layer id="3" name="decor_below" width="40" height="23">
   <data encoding="csv">
