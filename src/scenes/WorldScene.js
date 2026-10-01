@@ -138,11 +138,10 @@ export default class WorldScene extends Phaser.Scene {
 
     // * Les touches passent par l'InputManager : la scène ne connaît aucune touche
     this.input1 = new InputManager(this, 1);
-    player = this.physics.add.sprite(100,450, ' player');
-    recolteEtoiles(this.player, 500, 1000);
 
-
-
+    // TODO(équipe): appeler la récolte d'étoiles ici (voir src/systems/RecolteEtoiles.js)
+    // ! Le joueur existe déjà (this.player, créé plus haut) : ne pas le recréer.
+    // Une fonction écrite dans un autre fichier doit être exportée là-bas, puis importée ici.
   }
 
   /**
