@@ -6,8 +6,8 @@
  <tileset firstgid="1" name="tileset_garden" tilewidth="32" tileheight="32" tilecount="32" columns="8">
   <image source="../images/tilesets/tileset_garden.png" width="256" height="128"/>
  </tileset>
- <tileset firstgid="33" name="tileset_deco" tilewidth="32" tileheight="32" tilecount="40" columns="4">
-  <image source="../images/tilesets/tileset_deco.png" width="128" height="336"/>
+ <tileset firstgid="33" name="tileset_deco" tilewidth="32" tileheight="32" tilecount="44" columns="4">
+  <image source="../images/tilesets/tileset_deco.png" width="128" height="352"/>
  </tileset>
  <layer id="1" name="background" width="40" height="23">
   <data encoding="csv">
