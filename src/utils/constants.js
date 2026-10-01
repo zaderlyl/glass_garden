@@ -29,7 +29,8 @@ export const ASSETS = {
   PLAYER_1: 'player_1',
   HUB_MAP: 'hub_map',
   WORLD_1_MAP: 'world_1_map',
-  TILESET_GARDEN: 'tileset_garden',
+  TILESET_GARDEN: 'tileset_garden', // la construction : sol, murs, eau
+  TILESET_DECO: 'tileset_deco', // les décors
   WATER: 'water',
   MIRROR: 'mirror',
 };
