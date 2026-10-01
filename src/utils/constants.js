@@ -13,6 +13,10 @@ export const SCENES = {
   UI: 'UIScene',
 };
 
+// * Le monde normal (le jardin), tel qu'il est nommé dans la table WORLDS ci-dessous.
+// C'est là que les miroirs utilisés disparaissent.
+export const NORMAL_WORLD = 'hub';
+
 // * Table des mondes : le nom d'un miroir dans Tiled -> la scène qu'il ouvre.
 // Pour ajouter un monde : créer sa scène, puis ajouter une ligne ici.
 export const WORLDS = {
@@ -27,6 +31,7 @@ export const ASSETS = {
   WORLD_1_MAP: 'world_1_map',
   TILESET_GARDEN: 'tileset_garden',
   WATER: 'water',
+  MIRROR: 'mirror',
 };
 
 // Taille d'une tuile, en pixels (la même dans Tiled et dans les spritesheets de tuiles animées)
@@ -80,6 +85,11 @@ export const INTERACT_DISTANCE = 64;
 // ? Le placement des miroirs n'est pas encore officiel : les cartes actuelles sont des cartes de test.
 export const MIRROR_SPAWN_OFFSET = { X: 32, Y: 0 };
 
+// * Animation de disparition du miroir, jouée UNE SEULE fois (mirror_spritesheet.png : 17 images de 32 x 32
+// sur une ligne). L'image 0 est le miroir entier (c'est aussi son aspect fixe), l'image 16 est vide.
+// ? La vitesse (FRAME_RATE, en images par seconde) est à régler à l'oeil : 12 donne environ 1,4 seconde.
+export const MIRROR_VANISH = { KEY: 'mirror_vanish', FIRST_FRAME: 0, LAST_FRAME: 16, FRAME_RATE: 12 };
+
 // Durée d'affichage d'un message d'interaction, en millisecondes
 export const MESSAGE_DURATION_MS = 2000;
 
@@ -93,8 +103,6 @@ export const DEPTH = {
 export const COLORS = {
   BACKGROUND: '#2f6b3a',
   TEXT: '#f4f1e8',
-  MIRROR: 0xbfe9ff,
-  MIRROR_BORDER: 0xffffff,
 };
 
 // Textes

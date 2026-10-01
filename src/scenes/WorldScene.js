@@ -1,5 +1,6 @@
 import InputManager from '../systems/InputManager.js';
 import timer from '../systems/TimerSystem.js';
+import { isMirrorUsed, markMirrorUsed, shouldMirrorDisappear } from '../systems/MirrorSystem.js';
 import { pickVariant } from '../utils/helpers.js';
 import {
   SCENES,
@@ -9,7 +10,9 @@ import {
   ANIMATED_TILES,
   ANIMATED_TILES_BLOCK_PLAYER,
   WORLDS,
+  NORMAL_WORLD,
   MIRROR_SPAWN_OFFSET,
+  MIRROR_VANISH,
   PLAYER,
   INTERACT_DISTANCE,
   MESSAGE_DURATION_MS,
@@ -54,10 +57,36 @@ export default class WorldScene extends Phaser.Scene {
     this.load.tilemapTiledJSON(this.mapKey, this.mapPath);
     this.load.image(ASSETS.TILESET_GARDEN, 'assets/images/tilesets/tileset_garden.png');
 
+    // * Le spritesheet du miroir, découpé en images de 32 x 32 pixels.
+    // Un sprite créé sans préciser l'image affiche la première (le miroir entier).
+    this.load.spritesheet(ASSETS.MIRROR, 'assets/images/sprites/mirror_spritesheet.png', {
+      frameWidth: TILE_SIZE,
+      frameHeight: TILE_SIZE,
+    });
+
     // * Le spritesheet des tuiles animées (l'eau), découpé en images de 32 x 32 pixels
     this.load.spritesheet(ASSETS.WATER, 'assets/images/sprites/water_spritesheet.png', {
       frameWidth: TILE_SIZE,
       frameHeight: TILE_SIZE,
+    });
+  }
+
+  /**
+   * * Définit l'animation de disparition du miroir (voir MIRROR_VANISH dans constants.js).
+   * Elle ne se joue qu'une fois (repeat: 0). Comme les autres animations, elle est globale :
+   * on ne la crée qu'une seule fois pour tout le jeu.
+   */
+  createMirrorAnimation() {
+    if (this.anims.exists(MIRROR_VANISH.KEY)) return;
+
+    this.anims.create({
+      key: MIRROR_VANISH.KEY,
+      frames: this.anims.generateFrameNumbers(ASSETS.MIRROR, {
+        start: MIRROR_VANISH.FIRST_FRAME,
+        end: MIRROR_VANISH.LAST_FRAME,
+      }),
+      frameRate: MIRROR_VANISH.FRAME_RATE,
+      repeat: 0, // 0 = une seule fois
     });
   }
 
@@ -142,6 +171,7 @@ export default class WorldScene extends Phaser.Scene {
     timer.start(); // sans effet s'il tourne déjà
 
     this.createTileAnimations();
+    this.createMirrorAnimation();
 
     // * On construit la carte à partir du JSON Tiled
     const map = this.make.tilemap({ key: this.mapKey });
@@ -186,25 +216,43 @@ export default class WorldScene extends Phaser.Scene {
     // Leur nom donne le monde qu'ils ouvrent (ex. « world_1 »).
     // * Selon la version de Tiled, la classe s'appelle « class » ou « type » : on lit les deux.
     this.mirrors = [];
+
+    // * Au retour dans le jardin, le miroir pris pour partir est marqué « utilisé » AVANT de créer les miroirs.
+    // Si c'est le cas, vanishingWorld contient son nom : ce miroir va jouer son animation de disparition.
+    const vanishingWorld = this.markReturnMirrorUsed();
+
     map
       .getObjectLayer('objects')
       .objects.filter((object) => (object.class || object.type) === 'mirror')
       .forEach((object) => {
-        // ! Placeholder : un rectangle bleu clair, à remplacer par le vrai sprite du miroir
-        // Un rectangle est centré sur son point de placement, d'où le « + width / 2 »
-        const mirror = this.add.rectangle(
+        const vanishing = object.name === vanishingWorld;
+
+        // Un miroir utilisé AVANT n'est plus créé : il a déjà disparu (voir isMirrorAvailable)
+        if (!vanishing && !this.isMirrorAvailable(object.name)) return;
+
+        // * Le miroir est une image, centrée sur l'objet Tiled (un sprite est centré sur son point de placement,
+        // d'où le « + width / 2 »). Elle garde sa taille d'origine, quelle que soit celle de l'objet dans Tiled.
+        // « Statique » : le corps ne bouge jamais, et sa zone de blocage a la taille de l'image.
+        const mirror = this.physics.add.staticSprite(
           object.x + object.width / 2,
           object.y + object.height / 2,
-          object.width,
-          object.height,
-          COLORS.MIRROR,
+          ASSETS.MIRROR,
         );
-        mirror.setStrokeStyle(2, COLORS.MIRROR_BORDER);
         mirror.world = object.name; // le monde de destination
 
-        // * Un corps « statique » ne bouge jamais : le miroir bloque le joueur comme un mur
-        this.physics.add.existing(mirror, true);
-        this.physics.add.collider(this.player, mirror);
+        // * Le miroir bloque le joueur comme un mur
+        const collider = this.physics.add.collider(this.player, mirror);
+
+        if (vanishing) {
+          // * Il joue son animation de disparition. Il n'est PAS ajouté à this.mirrors : on ne peut plus l'utiliser.
+          // Quand l'animation est finie, on détruit le miroir et sa collision pour de bon.
+          mirror.play(MIRROR_VANISH.KEY);
+          mirror.once('animationcomplete', () => {
+            collider.destroy();
+            mirror.destroy();
+          });
+          return;
+        }
 
         this.mirrors.push(mirror);
       });
@@ -226,6 +274,38 @@ export default class WorldScene extends Phaser.Scene {
     this.input1 = new InputManager(this, 1);
   }
 
+  // Le nom de ce monde, comme dans la table WORLDS (ex. « hub », « world_1 »)
+  getWorldName() {
+    return Object.keys(WORLDS).find((name) => WORLDS[name] === this.scene.key);
+  }
+
+  // Cette scène est-elle le monde normal (le jardin) ?
+  isNormalWorld() {
+    return this.getWorldName() === NORMAL_WORLD;
+  }
+
+  /**
+   * * Au retour dans le jardin, le miroir qu'on avait pris pour partir devient « utilisé ».
+   * fromWorld est le monde d'où l'on vient : le miroir du jardin qui y mène porte son nom.
+   * Sans effet ailleurs que dans le jardin, ni au premier lancement du jeu (fromWorld est vide).
+   * @returns {string|null} le nom du miroir qui vient de disparaître (il doit jouer son animation),
+   * ou null s'il n'y en a pas (ou si ce miroir avait déjà disparu avant)
+   */
+  markReturnMirrorUsed() {
+    if (this.isNormalWorld() && this.fromWorld && shouldMirrorDisappear(this.fromWorld)) {
+      if (isMirrorUsed(this.fromWorld)) return null; // déjà disparu lors d'un passage précédent
+
+      markMirrorUsed(this.fromWorld);
+      return this.fromWorld;
+    }
+    return null;
+  }
+
+  // Ce miroir est-il encore là ? Seuls les miroirs du jardin disparaissent, jamais ceux des autres mondes.
+  isMirrorAvailable(name) {
+    return !(this.isNormalWorld() && isMirrorUsed(name));
+  }
+
   /**
    * * Position d'apparition du joueur.
    * - S'il arrive par un miroir : à côté du miroir qui mène au monde d'où il vient
@@ -233,8 +313,8 @@ export default class WorldScene extends Phaser.Scene {
    * - Sinon (premier lancement du jeu) : au point « spawn » de la carte.
    * ? Le placement des miroirs n'est pas encore officiel (cartes de test) : la position d'apparition
    * pourra changer avec les cartes définitives.
-   * TODO(équipe): faire disparaître le miroir par lequel le joueur arrive, mais seulement
-   * quand il revient dans le monde normal (le jardin)
+   * Le miroir d'arrivée disparaît au retour dans le jardin (voir markReturnMirrorUsed), mais sa
+   * position reste dans la carte : le joueur apparaît donc toujours à son emplacement.
    * @returns {{x: number, y: number}}
    */
   getSpawnPosition(map) {
@@ -298,7 +378,7 @@ export default class WorldScene extends Phaser.Scene {
         // (sans ça, un double appui rapide sur E peut relancer la scène)
         // * On quitte cette scène et on lance celle du monde visé, en lui disant d'où l'on vient.
         // Le nom de ce monde est la clé de WORLDS dont la valeur est notre scène.
-        const currentWorld = Object.keys(WORLDS).find((name) => WORLDS[name] === this.scene.key);
+        const currentWorld = this.getWorldName();
         this.scene.start(targetScene, { from: currentWorld });
       } else {
         // Le miroir existe dans Tiled mais son monde n'est pas encore créé
