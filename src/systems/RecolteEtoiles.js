@@ -12,6 +12,7 @@
 
 function RecolteEtoiles(player, scene, y,x){
   var RecolteEtoile;
+  var NombreEtoiles = 0;
 
   // ? Pas 1 : 'Etoile.png' est une clé de chargement, pas un nom de fichier. Où est-elle chargée ?
   // ? Pas 2 : d'où viennent x et y ? (voir comment WorldScene.js place les miroirs)
@@ -22,8 +23,12 @@ function RecolteEtoiles(player, scene, y,x){
      // ? Pas 3 : une scène est recréée à chaque téléportation. Où ranger le compteur ? (voir TimerSystem.js)
      // ? Pas 4 : si on revient dans ce monde, l'étoile déjà prise doit-elle réapparaître ?
 
-     etoile.disableBody(true, true);
+
   });
+  if (scene.physics.overlap(player, etoile) && etoile.active){
+    NombreEtoiles= NombreEtoiles+1
+    etoile.disableBody(true, true);
+  }
 
 
   }
