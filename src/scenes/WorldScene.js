@@ -48,6 +48,7 @@ export default class WorldScene extends Phaser.Scene {
     // * La carte (JSON exporté de Tiled) et l'image de son tileset
     this.load.tilemapTiledJSON(this.mapKey, this.mapPath);
     this.load.image(ASSETS.TILESET_GARDEN, 'assets/images/tilesets/tileset_garden.png');
+    this.load.image(ASSETS.TILESET_GARDEN, 'assets/images/srpites/Etoile.png');
   }
 
   create() {
@@ -137,6 +138,11 @@ export default class WorldScene extends Phaser.Scene {
 
     // * Les touches passent par l'InputManager : la scène ne connaît aucune touche
     this.input1 = new InputManager(this, 1);
+    player = this.physics.add.sprite(100,450, ' player');
+    recolteEtoiles(this.player, 500, 1000);
+
+
+
   }
 
   /**
