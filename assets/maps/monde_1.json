@@ -135,8 +135,84 @@
                  "type":"crate",
                  "visible":true,
                  "width":0,
-                 "x":386.44785600847,
-                 "y":310.56996647256
+                 "x":386.448,
+                 "y":310.57
+                }, 
+                {
+                 "height":0,
+                 "id":6,
+                 "name":"crate",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"hitPoints",
+                         "type":"int",
+                         "value":3
+                        }],
+                 "rotation":0,
+                 "type":"crate",
+                 "visible":true,
+                 "width":0,
+                 "x":444.679724722075,
+                 "y":354.685018528322
+                }, 
+                {
+                 "height":0,
+                 "id":7,
+                 "name":"crate",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"hitPoints",
+                         "type":"int",
+                         "value":3
+                        }],
+                 "rotation":0,
+                 "type":"crate",
+                 "visible":true,
+                 "width":0,
+                 "x":591.141697547203,
+                 "y":382.918651844009
+                }, 
+                {
+                 "height":0,
+                 "id":8,
+                 "name":"crate",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"hitPoints",
+                         "type":"int",
+                         "value":3
+                        }],
+                 "rotation":0,
+                 "type":"crate",
+                 "visible":true,
+                 "width":0,
+                 "x":682.901005823187,
+                 "y":324.686783130404
+                }, 
+                {
+                 "height":0,
+                 "id":9,
+                 "name":"crate",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"hitPoints",
+                         "type":"int",
+                         "value":3
+                        }],
+                 "rotation":0,
+                 "type":"crate",
+                 "visible":true,
+                 "width":0,
+                 "x":446.444326804306,
+                 "y":215.281454032116
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -281,7 +357,7 @@
          "y":0
         }],
  "nextlayerid":8,
- "nextobjectid":6,
+ "nextobjectid":10,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.0",
