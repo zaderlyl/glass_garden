@@ -11,7 +11,12 @@
 //   shoot()           elle apparaît devant le joueur et vole (animation en boucle)
 //   explodeBullet()   elle s'arrête, joue son explosion, puis disparaît pour de bon
 //   Elle explose toute seule après BULLET.LIFETIME_MS : même sortie de l'écran, une balle ne reste jamais indéfiniment.
-//   Plus tard, un mur ou une cible appelleront explodeBullet() quand la balle les touche.
+//   Un mur (voir HubScene) ou une cible (hitTarget) appellent explodeBullet() quand la balle les touche.
+//
+// * LES CIBLES
+//   Une cible est n'importe quel objet Phaser avec un corps physique. Elle peut avoir une propriété hitPoints
+//   (son nombre de vies : 1 si elle n'en a pas). Chaque balle qui la touche lui retire 1 vie ; à 0, elle est détruite.
+//   Le groupe de cibles (leur image, leur place, leurs vies) est créé par le monde qui en a besoin, pas ici.
 //
 // * COMMENT L'UTILISER
 //   import { createBulletAnimations, shoot, explodeBullet } from '../systems/fonctionTir.js';
@@ -23,8 +28,11 @@
 //   // Quand le joueur tire (update), avec la direction : 'up', 'down', 'left' ou 'right'
 //   shoot(this, this.bullets, this.player, 'right');
 //
+//   // Dans le monde qui a des cibles (UNE SEULE FOIS, après avoir créé le groupe de cibles)
+//   addTargetCollision(this, this.bullets, this.targets);
+//
 // ! La texture « bullet » doit être chargée comme un SPRITESHEET (images de BULLET.FRAME_SIZE), pas comme une image seule.
-// TODO(équipe): charger la texture, brancher la touche de tir, et les collisions avec les murs et les cibles
+// TODO(équipe): une animation quand une cible est détruite (pour l'instant elle disparaît simplement)
 // =====================================================================================
 
 import { BULLET, DIRECTION_VECTORS } from '../utils/constants.js';
@@ -103,4 +111,30 @@ export function explodeBullet(bullet) {
 
   bullet.play(BULLET.HIT_ANIM.KEY);
   bullet.once('animationcomplete', () => bullet.destroy());
+}
+
+/**
+ * Une balle touche une cible : la balle explose et la cible perd une vie (elle est détruite à 0).
+ * Sans effet si la balle a déjà explosé ou si la cible est déjà détruite.
+ * @param {Phaser.Physics.Arcade.Sprite} bullet
+ * @param {Phaser.GameObjects.GameObject} target  Une cible, avec éventuellement une propriété hitPoints
+ */
+export function hitTarget(bullet, target) {
+  if (!bullet.active || bullet.exploding || !target.active) return;
+
+  explodeBullet(bullet);
+
+  target.hitPoints = (target.hitPoints ?? 1) - 1;
+  if (target.hitPoints <= 0) target.destroy();
+}
+
+/**
+ * Branche la collision entre les balles et un groupe de cibles : chaque contact appelle hitTarget.
+ * On utilise « overlap » (traverser) et non « collider » (rebondir) : une cible ne doit pas être poussée par une balle.
+ * @param {Phaser.Scene} scene
+ * @param {Phaser.Physics.Arcade.Group} bullets  Le groupe de balles (voir shoot)
+ * @param {Phaser.Physics.Arcade.Group|Phaser.Physics.Arcade.StaticGroup} targets  Le groupe de cibles
+ */
+export function addTargetCollision(scene, bullets, targets) {
+  return scene.physics.add.overlap(bullets, targets, hitTarget);
 }
