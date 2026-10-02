@@ -251,4 +251,16 @@ export const CRATE = {
   FRAME_SIZE: 32, // l'image fait 32 x 32 pixels, comme une tuile
   TILED_CLASS: 'crate', // la classe de l'objet dans Tiled
   DEFAULT_HIT_POINTS: 1, // nombre de tirs pour la casser, si l'objet Tiled n'a pas de propriété « hitPoints »
+  // * Effets visuels (VFX). Éclat blanc à chaque coup qui ne casse pas, gerbe d'éclats de bois quand elle casse.
+  VFX: {
+    DEBRIS_KEY: 'crate_debris', // texture générée par le code : un petit carré blanc, coloré par les teintes ci-dessous
+    DEBRIS_SIZE: 6, // en pixels
+    DEBRIS_COLORS: [0x8a5a2b, 0xb8743a, 0xd9a45c, 0xe8c27a], // des bruns de bois
+    DEBRIS_COUNT: 20, // nombre d'éclats
+    DEBRIS_SPEED: { MIN: 50, MAX: 190 }, // pixels par seconde
+    DEBRIS_LIFETIME_MS: { MIN: 350, MAX: 650 },
+    DEBRIS_DEPTH: 15, // devant les calques et le joueur
+    HIT_FLASH_MS: 70, // durée de l'éclat blanc
+    SHAKE: { DURATION_MS: 90, INTENSITY: 0.004 }, // léger tremblement de l'écran quand la caisse casse
+  },
 };

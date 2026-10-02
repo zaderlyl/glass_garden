@@ -22,7 +22,11 @@
 //
 // La collision balle/caisse est celle des cibles (addTargetCollision, dans fonctionTir.js) : la balle explose,
 // la caisse perd une vie.
-// TODO(équipe): une animation quand la caisse se casse (pour l'instant elle disparaît simplement)
+//
+// * LES EFFETS (VFX)
+// Un coup qui ne casse pas fait clignoter la caisse en blanc. Le coup fatal projette des éclats de bois et fait
+// légèrement trembler l'écran. Tout se règle dans CRATE.VFX (constants.js). Les effets passent par la fonction
+// facultative onHit de chaque caisse, appelée par hitTarget (voir fonctionTir.js).
 // =====================================================================================
 
 import { CRATE } from '../utils/constants.js';
@@ -49,6 +53,55 @@ export function getTiledProperty(object, name, defaultValue) {
 }
 
 /**
+ * Crée (une seule fois) la petite texture des éclats : un carré blanc, que les émetteurs colorent.
+ * @param {Phaser.Scene} scene
+ */
+function ensureDebrisTexture(scene) {
+  const { DEBRIS_KEY, DEBRIS_SIZE } = CRATE.VFX;
+  if (scene.textures.exists(DEBRIS_KEY)) return;
+
+  const graphics = scene.make.graphics({ x: 0, y: 0, add: false });
+  graphics.fillStyle(0xffffff);
+  graphics.fillRect(0, 0, DEBRIS_SIZE, DEBRIS_SIZE);
+  graphics.generateTexture(DEBRIS_KEY, DEBRIS_SIZE, DEBRIS_SIZE);
+  graphics.destroy();
+}
+
+/**
+ * L'effet d'un coup reçu par une caisse : un éclat blanc, ou la casse si c'était le dernier coup.
+ * Appelé par hitTarget AVANT que la caisse ne soit détruite : elle a encore sa position et ses points de vie à jour.
+ * @param {Phaser.Scene} scene
+ * @param {Phaser.GameObjects.Sprite} crate
+ */
+function playHitEffect(scene, crate) {
+  const { VFX } = CRATE;
+
+  if (crate.hitPoints > 0) {
+    // * Elle tient encore : un éclat blanc très court
+    crate.setTintFill(0xffffff);
+    scene.time.delayedCall(VFX.HIT_FLASH_MS, () => crate.active && crate.clearTint());
+    return;
+  }
+
+  // * Elle casse : une gerbe d'éclats dans toutes les directions, qui rétrécissent puis disparaissent
+  const debris = scene.add.particles(crate.x, crate.y, VFX.DEBRIS_KEY, {
+    speed: { min: VFX.DEBRIS_SPEED.MIN, max: VFX.DEBRIS_SPEED.MAX },
+    angle: { min: 0, max: 360 },
+    lifespan: { min: VFX.DEBRIS_LIFETIME_MS.MIN, max: VFX.DEBRIS_LIFETIME_MS.MAX },
+    scale: { start: 1, end: 0 },
+    tint: VFX.DEBRIS_COLORS,
+    emitting: false,
+  });
+  debris.setDepth(VFX.DEBRIS_DEPTH);
+  debris.explode(VFX.DEBRIS_COUNT);
+
+  // * L'émetteur n'a plus de raison d'exister une fois les éclats éteints
+  scene.time.delayedCall(VFX.DEBRIS_LIFETIME_MS.MAX + 100, () => debris.destroy());
+
+  scene.cameras.main.shake(VFX.SHAKE.DURATION_MS, VFX.SHAKE.INTENSITY);
+}
+
+/**
  * Crée les caisses d'une carte : un groupe statique, bloquant pour le joueur et cassable par les balles.
  * Sans objet « crate » dans la carte (ou sans calque « objects »), le groupe est simplement vide.
  * @param {Phaser.Scene} scene
@@ -58,6 +111,7 @@ export function getTiledProperty(object, name, defaultValue) {
  * @returns {Phaser.Physics.Arcade.StaticGroup} le groupe de caisses
  */
 export function createCrates(scene, map, player, bullets) {
+  ensureDebrisTexture(scene);
   const crates = scene.physics.add.staticGroup();
   const objects = map.getObjectLayer('objects')?.objects ?? [];
 
@@ -70,6 +124,7 @@ export function createCrates(scene, map, player, bullets) {
 
       const crate = crates.create(x, y, CRATE.KEY);
       crate.hitPoints = getTiledProperty(object, 'hitPoints', CRATE.DEFAULT_HIT_POINTS);
+      crate.onHit = () => playHitEffect(scene, crate);
     });
 
   scene.physics.add.collider(player, crates);
