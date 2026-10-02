@@ -282,7 +282,7 @@ Le temps total est sauvegardé pour chaque mode (solo et multijoueur), afin de p
 ### Style visuel
 
 - **Pixel art**, vue du dessus.
-- Une **palette de couleurs par monde** : c'est elle qui transmet l'ambiance, pas besoin de dessiner des décors radicalement différents. Le jeu recolore automatiquement la construction (sol, murs, eau) à l'arrivée dans le monde (voir la section 9). Les décors propres à un monde sont dessinés à la main, avec leurs couleurs finales.
+- Une **teinte de couleurs par monde** : c'est elle qui transmet l'ambiance, pas besoin de dessiner des décors radicalement différents. Le jeu teinte automatiquement la construction (sol, murs, eau) à l'arrivée dans le monde (voir la section 9). Une vraie recoloration par palette existe en réserve. Les décors propres à un monde sont dessinés à la main, avec leurs couleurs finales.
 - Personnages : deux sprites jouables (joueur 1 et joueur 2).
 - Éléments de base : tuile de sol, tuile de mur, miroir, éléments de décor.
 
@@ -303,8 +303,8 @@ Le temps total est sauvegardé pour chaque mode (solo et multijoueur), afin de p
 - [x] Spritesheet de l'eau animée (2 bords et 1 angle)
 - [x] Spritesheet de disparition du miroir (17 images)
 - [x] Tileset des décors de départ (`tileset_deco`)
-- [x] Palettes de couleurs : automne et magie
-- [ ] Palettes de couleurs : nuit, rêve et post-apocalypse
+- [x] Teintes : nuit (monde 1), automne et magie (ternes, voir section 9) ; palettes de recoloration en réserve
+- [ ] Couleurs : rêve et post-apocalypse, et de vraies couleurs pour l'automne et la magie
 - [ ] Écran d'accueil
 - [ ] Écran des contrôles
 - [ ] Décors propres à chaque monde (un tileset par monde, sans recoloration)
@@ -357,7 +357,7 @@ glass_garden/
 │   ├── config.js         configuration Phaser (1280 x 720, physique)
 │   ├── scenes/           PreloadScene, MenuScene, WorldScene (base des mondes), HubScene, World1Scene, UIScene
 │   │                     prévu : mondes 2 à 5…
-│   ├── systems/          InputManager, ControlMode, TimerSystem, SaveSystem, MirrorSystem, PaletteSystem,
+│   ├── systems/          InputManager, ControlMode, TimerSystem, SaveSystem, MirrorSystem, TintSystem, PaletteSystem (en réserve),
 │   │                     StarSystem, RecolteEtoiles
 │   │                     prévu : Audio, Dialogue, tir…
 │   ├── entities/         Player, Enemy, Collectible…            (prévu)
@@ -415,7 +415,20 @@ Une tuile animée se place dans Tiled comme une tuile normale, dans le calque `a
 
 **Ajouter une nouvelle animation :** ajouter ses images au spritesheet, une entrée dans `TILE_ANIMATIONS` (images de début et de fin), une tuile repère dans le tileset, et une ligne dans `ANIMATED_TILES`.
 
-### Les palettes de couleurs par monde
+### Les couleurs de monde : teintes pour l'instant, palettes en réserve
+
+> **État actuel : les mondes utilisent des TEINTES, pas les palettes.** Les palettes décrites plus bas (recoloration des pixels) fonctionnent mais **ne sont plus appelées** : le code est gardé (`palette.js`, `PaletteSystem.js`, `PALETTES`, `WORLD_PALETTES`) pour une vraie recoloration plus tard. Les couleurs de chaque monde viennent maintenant de `TINTS` et `WORLD_TINTS`.
+
+**Les teintes** (`src/systems/TintSystem.js`, `TILE_GROUPS`, `TINTS` et `WORLD_TINTS` dans `constants.js`) :
+- Une **teinte** (`tint` de Phaser) multiplie les couleurs d'une tuile. Aucune image n'est modifiée ni copiée : c'est beaucoup plus simple que les palettes.
+- Les tuiles de `tileset_garden` sont rangées en familles par numéro (`TILE_GROUPS` : pierre, herbe, eau), et chaque famille reçoit sa couleur. Les autres tuiles (le noir, les décors de `tileset_deco`, les cases vides) ne sont jamais teintées. Les plantes (tuiles 7 et 8) sont teintées comme l'herbe. L'eau animée, faite de sprites, reçoit la teinte de l'eau.
+- Un monde absent de `WORLD_TINTS` garde ses couleurs d'origine : c'est le cas du jardin. Le monde 1 porte la teinte `night`.
+- **Limite principale :** comme la teinte *multiplie*, elle assombrit et nuance mais ne change pas vraiment de couleur. La **nuit** donne un très bon rendu (sol vert-gris sombre, pierre bleutée, eau bleu profond). L'**automne** donne un vert olive et la **magie** un brun-mauve, ternes. Pour de vraies couleurs, il faudra soit réactiver les palettes, soit partir d'une version grise du tileset (multiplier du gris par une couleur donne cette couleur).
+- La teinte des tuiles ne marche qu'avec **WebGL** (`Phaser.AUTO` le choisit quand c'est possible) : à vérifier sur la borne.
+
+**Réactiver les palettes :** dans `WorldScene`, repasser le tileset de construction et l'eau par `getPaletteTexture` (avec `WORLD_PALETTES`) et retirer `applyTint`.
+
+#### Les palettes (en réserve)
 
 On ne redessine pas les tuiles pour chaque monde : on garde **un seul jeu de tuiles** et on **change ses couleurs à l'arrivée dans le monde**. L'ambiance de chaque monde vient de sa palette (voir la section 7).
 
@@ -550,7 +563,7 @@ Trois développeurs, qui travaillent **tous sur le code** et en parallèle sur l
 - [ ] **Histoire :** écrire un fil narratif court (elle est évaluée).
 - [ ] **Musique :** choisir ou composer une piste par monde.
 - [ ] **Multijoueur :** décider du périmètre (coopération seule ou aussi compétition).
-- [ ] **Palettes :** définir celles de la nuit (monde 1), du rêve (monde 2) et du post-apocalyptique (monde 4), et retirer la palette de test du monde 1.
+- [ ] **Couleurs de monde :** définir celles du rêve (monde 2) et du post-apocalyptique (monde 4), et obtenir de vraies couleurs pour l'automne et la magie (version grise du tileset, ou réactiver les palettes).
 - [ ] **Étoiles :** afficher le temps final et enregistrer le record à la victoire, placer une étoile dans chaque monde.
 - [ ] **Plantes :** les retirer de `tileset_garden.png` pour qu'elles ne soient pas recolorées.
 - [ ] **Noms de l'équipe :** remplacer les `[Membre n]`.

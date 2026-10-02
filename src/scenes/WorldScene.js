@@ -3,7 +3,7 @@ import timer from '../systems/TimerSystem.js';
 import { RecolteEtoiles } from '../systems/RecolteEtoiles.js';
 import { areAllStarsCollected } from '../systems/StarSystem.js';
 import { isMirrorUsed, markMirrorUsed, shouldMirrorDisappear } from '../systems/MirrorSystem.js';
-import { getPaletteTexture } from '../systems/PaletteSystem.js';
+import { applyTint } from '../systems/TintSystem.js';
 import { pickVariant } from '../utils/helpers.js';
 import {
   SCENES,
@@ -13,7 +13,7 @@ import {
   ANIMATED_TILES,
   ANIMATED_TILES_BLOCK_PLAYER,
   WORLDS,
-  WORLD_PALETTES,
+  WORLD_TINTS,
   NORMAL_WORLD,
   MIRROR_SPAWN_OFFSET,
   MIRROR_VANISH,
@@ -153,6 +153,7 @@ export default class WorldScene extends Phaser.Scene {
       // * Le sprite prend la place exacte de la tuile (son centre), puis joue son animation.
       // Il utilise la texture d'eau de ce monde et l'animation qui lui correspond (voir createTileAnimations).
       const sprite = this.add.sprite(tile.getCenterX(), tile.getCenterY(), waterTexture);
+      this.waterSprites.push(sprite); // pour leur donner la teinte du monde (voir applyTint)
       sprite.play(animation + animationSuffix);
 
       // * On reporte l'orientation de la tuile (posée dans Tiled avec les touches Z, X, Y) sur le sprite.
@@ -173,6 +174,7 @@ export default class WorldScene extends Phaser.Scene {
     // ! Sinon un message encore affiché au moment de partir bloquerait le texte d'aide au retour
     this.messageActive = false;
     this.gameWon = false;
+    this.waterSprites = []; // les sprites de l'eau animée de CETTE visite (remplis par createAnimatedTiles)
 
     // * Le chronomètre et son affichage sont globaux : ils ne dépendent pas du monde.
     // On lance l'interface une seule fois, puis on la garde au premier plan à chaque monde.
@@ -183,14 +185,12 @@ export default class WorldScene extends Phaser.Scene {
     this.scene.bringToTop(SCENES.UI);
     timer.start(); // sans effet s'il tourne déjà
 
-    // * La palette de couleurs de ce monde (voir WORLD_PALETTES dans constants.js). Sans palette (le jardin),
-    // on garde les textures d'origine ; avec une palette, on utilise des copies recolorées.
-    const paletteName = WORLD_PALETTES[this.getWorldName()];
-
-    // * L'eau : une copie recolorée du spritesheet (avec ses images numérotées de 32 x 32), ou l'original.
-    // Les images numérotées doivent exister AVANT de créer les animations, sinon Phaser les ignore sans erreur.
-    const waterTexture = getPaletteTexture(this, ASSETS.WATER, paletteName, { width: TILE_SIZE, height: TILE_SIZE });
-    const animationSuffix = waterTexture === ASSETS.WATER ? '' : `@${paletteName}`;
+    // * Les couleurs de ce monde sont une TEINTE (voir WORLD_TINTS), posée plus bas sur les tuiles (voir applyTint).
+    // Les textures sont donc toujours les originales.
+    // ? Les palettes (PaletteSystem.js, getPaletteTexture) ne sont plus appelées : pour les réactiver, l'eau et le tileset
+    // de construction repasseraient par getPaletteTexture, avec WORLD_PALETTES.
+    const waterTexture = ASSETS.WATER;
+    const animationSuffix = '';
 
     this.createTileAnimations(waterTexture, animationSuffix);
     this.createMirrorAnimation();
@@ -198,15 +198,11 @@ export default class WorldScene extends Phaser.Scene {
     // * On construit la carte à partir du JSON Tiled
     const map = this.make.tilemap({ key: this.mapKey });
 
-    // * Le tileset de construction (sol, murs) : une copie recolorée si ce monde a une palette (voir plus haut).
-    // Les décors (tileset_deco) ne sont jamais recolorés : ils gardent leurs couleurs.
-    const gardenTexture = getPaletteTexture(this, ASSETS.TILESET_GARDEN, paletteName);
-
     // ! Le 1er nom est celui du tileset DANS Tiled, le 2e est la clé de l'image à utiliser.
     // Une carte peut utiliser plusieurs tilesets : on les passe tous à chaque calque, qui prend dans chacun
     // les tuiles qu'il utilise. Un tileset absent de la carte renvoie null : filter(Boolean) l'écarte.
     const tilesets = [
-      map.addTilesetImage('tileset_garden', gardenTexture),
+      map.addTilesetImage('tileset_garden', ASSETS.TILESET_GARDEN),
       map.addTilesetImage('tileset_deco', ASSETS.TILESET_DECO),
     ].filter(Boolean);
 
@@ -306,6 +302,9 @@ export default class WorldScene extends Phaser.Scene {
 
     // * Les étoiles de ce monde, posées dans Tiled (le joueur existe déjà : l'étoile a besoin de lui)
     this.createStars(map);
+
+    // * La teinte du monde, posée en dernier : tous les calques et les sprites d'eau existent. Le jardin n'en a pas.
+    applyTint(map, this.waterSprites, WORLD_TINTS[this.getWorldName()]);
   }
 
   /**
