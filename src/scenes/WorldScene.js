@@ -2,6 +2,7 @@ import InputManager from '../systems/InputManager.js';
 import timer from '../systems/TimerSystem.js';
 import { RecolteEtoiles } from '../systems/RecolteEtoiles.js';
 import { areAllStarsCollected } from '../systems/StarSystem.js';
+import { createBulletAnimations, explodeBullet, shoot } from '../systems/fonctionTir.js';
 import { isMirrorUsed, markMirrorUsed, shouldMirrorDisappear } from '../systems/MirrorSystem.js';
 import { applyTint } from '../systems/TintSystem.js';
 import { pickVariant } from '../utils/helpers.js';
@@ -18,6 +19,7 @@ import {
   MIRROR_SPAWN_OFFSET,
   MIRROR_VANISH,
   PLAYER,
+  BULLET,
   INTERACT_DISTANCE,
   MESSAGE_DURATION_MS,
   DEPTH,
@@ -63,6 +65,12 @@ export default class WorldScene extends Phaser.Scene {
     this.load.image(ASSETS.TILESET_GARDEN, 'assets/images/tilesets/tileset_garden.png');
     this.load.image('etoile', 'assets/images/sprites/Etoile.png');
     this.load.image(ASSETS.TILESET_DECO, 'assets/images/tilesets/tileset_deco.png');
+
+    // * Les balles : balle.png est une bande de 33 images de 16 x 16 pixels, chargée comme un spritesheet
+    this.load.spritesheet(BULLET.KEY, 'assets/images/sprites/balle.png', {
+      frameWidth: BULLET.FRAME_SIZE,
+      frameHeight: BULLET.FRAME_SIZE,
+    });
 
     // * Le spritesheet du miroir, découpé en images de 32 x 32 pixels.
     // Un sprite créé sans préciser l'image affiche la première (le miroir entier).
@@ -226,6 +234,9 @@ export default class WorldScene extends Phaser.Scene {
     this.player = this.physics.add.sprite(spawn.x, spawn.y, ASSETS.PLAYER_1, PLAYER.FRAMES.DOWN);
     this.player.setCollideWorldBounds(true);
 
+    // * Dans quelle direction regarde le joueur ? C'est la direction des tirs. Il commence de face (vers le bas).
+    this.facing = 'down';
+
     // * La boîte de collision est plus petite que l'image et placée au niveau des pieds :
     // le joueur peut passer « devant » un mur sans que sa tête ne le bloque
     this.player.body.setSize(PLAYER.HITBOX.WIDTH, PLAYER.HITBOX.HEIGHT);
@@ -299,6 +310,15 @@ export default class WorldScene extends Phaser.Scene {
 
     // * Les touches passent par l'InputManager : la scène ne connaît aucune touche
     this.input1 = new InputManager(this, 1);
+
+    // * Les balles : les animations (créées une seule fois pour tout le jeu) et le groupe des balles de ce monde.
+    // Le groupe est créé ICI, une fois par visite, et non à chaque tir (voir shoot dans fonctionTir.js).
+    // ? Tout monde peut tirer pour l'instant (pour tester) : le GDD ne prévoit le tir que dans les mondes 2 et 4.
+    createBulletAnimations(this);
+    this.bullets = this.physics.add.group();
+
+    // * Une balle qui touche un mur explose (le premier objet reçu est la balle, le second la tuile du mur)
+    this.physics.add.collider(this.bullets, walls, (bullet) => explodeBullet(bullet));
 
     // * Les étoiles de ce monde, posées dans Tiled (le joueur existe déjà : l'étoile a besoin de lui)
     this.createStars(map);
@@ -409,10 +429,25 @@ export default class WorldScene extends Phaser.Scene {
 
     // * On change l'image selon la direction. À l'arrêt, on garde la dernière image.
     // En diagonale, la direction horizontale est prioritaire.
-    if (x > 0) this.player.setFrame(PLAYER.FRAMES.RIGHT);
-    else if (x < 0) this.player.setFrame(PLAYER.FRAMES.LEFT);
-    else if (y < 0) this.player.setFrame(PLAYER.FRAMES.UP);
-    else if (y > 0) this.player.setFrame(PLAYER.FRAMES.DOWN);
+    // * On retient aussi la direction regardée (this.facing) : à l'arrêt, le joueur tire toujours dans la dernière direction.
+    if (x > 0) {
+      this.player.setFrame(PLAYER.FRAMES.RIGHT);
+      this.facing = 'right';
+    } else if (x < 0) {
+      this.player.setFrame(PLAYER.FRAMES.LEFT);
+      this.facing = 'left';
+    } else if (y < 0) {
+      this.player.setFrame(PLAYER.FRAMES.UP);
+      this.facing = 'up';
+    } else if (y > 0) {
+      this.player.setFrame(PLAYER.FRAMES.DOWN);
+      this.facing = 'down';
+    }
+
+    // * Tir : une balle par appui, dans la direction regardée
+    if (this.input1.justPressed('shoot')) {
+      shoot(this, this.bullets, this.player, this.facing);
+    }
 
     // * On donne une vitesse (en pixels par seconde) : c'est la physique Phaser qui déplace
     // le joueur et qui l'arrête contre les murs
