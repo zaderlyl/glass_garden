@@ -1,8 +1,10 @@
 import InputManager from '../systems/InputManager.js';
+import { createBulletAnimations } from '../systems/fonctionTir.js';
 import {
   SCENES,
   ASSETS,
   PLAYER,
+  BULLET,
   INTERACT_DISTANCE,
   MESSAGE_DURATION_MS,
   DEPTH,
@@ -26,6 +28,12 @@ export default class HubScene extends Phaser.Scene {
     this.load.spritesheet(ASSETS.PLAYER_1, 'assets/images/sprites/player_1_spritesheet.png', {
       frameWidth: PLAYER.FRAME_SIZE,
       frameHeight: PLAYER.FRAME_SIZE,
+    });
+
+    // * Les balles : balle.png est une bande de 33 images de 16 x 16 pixels, chargée comme un spritesheet
+    this.load.spritesheet(BULLET.KEY, 'assets/images/sprites/balle.png', {
+      frameWidth: BULLET.FRAME_SIZE,
+      frameHeight: BULLET.FRAME_SIZE,
     });
 
     // * La carte (JSON exporté de Tiled) et l'image de son tileset
@@ -107,6 +115,11 @@ export default class HubScene extends Phaser.Scene {
 
     // * Les touches passent par l'InputManager : la scène ne connaît aucune touche
     this.input1 = new InputManager(this, 1);
+
+    // * Les balles : les animations (créées une seule fois pour tout le jeu) et le groupe qui contient les balles de ce monde.
+    // Le groupe est créé ICI, une seule fois par monde, et non à chaque tir (voir shoot dans fonctionTir.js)
+    createBulletAnimations(this);
+    this.bullets = this.physics.add.group();
   }
 
   // update() est appelée à chaque image (environ 60 fois par seconde)
