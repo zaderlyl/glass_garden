@@ -1,5 +1,5 @@
 import InputManager from '../systems/InputManager.js';
-import { createBulletAnimations, shoot } from '../systems/fonctionTir.js';
+import { createBulletAnimations, explodeBullet, shoot } from '../systems/fonctionTir.js';
 import {
   SCENES,
   ASSETS,
@@ -123,6 +123,9 @@ export default class HubScene extends Phaser.Scene {
     // Le groupe est créé ICI, une seule fois par monde, et non à chaque tir (voir shoot dans fonctionTir.js)
     createBulletAnimations(this);
     this.bullets = this.physics.add.group();
+
+    // * Une balle qui touche un mur explose (le premier objet reçu est la balle, le second la tuile du mur)
+    this.physics.add.collider(this.bullets, walls, (bullet) => explodeBullet(bullet));
   }
 
   // update() est appelée à chaque image (environ 60 fois par seconde)
