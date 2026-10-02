@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="100" height="20" tilewidth="32" tileheight="32" infinite="0" nextlayerid="6" nextobjectid="4">
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="100" height="20" tilewidth="32" tileheight="32" infinite="0" nextlayerid="6" nextobjectid="5">
+ <editorsettings>
+  <export target="world_garden.json" format="json"/>
+ </editorsettings>
  <tileset firstgid="1" name="tileset_garden" tilewidth="32" tileheight="32" tilecount="32" columns="8">
   <image source="../images/tilesets/tileset_garden.png" width="256" height="128"/>
  </tileset>
@@ -57,6 +60,9 @@
   </object>
   <object id="2" name="miroir" x="2782.67" y="221.333" width="33.3333" height="68"/>
   <object id="3" name="spawn" x="205.333" y="234.667">
+   <point/>
+  </object>
+  <object id="4" x="1492" y="806.667">
    <point/>
   </object>
  </objectgroup>
