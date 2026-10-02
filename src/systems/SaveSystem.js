@@ -86,3 +86,6 @@ export function resetBestTime(mode = GAME_MODES.SOLO) {
     // Rien à faire : sans localStorage, il n'y a rien à effacer
   }
 }
+
+
+

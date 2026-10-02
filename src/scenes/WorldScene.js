@@ -1,6 +1,10 @@
 import InputManager from '../systems/InputManager.js';
 import timer from '../systems/TimerSystem.js';
+import { RecolteEtoiles } from '../systems/RecolteEtoiles.js';
+import { areAllStarsCollected } from '../systems/StarSystem.js';
+import { createBulletAnimations, explodeBullet, shoot } from '../systems/fonctionTir.js';
 import { isMirrorUsed, markMirrorUsed, shouldMirrorDisappear } from '../systems/MirrorSystem.js';
+import { applyTint } from '../systems/TintSystem.js';
 import { pickVariant } from '../utils/helpers.js';
 import {
   SCENES,
@@ -10,10 +14,12 @@ import {
   ANIMATED_TILES,
   ANIMATED_TILES_BLOCK_PLAYER,
   WORLDS,
+  WORLD_TINTS,
   NORMAL_WORLD,
   MIRROR_SPAWN_OFFSET,
   MIRROR_VANISH,
   PLAYER,
+  BULLET,
   INTERACT_DISTANCE,
   MESSAGE_DURATION_MS,
   DEPTH,
@@ -53,9 +59,18 @@ export default class WorldScene extends Phaser.Scene {
       frameHeight: PLAYER.FRAME_SIZE,
     });
 
-    // * La carte (JSON exporté de Tiled) et l'image de son tileset
+    // * La carte (JSON exporté de Tiled) et les images de ses deux tilesets :
+    // la construction (sol, murs, eau) et les décors
     this.load.tilemapTiledJSON(this.mapKey, this.mapPath);
     this.load.image(ASSETS.TILESET_GARDEN, 'assets/images/tilesets/tileset_garden.png');
+    this.load.image('etoile', 'assets/images/sprites/Etoile.png');
+    this.load.image(ASSETS.TILESET_DECO, 'assets/images/tilesets/tileset_deco.png');
+
+    // * Les balles : balle.png est une bande de 33 images de 16 x 16 pixels, chargée comme un spritesheet
+    this.load.spritesheet(BULLET.KEY, 'assets/images/sprites/balle.png', {
+      frameWidth: BULLET.FRAME_SIZE,
+      frameHeight: BULLET.FRAME_SIZE,
+    });
 
     // * Le spritesheet du miroir, découpé en images de 32 x 32 pixels.
     // Un sprite créé sans préciser l'image affiche la première (le miroir entier).
@@ -95,13 +110,17 @@ export default class WorldScene extends Phaser.Scene {
    * Les animations sont globales à tout le jeu : on ne les crée qu'une fois,
    * même si plusieurs mondes appellent cette méthode.
    */
-  createTileAnimations() {
+  createTileAnimations(waterTexture, suffix) {
     TILE_ANIMATIONS.forEach(({ key, sheet, start, end, frameRate }) => {
-      if (this.anims.exists(key)) return;
+      // * Une animation est liée à UNE texture : l'eau recolorée d'un monde a donc ses propres animations,
+      // reconnaissables à leur suffixe (« water_1@magic »). Celles de l'eau d'origine n'ont pas de suffixe.
+      const animationKey = key + suffix;
+      if (this.anims.exists(animationKey)) return;
 
       this.anims.create({
-        key,
-        frames: this.anims.generateFrameNumbers(sheet, { start, end }),
+        key: animationKey,
+        // L'eau utilise la texture de ce monde (une copie recolorée, ou l'original) ; les autres images gardent la leur
+        frames: this.anims.generateFrameNumbers(sheet === ASSETS.WATER ? waterTexture : sheet, { start, end }),
         frameRate,
         repeat: -1, // -1 = en boucle, sans fin
       });
@@ -115,11 +134,11 @@ export default class WorldScene extends Phaser.Scene {
    * Une carte sans ce calque est simplement ignorée.
    * @returns {Phaser.Physics.Arcade.StaticGroup|null} les blocs qui bloquent le joueur, ou null
    */
-  createAnimatedTiles(map, tileset) {
+  createAnimatedTiles(map, tilesets, waterTexture, animationSuffix) {
     // ! On teste d'abord l'existence du calque : createLayer afficherait un avertissement sinon
     if (!map.getLayer('animated_tiles')) return null;
 
-    const layer = map.createLayer('animated_tiles', tileset);
+    const layer = map.createLayer('animated_tiles', tilesets);
 
     // * Les tuiles repères sont retirées de la carte plus bas, donc elles ne bloquent plus le joueur.
     // On crée à la place un bloc invisible de la taille d'une tuile (« zone ») sous chaque case d'eau.
@@ -139,9 +158,11 @@ export default class WorldScene extends Phaser.Scene {
       // * S'il y a plusieurs animations possibles, on en choisit une selon la position de la tuile
       const animation = variants[pickVariant(tile.x, tile.y, variants.length)];
 
-      // * Le sprite prend la place exacte de la tuile (son centre), puis joue son animation
-      const sprite = this.add.sprite(tile.getCenterX(), tile.getCenterY(), ASSETS.WATER);
-      sprite.play(animation);
+      // * Le sprite prend la place exacte de la tuile (son centre), puis joue son animation.
+      // Il utilise la texture d'eau de ce monde et l'animation qui lui correspond (voir createTileAnimations).
+      const sprite = this.add.sprite(tile.getCenterX(), tile.getCenterY(), waterTexture);
+      this.waterSprites.push(sprite); // pour leur donner la teinte du monde (voir applyTint)
+      sprite.play(animation + animationSuffix);
 
       // * On reporte l'orientation de la tuile (posée dans Tiled avec les touches Z, X, Y) sur le sprite.
       // Phaser a converti les retournements de Tiled en un miroir horizontal (flipX) et une rotation :
@@ -160,6 +181,8 @@ export default class WorldScene extends Phaser.Scene {
     // * Une même scène est réutilisée à chaque visite : on remet l'état à zéro
     // ! Sinon un message encore affiché au moment de partir bloquerait le texte d'aide au retour
     this.messageActive = false;
+    this.gameWon = false;
+    this.waterSprites = []; // les sprites de l'eau animée de CETTE visite (remplis par createAnimatedTiles)
 
     // * Le chronomètre et son affichage sont globaux : ils ne dépendent pas du monde.
     // On lance l'interface une seule fois, puis on la garde au premier plan à chaque monde.
@@ -170,23 +193,35 @@ export default class WorldScene extends Phaser.Scene {
     this.scene.bringToTop(SCENES.UI);
     timer.start(); // sans effet s'il tourne déjà
 
-    this.createTileAnimations();
+    // * Les couleurs de ce monde sont une TEINTE (voir WORLD_TINTS), posée plus bas sur les tuiles (voir applyTint).
+    // Les textures sont donc toujours les originales.
+    // ? Les palettes (PaletteSystem.js, getPaletteTexture) ne sont plus appelées : pour les réactiver, l'eau et le tileset
+    // de construction repasseraient par getPaletteTexture, avec WORLD_PALETTES.
+    const waterTexture = ASSETS.WATER;
+    const animationSuffix = '';
+
+    this.createTileAnimations(waterTexture, animationSuffix);
     this.createMirrorAnimation();
 
     // * On construit la carte à partir du JSON Tiled
     const map = this.make.tilemap({ key: this.mapKey });
 
-    // ! Le 1er nom est celui du tileset DANS Tiled, le 2e est la clé de l'image chargée ci-dessus
-    const tileset = map.addTilesetImage('tileset_garden', ASSETS.TILESET_GARDEN);
+    // ! Le 1er nom est celui du tileset DANS Tiled, le 2e est la clé de l'image à utiliser.
+    // Une carte peut utiliser plusieurs tilesets : on les passe tous à chaque calque, qui prend dans chacun
+    // les tuiles qu'il utilise. Un tileset absent de la carte renvoie null : filter(Boolean) l'écarte.
+    const tilesets = [
+      map.addTilesetImage('tileset_garden', ASSETS.TILESET_GARDEN),
+      map.addTilesetImage('tileset_deco', ASSETS.TILESET_DECO),
+    ].filter(Boolean);
 
     // * Les calques sont créés du dessous vers le dessus, dans le même ordre que dans Tiled
-    map.createLayer('background', tileset);
-    map.createLayer('ground', tileset);
-    map.createLayer('decor_below', tileset);
+    map.createLayer('background', tilesets);
+    map.createLayer('ground', tilesets);
+    map.createLayer('decor_below', tilesets);
 
     // * L'eau : créée ici, entre le décor du dessous et les murs, pour passer sous le joueur
-    const waterBlockers = this.createAnimatedTiles(map, tileset);
-    const walls = map.createLayer('walls', tileset);
+    const waterBlockers = this.createAnimatedTiles(map, tilesets, waterTexture, animationSuffix);
+    const walls = map.createLayer('walls', tilesets);
 
     // * Toute tuile posée dans le calque « walls » devient un obstacle (-1 = case vide)
     walls.setCollisionByExclusion([-1]);
@@ -198,6 +233,9 @@ export default class WorldScene extends Phaser.Scene {
     // Il commence de face (vers le bas), sur le point de départ
     this.player = this.physics.add.sprite(spawn.x, spawn.y, ASSETS.PLAYER_1, PLAYER.FRAMES.DOWN);
     this.player.setCollideWorldBounds(true);
+
+    // * Dans quelle direction regarde le joueur ? C'est la direction des tirs. Il commence de face (vers le bas).
+    this.facing = 'down';
 
     // * La boîte de collision est plus petite que l'image et placée au niveau des pieds :
     // le joueur peut passer « devant » un mur sans que sa tête ne le bloque
@@ -268,10 +306,37 @@ export default class WorldScene extends Phaser.Scene {
       .setDepth(DEPTH.UI);
 
     // * decor_above passe devant le joueur : on le crée après lui avec une profondeur plus grande
-    map.createLayer('decor_above', tileset).setDepth(DEPTH.ABOVE_PLAYER);
+    map.createLayer('decor_above', tilesets).setDepth(DEPTH.ABOVE_PLAYER);
 
     // * Les touches passent par l'InputManager : la scène ne connaît aucune touche
     this.input1 = new InputManager(this, 1);
+
+    // * Les balles : les animations (créées une seule fois pour tout le jeu) et le groupe des balles de ce monde.
+    // Le groupe est créé ICI, une fois par visite, et non à chaque tir (voir shoot dans fonctionTir.js).
+    // ? Tout monde peut tirer pour l'instant (pour tester) : le GDD ne prévoit le tir que dans les mondes 2 et 4.
+    createBulletAnimations(this);
+    this.bullets = this.physics.add.group();
+
+    // * Une balle qui touche un mur explose (le premier objet reçu est la balle, le second la tuile du mur)
+    this.physics.add.collider(this.bullets, walls, (bullet) => explodeBullet(bullet));
+
+    // * Les étoiles de ce monde, posées dans Tiled (le joueur existe déjà : l'étoile a besoin de lui)
+    this.createStars(map);
+
+    // * La teinte du monde, posée en dernier : tous les calques et les sprites d'eau existent. Le jardin n'en a pas.
+    applyTint(map, this.waterSprites, WORLD_TINTS[this.getWorldName()]);
+  }
+
+  /**
+   * * Crée une étoile à la position de chaque objet de classe « star » posé dans le calque « objects » de la carte.
+   * Une carte sans objet « star » (le jardin) n'a donc pas d'étoile. Changer la place d'une étoile se fait dans Tiled.
+   * Selon la version de Tiled, la classe s'appelle « class » ou « type » : on lit les deux.
+   */
+  createStars(map) {
+    map
+      .getObjectLayer('objects')
+      .objects.filter((object) => (object.class || object.type) === 'star')
+      .forEach((object) => RecolteEtoiles(this.player, this, object.x, object.y));
   }
 
   // Le nom de ce monde, comme dans la table WORLDS (ex. « hub », « world_1 »)
@@ -336,17 +401,53 @@ export default class WorldScene extends Phaser.Scene {
     return { x: spawn.x, y: spawn.y };
   }
 
+  /**
+   * * Fin de la partie : on arrête le chronomètre, on fige le joueur et la physique, et l'interface affiche le message.
+   * TODO(équipe): écran de fin (temps final, record via saveBestTime, rejouer), à la place du simple message
+   */
+  winGame() {
+    this.gameWon = true;
+    timer.stop(); // le temps final est celui de cet instant
+    this.player.setVelocity(0, 0);
+    this.physics.pause();
+    this.scene.get(SCENES.UI).showVictory();
+  }
+
   // update() est appelée à chaque image (environ 60 fois par seconde)
   update() {
+    // * Partie gagnée : tout est figé, on ne lit plus les touches
+    if (this.gameWon) return;
+
+    // * Victoire : toutes les étoiles du jeu sont ramassées ET le joueur est de retour dans le jardin
+    if (this.isNormalWorld() && areAllStarsCollected()) {
+      this.winGame();
+      return;
+    }
+
     // * Direction souhaitée, déjà normalisée en diagonale par l'InputManager
     const { x, y } = this.input1.getMove();
 
     // * On change l'image selon la direction. À l'arrêt, on garde la dernière image.
     // En diagonale, la direction horizontale est prioritaire.
-    if (x > 0) this.player.setFrame(PLAYER.FRAMES.RIGHT);
-    else if (x < 0) this.player.setFrame(PLAYER.FRAMES.LEFT);
-    else if (y < 0) this.player.setFrame(PLAYER.FRAMES.UP);
-    else if (y > 0) this.player.setFrame(PLAYER.FRAMES.DOWN);
+    // * On retient aussi la direction regardée (this.facing) : à l'arrêt, le joueur tire toujours dans la dernière direction.
+    if (x > 0) {
+      this.player.setFrame(PLAYER.FRAMES.RIGHT);
+      this.facing = 'right';
+    } else if (x < 0) {
+      this.player.setFrame(PLAYER.FRAMES.LEFT);
+      this.facing = 'left';
+    } else if (y < 0) {
+      this.player.setFrame(PLAYER.FRAMES.UP);
+      this.facing = 'up';
+    } else if (y > 0) {
+      this.player.setFrame(PLAYER.FRAMES.DOWN);
+      this.facing = 'down';
+    }
+
+    // * Tir : une balle par appui, dans la direction regardée
+    if (this.input1.justPressed('shoot')) {
+      shoot(this, this.bullets, this.player, this.facing);
+    }
 
     // * On donne une vitesse (en pixels par seconde) : c'est la physique Phaser qui déplace
     // le joueur et qui l'arrête contre les murs
@@ -360,10 +461,11 @@ export default class WorldScene extends Phaser.Scene {
     );
 
     // On ne réécrit pas le texte pendant l'affichage du message d'interaction
-    // ? La touche affichée (E) est provisoire : à changer avec les boutons de la borne
+    // ? Les touches sont provisoires : à changer avec les boutons de la borne (voir BINDINGS dans InputManager)
     // TODO(équipe): changer le message d'interaction (utiliser une icône de touche au-dessus des miroirs)
     if (!this.messageActive) {
-      this.hint.setText(nearMirror ? 'E : entrer dans le miroir' : '');
+      // * La touche affichée suit le mode de contrôle (I en arcade, E en pc) : l'aide ne ment jamais
+      this.hint.setText(nearMirror ? `${this.input1.getKeyLabel('interact')} : entrer dans le miroir` : '');
     }
 
     if (nearMirror && this.input1.justPressed('interact')) {

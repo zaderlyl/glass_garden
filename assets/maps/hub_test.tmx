@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.0" orientation="orthogonal" renderorder="right-down" width="40" height="23" tilewidth="32" tileheight="32" infinite="0" nextlayerid="8" nextobjectid="4">
+<map version="1.10" tiledversion="1.12.0" orientation="orthogonal" renderorder="right-down" width="40" height="23" tilewidth="32" tileheight="32" infinite="0" nextlayerid="8" nextobjectid="7">
  <editorsettings>
   <export target="hub_test.json" format="json"/>
  </editorsettings>
  <tileset firstgid="1" name="tileset_garden" tilewidth="32" tileheight="32" tilecount="32" columns="8">
   <image source="../images/tilesets/tileset_garden.png" width="256" height="128"/>
+ </tileset>
+ <tileset firstgid="33" name="tileset_deco" tilewidth="32" tileheight="32" tilecount="44" columns="4">
+  <image source="../images/tilesets/tileset_deco.png" width="128" height="352"/>
  </tileset>
  <layer id="1" name="background" width="40" height="23">
   <data encoding="csv">
@@ -68,6 +71,9 @@
    <properties>
     <property name="type" value=""/>
    </properties>
+  </object>
+  <object id="6" name="star" type="star" x="798.618" y="316.759">
+   <point/>
   </object>
  </objectgroup>
  <layer id="3" name="decor_below" width="40" height="23">

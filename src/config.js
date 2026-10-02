@@ -1,3 +1,4 @@
+import PreloadScene from './scenes/PreloadScene.js';
 import MenuScene from './scenes/MenuScene.js';
 import HubScene from './scenes/HubScene.js';
 import World1Scene from './scenes/World1Scene.js';
@@ -7,10 +8,12 @@ import { GAME_WIDTH, GAME_HEIGHT, COLORS } from './utils/constants.js';
 // * Configuration Phaser. La résolution est celle de la borne d'arcade : 1280 x 720 (16:9).
 export default {
   type: Phaser.AUTO,
-  parent: 'game',
+  parent: 'game-container', // * l'id de la div dans index.html (pas « game » : cela créerait une variable globale du même nom, voir index.js)
   width: GAME_WIDTH,
   height: GAME_HEIGHT,
   backgroundColor: COLORS.BACKGROUND,
+  // * Les chemins des assets sont relatifs à l'adresse de la page : le lanceur de la borne sert le jeu depuis un sous-dossier (comme le template du prof)
+  baseURL: window.location.pathname.replace(/\/[^/]*$/, ''),
   pixelArt: true, // pas de lissage : on veut des pixels nets
   scale: {
     // * FIT adapte le jeu à la taille de la fenêtre en gardant le ratio 16:9
@@ -26,6 +29,7 @@ export default {
     },
   },
   // * La première scène de la liste est celle qui démarre
-  // ? HubScene est en premier le temps de développer le joueur. Le menu redeviendra la première scène.
-  scene: [HubScene, MenuScene, World1Scene, UIScene],
+  // PreloadScene charge les cartes de tous les mondes, puis démarre le jardin.
+  // ? Elle démarre HubScene directement le temps de développer le joueur. Le menu redeviendra la scène suivante.
+  scene: [PreloadScene, HubScene, MenuScene, World1Scene, UIScene],
 };

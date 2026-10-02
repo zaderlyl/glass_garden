@@ -15,6 +15,8 @@
 //   import { isMirrorUsed, markMirrorUsed, shouldMirrorDisappear } from '../systems/MirrorSystem.js';
 // =====================================================================================
 
+import { isWorldStarCollected } from './StarSystem.js';
+
 const usedMirrors = [];
 
 /** Ce miroir est-il déjà utilisé (donc disparu) ? */
@@ -36,11 +38,8 @@ export function resetMirrors() {
 
 /**
  * Le miroir de ce monde doit-il disparaître quand le joueur revient dans le jardin ?
- * ! Pour l'instant : toujours oui. Attention : un joueur qui revient sans l'étoile ne pourra plus
- * jamais entrer dans ce monde.
- * TODO(équipe): remplacer par « l'étoile de ce monde est prise » (isStarCollected) quand le système
- * d'étoiles sera fusionné dans main
+ * * Oui seulement si l'étoile de ce monde est ramassée. Sans elle, le miroir reste : le joueur peut y retourner.
  */
 export function shouldMirrorDisappear(world) {
-  return true;
+  return isWorldStarCollected(world);
 }
