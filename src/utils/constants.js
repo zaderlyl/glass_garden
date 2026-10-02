@@ -87,7 +87,7 @@ export const TINTS = {
 // Un monde absent de cette table garde ses couleurs d'origine : c'est le cas du jardin (le monde normal).
 // TODO(équipe): définir la teinte de chaque monde quand les mondes seront créés (monde 1 = la nuit)
 export const WORLD_TINTS = {
-  world_1: 'night',
+  world_1: 'magic', // ! TEST : remettre 'night' (le monde 1 est la nuit)
 };
 
 // * Clés des assets : le nom sous lequel Phaser retrouve un fichier chargé
