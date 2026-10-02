@@ -1,6 +1,6 @@
 # Le système de tir
 
-Ce document décrit le tir tel qu'il est écrit sur la branche `feature/logique_tir` : ce qui marche, comment l'utiliser, ce qui reste à brancher. Il est dans un fichier à part parce que la branche n'est pas encore à jour avec `main` (le journal et le GDD y sont en retard : leurs entrées seront ajoutées après la fusion).
+Ce document décrit le système de tir : ce qui marche, comment l'utiliser, ce qui reste à faire. Le résumé est aussi dans le GDD (section 9, « Le tir »).
 
 ## Ce qui est fait
 
@@ -16,11 +16,11 @@ Le code est dans `src/systems/fonctionTir.js`. Il ne contient que la **vie d'une
 
 **La vie d'une balle :** elle apparaît à `BULLET.START_OFFSET` pixels devant le joueur (pas sur lui), vole à `BULLET.SPEED` pixels par seconde en jouant son animation en boucle, puis explose quand elle touche un mur ou une cible. Si elle ne touche rien, elle explose toute seule après `BULLET.LIFETIME_MS` : une balle ne reste jamais en mémoire indéfiniment.
 
-**Dans `HubScene`** (le seul monde sur cette branche) :
-- `balle.png` est chargée comme un spritesheet, puis `createBulletAnimations` et le groupe `this.bullets` sont créés **une seule fois** dans `create`.
+**Dans `WorldScene`** (la base de tous les mondes, donc tous les mondes tirent) :
+- `balle.png` est chargée comme un spritesheet dans `preload`, puis `createBulletAnimations` et le groupe `this.bullets` sont créés **une seule fois par visite** dans `create`.
 - La scène retient la direction regardée (`this.facing`) : à l'arrêt, le joueur tire donc dans la dernière direction où il a marché.
 - Une collision entre les balles et le calque `walls` appelle `explodeBullet`.
-- L'action `shoot` de l'`InputManager` (touche `A` pour le joueur 1, `Espace` pour le joueur 2, **provisoires**) appelle `shoot`.
+- L'action `shoot` de l'`InputManager` appelle `shoot` : `O` en mode arcade et `A` en mode pc pour le joueur 1, `Espace` pour le joueur 2 (**provisoires**).
 
 ## Les valeurs réglables
 
@@ -60,13 +60,15 @@ addTargetCollision(this, this.bullets, this.targets);
 
 ## Ce qui reste à faire
 
-- **Fusionner `main`** dans la branche. Ensuite, déplacer les ajouts de `HubScene.js` dans `WorldScene` (chargement de la balle, groupe, collision avec les murs, tir), pour que tous les mondes tirent.
-- **Le bouton de tir en arcade** : `O` est prévu. À ajouter dans la partie « arcade » de `BINDINGS` après la fusion avec les modes de contrôle ; en mode pc, `A`.
-- **Où peut-on tirer ?** Pour l'instant dans tous les mondes, pour tester. Le GDD ne prévoit le tir que pour les mondes 2 et 4 : à décider, et à limiter si besoin.
+- **Où peut-on tirer ?** Pour l'instant dans tous les mondes, pour tester. Le GDD ne prévoit le tir que pour les mondes 2 et 4 : à décider, et à limiter si besoin (par exemple avec une propriété du monde).
 - **Le monde 4** : placer les cibles (boîtes), choisir laquelle cache l'étoile.
 - **Une animation de destruction** des cibles (pour l'instant elles disparaissent simplement).
 - **Les ennemis du monde 2** : les balles devront aussi pouvoir les toucher. `hitTarget` devrait s'y appliquer tel quel.
 - Une balle qui sort de l'écran n'explose qu'à la fin de sa durée de vie : si besoin, ajouter un test de position.
+
+## L'incident de la fusion
+
+La fusion de `main` dans `feature/logique_tir` avait été résolue avec « accepter les deux changements » sur deux fichiers très modifiés des deux côtés : `HubScene.js` (l'ancienne scène de 170 lignes collée sous la nouvelle de 13 lignes, avec deux imports de `constants.js`, d'où l'erreur « Identifier 'SCENES' has already been declared ») et `InputManager.js` (deux tables `BINDINGS` entremêlées, erreur de syntaxe). Le jeu ne démarrait plus sur `main`. Réparé dans la branche `fix/fusion-tir` : retour aux versions de `main`, puis le tir est rebranché dans `WorldScene` au lieu de `HubScene`. Pour un fichier modifié des deux côtés, choisir **une** version, jamais les deux.
 
 ## Ce qui a été corrigé par rapport au premier fichier
 
@@ -80,6 +82,6 @@ Le premier `fonctionTir.js` venait d'un jeu de plateforme et plantait dès qu'on
 
 ## Comment tester
 
-1. Lancer le jeu, marcher dans une direction (`Z` `Q` `S` `D`), puis appuyer sur `A` : une balle part dans cette direction.
+1. Lancer le jeu, marcher dans une direction (flèches en arcade, `Z` `Q` `S` `D` en mode pc après `Ctrl + C`), puis appuyer sur `O` (arcade) ou `A` (pc) : une balle part dans cette direction.
 2. Tirer contre un mur : la balle explose en un losange bleu puis disparaît.
 3. Pour essayer une cible, créer temporairement un objet avec un corps physique et une propriété `hitPoints` dans un groupe, puis appeler `addTargetCollision`.
