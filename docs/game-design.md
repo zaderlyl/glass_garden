@@ -152,7 +152,7 @@ Le monde d'introduction. On y apprend à se déplacer dans un lieu sombre, uniqu
 
 Le joueur **tire** sur des squelettes. Un seul contact avec un ennemi ou un projectile suffit à le faire **mourir : le monde recommence**. La précision et le placement sont donc essentiels.
 
-**À faire :** système de tir (réutilisé au monde 4) · ennemis avec déplacement simple · gestion de la mort et du redémarrage du monde.
+**Déjà fait :** le système de tir (voir la section 9). **À faire :** ennemis avec déplacement simple · gestion de la mort et du redémarrage du monde.
 
 ---
 
@@ -228,11 +228,11 @@ Le jeu a **deux modes de contrôle** (voir plus bas) : le mode **arcade** (celui
 | Se déplacer | Joystick (flèches *supposées*) | `Z` `Q` `S` `D` | Flèches |
 | Interagir (miroir, objet, PNJ) | Bouton `I` | `E` *(à définir)* | `Entrée` |
 | Courir | *(à définir)* | `Maj` *(à définir)* | *(à définir)* |
-| Tirer | *(à définir)* | *(à définir)* | *(à définir)* |
+| Tirer | Bouton `O` | `A` | `Espace` |
 | Lampe / bougie | *(à définir)* | *(à définir)* | *(à définir)* |
 | Pause | *(à définir)* | `Échap` | — |
 
-**Les six boutons du joueur 1** sont les touches `I O P` (rangée du haut) et `K L M` (rangée du bas). Seul `I` sert pour l'instant ; les cinq autres sont réservés aux actions à venir.
+**Les six boutons du joueur 1** sont les touches `I O P` (rangée du haut) et `K L M` (rangée du bas). `I` sert à interagir et `O` à tirer ; les quatre autres (`P K L M`) sont réservés aux actions à venir.
 
 ### Les deux modes de contrôle
 
@@ -358,8 +358,8 @@ glass_garden/
 │   ├── scenes/           PreloadScene, MenuScene, WorldScene (base des mondes), HubScene, World1Scene, UIScene
 │   │                     prévu : mondes 2 à 5…
 │   ├── systems/          InputManager, ControlMode, TimerSystem, SaveSystem, MirrorSystem, TintSystem, PaletteSystem (en réserve),
-│   │                     StarSystem, RecolteEtoiles
-│   │                     prévu : Audio, Dialogue, tir…
+│   │                     StarSystem, RecolteEtoiles, fonctionTir
+│   │                     prévu : Audio, Dialogue…
 │   ├── entities/         Player, Enemy, Collectible…            (prévu)
 │   ├── ui/               boutons, barres, HUD                   (prévu)
 │   ├── data/             données de jeu (JSON)                  (prévu)
@@ -510,7 +510,17 @@ Une palette dit, **pour chaque famille**, comment la recolorer. **Les nuances so
 ### Systèmes à écrire une seule fois
 
 Entrées (clavier et borne) · Chronomètre global · High score · Dialogues · Lumière · Tir · Compte à rebours.
-*Déjà faits : entrées, chronomètre, high score, compteur d'étoiles.*
+*Déjà faits : entrées, chronomètre, high score, compteur d'étoiles, tir.*
+
+### Le tir
+
+Le joueur tire une balle dans la **dernière direction regardée** (haut, bas, gauche, droite), avec `O` en arcade et `A` en mode pc. Le code est dans `src/systems/fonctionTir.js` et ne contient que la vie d'une balle : elle apparaît devant le joueur, vole en jouant son animation, puis **explose** quand elle touche un mur ou une cible, ou toute seule après `BULLET.LIFETIME_MS` (pour qu'aucune balle ne reste en mémoire). Le tir est branché dans `WorldScene` : **tous les mondes tirent pour l'instant**, pour tester.
+
+- **Les cibles** : tout objet avec un corps physique et, éventuellement, une propriété `hitPoints` (1 si absente). Chaque balle lui retire une vie ; elle est détruite à zéro. Le monde qui a des cibles (le monde 4) les crée et appelle `addTargetCollision`.
+- **L'image** `balle.png` est une bande de 33 images de 16 x 16 pixels : vol (0 à 5), explosion (6 à 15), et un rayon inutilisé (16 à 32).
+- Les réglages (vitesse, portée, animations) sont dans `BULLET` (`constants.js`).
+
+Le détail est dans `docs/systeme_tir.md`.
 
 ---
 
@@ -559,7 +569,8 @@ Trois développeurs, qui travaillent **tous sur le code** et en parallèle sur l
 
 - [ ] **Monde 3 :** définir l'énigme du petit monstre.
 - [ ] **Monde 4 :** préciser comment trouver la bonne boîte.
-- [ ] **Contrôles :** vérifier sur la borne les touches envoyées par le joystick (flèches supposées), puis attribuer les cinq autres boutons (`O P K L M`) et les touches du joueur 2.
+- [ ] **Contrôles :** vérifier sur la borne les touches envoyées par le joystick (flèches supposées), puis attribuer les quatre autres boutons (`P K L M`) et les touches du joueur 2.
+- [ ] **Tir :** décider dans quels mondes on peut tirer (le GDD ne le prévoit que dans les mondes 2 et 4), puis créer les cibles du monde 4 et les ennemis du monde 2.
 - [ ] **Histoire :** écrire un fil narratif court (elle est évaluée).
 - [ ] **Musique :** choisir ou composer une piste par monde.
 - [ ] **Multijoueur :** décider du périmètre (coopération seule ou aussi compétition).
