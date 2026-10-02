@@ -343,7 +343,10 @@ Une **musique d'ambiance par monde**, en boucle, et quelques effets sonores (mir
 
 ```
 glass_garden/
-├── index.html            charge Phaser (CDN) puis src/main.js
+├── index.html            charge Phaser (CDN) puis index.js (pour les tests en local ; la borne n'utilise pas ce fichier)
+├── index.js              point d'entrée, exporte `game` : c'est CE fichier que charge le lanceur de la borne
+├── game.json             fiche du jeu pour la borne (titre, description, genre, auteurs)
+├── presentation.png      image de présentation (800 x 450, moins de 200 Ko)
 ├── README.md
 ├── assets/
 │   ├── images/
@@ -353,7 +356,6 @@ glass_garden/
 │   ├── audio/            music/, sfx/                          (prévu)
 │   └── fonts/                                                  (prévu)
 ├── src/
-│   ├── main.js           point d'entrée
 │   ├── config.js         configuration Phaser (1280 x 720, physique)
 │   ├── scenes/           PreloadScene, MenuScene, WorldScene (base des mondes), HubScene, World1Scene, UIScene
 │   │                     prévu : mondes 2 à 5…
