@@ -29,17 +29,6 @@
 //   }
 //
 // TODO(équipe): ajouter les actions courir, lampe, pause
-// TODO(équipe): brancher les boutons de la borne (joystick + 6 boutons par joueur)
-// =====================================================================================
-
-// * Association action -> touche (noms de touches Phaser), pour chaque joueur.
-// ? Les touches du joueur 2 sont provisoires : à valider avec l'équipe et la borne.
-// ? La touche E (interagir) n'est PAS définitive : elle dépendra des boutons de la borne d'arcade.
-// ? La touche A (tirer) non plus : en arcade ce sera un des six boutons (O prévu).
-const BINDINGS = {
-  1: { up: 'Z', down: 'S', left: 'Q', right: 'D', interact: 'E', shoot: 'A' },
-  2: { up: 'UP', down: 'DOWN', left: 'LEFT', right: 'RIGHT', interact: 'ENTER', shoot: 'SPACE' },
-// TODO(équipe): ajouter les actions courir, tirer, lampe, pause
 // TODO(équipe): brancher les cinq autres boutons de la borne quand les actions existeront
 // =====================================================================================
 
@@ -51,17 +40,17 @@ import { CONTROL_MODES } from '../utils/constants.js';
 // ? Arcade : le joystick est supposé envoyer les FLÈCHES (le template du prof utilise les flèches).
 // À vérifier sur la borne : si c'est autre chose, ne changer que les lignes « arcade ».
 // ? La touche I (interagir) est la première des six boutons. Les cinq autres (O P pour la rangée du haut,
-// K L M pour celle du bas) ne servent pas encore.
+// K L M pour celle du bas) ne servent pas encore, sauf O : le tir.
 // ? Les touches du joueur 2 sont provisoires, et identiques dans les deux modes : à définir avec la borne.
-// ? La touche E (interagir, mode pc) n'est PAS définitive.
+// ? La touche E (interagir, mode pc) n'est PAS définitive. La touche A (tirer, mode pc) non plus.
 const BINDINGS = {
   [CONTROL_MODES.ARCADE]: {
-    1: { up: 'UP', down: 'DOWN', left: 'LEFT', right: 'RIGHT', interact: 'I' },
-    2: { up: 'UP', down: 'DOWN', left: 'LEFT', right: 'RIGHT', interact: 'ENTER' },
+    1: { up: 'UP', down: 'DOWN', left: 'LEFT', right: 'RIGHT', interact: 'I', shoot: 'O' },
+    2: { up: 'UP', down: 'DOWN', left: 'LEFT', right: 'RIGHT', interact: 'ENTER', shoot: 'SPACE' },
   },
   [CONTROL_MODES.PC]: {
-    1: { up: 'Z', down: 'S', left: 'Q', right: 'D', interact: 'E' },
-    2: { up: 'UP', down: 'DOWN', left: 'LEFT', right: 'RIGHT', interact: 'ENTER' },
+    1: { up: 'Z', down: 'S', left: 'Q', right: 'D', interact: 'E', shoot: 'A' },
+    2: { up: 'UP', down: 'DOWN', left: 'LEFT', right: 'RIGHT', interact: 'ENTER', shoot: 'SPACE' },
   },
 };
 
