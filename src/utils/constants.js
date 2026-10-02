@@ -242,3 +242,13 @@ export const BULLET = {
 };
 // Marge (en pixels) entre les éléments d'interface et le bord de l'écran
 export const UI_MARGIN = 24;
+
+// * Les caisses : des objets Tiled de classe « crate », que le joueur casse en tirant dessus (voir CrateSystem.js).
+// ? boite1.png est un nom provisoire : le jour où il change, il n'y a que PATH à modifier.
+export const CRATE = {
+  KEY: 'crate', // la clé Phaser de la texture
+  PATH: 'assets/images/sprites/boite1.png',
+  FRAME_SIZE: 32, // l'image fait 32 x 32 pixels, comme une tuile
+  TILED_CLASS: 'crate', // la classe de l'objet dans Tiled
+  DEFAULT_HIT_POINTS: 1, // nombre de tirs pour la casser, si l'objet Tiled n'a pas de propriété « hitPoints »
+};
