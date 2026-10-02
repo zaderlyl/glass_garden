@@ -10,7 +10,7 @@
 // * POURQUOI C'EST IMPORTANT : LA BORNE D'ARCADE
 // Le jeu doit tourner sur une borne d'arcade : joystick + boutons, pas de clavier.
 // Si les touches sont écrites dans chaque scène, il faudra modifier tout le code.
-// Avec ce fichier, brancher la borne = modifier UNIQUEMENT la table BINDINGS ci-dessous.
+// Avec ce fichier, brancher la borne = modifier UNIQUEMENT la table BINDINGS ci-dessous (mode « arcade »).
 //
 // * AUTRES AVANTAGES
 // - Le joueur 2 : un deuxième InputManager avec d'autres touches, sans dupliquer de code.
@@ -39,6 +39,30 @@
 const BINDINGS = {
   1: { up: 'Z', down: 'S', left: 'Q', right: 'D', interact: 'E', shoot: 'A' },
   2: { up: 'UP', down: 'DOWN', left: 'LEFT', right: 'RIGHT', interact: 'ENTER', shoot: 'SPACE' },
+// TODO(équipe): ajouter les actions courir, tirer, lampe, pause
+// TODO(équipe): brancher les cinq autres boutons de la borne quand les actions existeront
+// =====================================================================================
+
+import { getControlMode } from './ControlMode.js';
+import { CONTROL_MODES } from '../utils/constants.js';
+
+// * Association action -> touche (noms de touches Phaser), pour chaque mode de contrôle puis chaque joueur.
+// Le mode actuel est dans ControlMode.js. Les deux jeux de touches sont toujours branchés : seule la table lue change.
+// ? Arcade : le joystick est supposé envoyer les FLÈCHES (le template du prof utilise les flèches).
+// À vérifier sur la borne : si c'est autre chose, ne changer que les lignes « arcade ».
+// ? La touche I (interagir) est la première des six boutons. Les cinq autres (O P pour la rangée du haut,
+// K L M pour celle du bas) ne servent pas encore.
+// ? Les touches du joueur 2 sont provisoires, et identiques dans les deux modes : à définir avec la borne.
+// ? La touche E (interagir, mode pc) n'est PAS définitive.
+const BINDINGS = {
+  [CONTROL_MODES.ARCADE]: {
+    1: { up: 'UP', down: 'DOWN', left: 'LEFT', right: 'RIGHT', interact: 'I' },
+    2: { up: 'UP', down: 'DOWN', left: 'LEFT', right: 'RIGHT', interact: 'ENTER' },
+  },
+  [CONTROL_MODES.PC]: {
+    1: { up: 'Z', down: 'S', left: 'Q', right: 'D', interact: 'E' },
+    2: { up: 'UP', down: 'DOWN', left: 'LEFT', right: 'RIGHT', interact: 'ENTER' },
+  },
 };
 
 export default class InputManager {
@@ -49,8 +73,17 @@ export default class InputManager {
   constructor(scene, playerId = 1) {
     this.playerId = playerId;
 
-    // addKeys crée un objet { action: touche } à partir de { action: 'NOM_DE_TOUCHE' }
-    this.keys = scene.input.keyboard.addKeys(BINDINGS[playerId]);
+    // * addKeys crée un objet { action: touche } à partir de { action: 'NOM_DE_TOUCHE' }.
+    // On le fait pour les deux modes : changer de mode en cours de partie ne demande alors rien de plus.
+    this.keysByMode = {};
+    Object.values(CONTROL_MODES).forEach((mode) => {
+      this.keysByMode[mode] = scene.input.keyboard.addKeys(BINDINGS[mode][playerId]);
+    });
+  }
+
+  // Les touches du mode actuel (relues à chaque appel, donc le changement de mode est immédiat)
+  get keys() {
+    return this.keysByMode[getControlMode()];
   }
 
   /**

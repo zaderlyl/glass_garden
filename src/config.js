@@ -1,5 +1,8 @@
+import PreloadScene from './scenes/PreloadScene.js';
 import MenuScene from './scenes/MenuScene.js';
 import HubScene from './scenes/HubScene.js';
+import World1Scene from './scenes/World1Scene.js';
+import UIScene from './scenes/UIScene.js';
 import { GAME_WIDTH, GAME_HEIGHT, COLORS } from './utils/constants.js';
 
 // * Configuration Phaser. La résolution est celle de la borne d'arcade : 1280 x 720 (16:9).
@@ -24,6 +27,7 @@ export default {
     },
   },
   // * La première scène de la liste est celle qui démarre
-  // ? HubScene est en premier le temps de développer le joueur. Le menu redeviendra la première scène.
-  scene: [HubScene, MenuScene],
+  // PreloadScene charge les cartes de tous les mondes, puis démarre le jardin.
+  // ? Elle démarre HubScene directement le temps de développer le joueur. Le menu redeviendra la scène suivante.
+  scene: [PreloadScene, HubScene, MenuScene, World1Scene, UIScene],
 };

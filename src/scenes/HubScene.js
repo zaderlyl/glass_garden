@@ -12,12 +12,15 @@ import {
   FONT_FAMILY,
   FONT_SIZE,
 } from '../utils/constants.js';
+import WorldScene from './WorldScene.js';
+import { SCENES, WORLD_MAPS } from '../utils/constants.js';
 
 /**
- * * Le jardin du spawn : le monde normal, d'où partiront les miroirs.
- * Pour l'instant : la carte de test et le joueur 1, placé au point de départ.
+ * * Le jardin du spawn : le monde normal, d'où partent les miroirs.
+ * Tout le comportement vient de WorldScene : cette scène indique seulement quelle carte afficher
+ * (sa carte est décrite dans WORLD_MAPS, dans constants.js).
  */
-export default class HubScene extends Phaser.Scene {
+export default class HubScene extends WorldScene {
   constructor() {
     super(SCENES.HUB);
   }
@@ -181,5 +184,6 @@ export default class HubScene extends Phaser.Scene {
         this.messageActive = false;
       });
     }
+    super(SCENES.HUB, WORLD_MAPS.hub.key, WORLD_MAPS.hub.path);
   }
 }
