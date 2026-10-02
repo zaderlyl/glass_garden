@@ -11,7 +11,7 @@ Le code est dans `src/systems/fonctionTir.js`. Il ne contient que la **vie d'une
 | `createBulletAnimations(scene)` | Crée les animations de la balle (vol, explosion). Sans effet si elles existent déjà |
 | `shoot(scene, bullets, player, direction)` | Crée une balle devant le joueur et l'envoie dans une direction : `'up'`, `'down'`, `'left'` ou `'right'` |
 | `explodeBullet(bullet)` | Arrête la balle, joue son explosion, puis la détruit. Sans effet si elle a déjà explosé |
-| `hitTarget(bullet, target)` | Une balle touche une cible : la balle explose, la cible perd une vie, détruite à 0 |
+| `hitTarget(bullet, target)` | Une balle touche une cible : la balle explose, la cible perd une vie, détruite à 0. Si la cible a une fonction `onHit(cible)`, elle est appelée à chaque coup, **avant** la destruction (pour jouer un effet) |
 | `addTargetCollision(scene, bullets, targets)` | Branche la collision entre le groupe de balles et un groupe de cibles |
 
 **La vie d'une balle :** elle apparaît à `BULLET.START_OFFSET` pixels devant le joueur (pas sur lui), vole à `BULLET.SPEED` pixels par seconde en jouant son animation en boucle, puis explose quand elle touche un mur ou une cible. Si elle ne touche rien, elle explose toute seule après `BULLET.LIFETIME_MS` : une balle ne reste jamais en mémoire indéfiniment.
@@ -67,7 +67,13 @@ Les cibles du jeu sont des **caisses**, posées dans Tiled. Elles bloquent le jo
 
 **Dans le code** : `preloadCrate(scene)` dans `preload()` et `createCrates(scene, map, player, bullets)` dans `create()` (déjà fait dans `WorldScene`, donc tous les mondes en héritent : une carte sans objet `crate` n'a pas de caisse). Les réglages sont dans `CRATE` (`constants.js`) : clé de la texture, chemin de l'image (`boite1.png`, nom provisoire : il n'y a que `PATH` à changer), classe Tiled, vies par défaut.
 
-La collision balle-caisse est celle des cibles (`addTargetCollision`). Une caisse **disparaît** simplement quand elle est cassée : une animation reste à faire.
+La collision balle-caisse est celle des cibles (`addTargetCollision`).
+
+**Les effets (VFX)** passent par `onHit`, que chaque caisse reçoit à sa création :
+- un coup qui **ne casse pas** fait clignoter la caisse en blanc (`HIT_FLASH_MS`, 70 ms) ;
+- le coup **fatal** projette une gerbe d'éclats de bois (des petits carrés générés par le code, colorés avec les bruns de `DEBRIS_COLORS`, qui rétrécissent puis s'éteignent) et fait légèrement trembler l'écran.
+
+Tout se règle dans `CRATE.VFX` (`constants.js`) : couleurs, taille et nombre d'éclats, vitesse, durée, force du tremblement. L'émetteur d'éclats est détruit après usage. Une cible sans `onHit` (futurs ennemis, par exemple) marche comme avant, sans effet.
 
 **Le premier fichier de la branche** (`fonctionCibles.js`) venait d'un jeu de plateforme (code hors de toute fonction, variables inexistantes, fonction `hit` écrite deux fois, position des cibles au hasard avec un rebond). `CrateSystem.js` le remplace.
 
@@ -75,7 +81,7 @@ La collision balle-caisse est celle des cibles (`addTargetCollision`). Une caiss
 
 - **Où peut-on tirer ?** Pour l'instant dans tous les mondes, pour tester. Le GDD ne prévoit le tir que pour les mondes 2 et 4 : à décider, et à limiter si besoin (par exemple avec une propriété du monde).
 - **Le monde 4** : placer les caisses dans la carte, et choisir laquelle cache l'étoile (par exemple une propriété `contains` sur l'objet Tiled).
-- **Une animation de destruction** des caisses (pour l'instant elles disparaissent simplement).
+- **Des effets sonores** de coup et de casse (les effets visuels sont faits).
 - **Les ennemis du monde 2** : les balles devront aussi pouvoir les toucher. `hitTarget` devrait s'y appliquer tel quel.
 - Une balle qui sort de l'écran n'explose qu'à la fin de sa durée de vie : si besoin, ajouter un test de position.
 
