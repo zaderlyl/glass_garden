@@ -461,10 +461,11 @@ export default class WorldScene extends Phaser.Scene {
     );
 
     // On ne réécrit pas le texte pendant l'affichage du message d'interaction
-    // ? La touche affichée (E) est provisoire : à changer avec les boutons de la borne
+    // ? Les touches sont provisoires : à changer avec les boutons de la borne (voir BINDINGS dans InputManager)
     // TODO(équipe): changer le message d'interaction (utiliser une icône de touche au-dessus des miroirs)
     if (!this.messageActive) {
-      this.hint.setText(nearMirror ? 'E : entrer dans le miroir' : '');
+      // * La touche affichée suit le mode de contrôle (I en arcade, E en pc) : l'aide ne ment jamais
+      this.hint.setText(nearMirror ? `${this.input1.getKeyLabel('interact')} : entrer dans le miroir` : '');
     }
 
     if (nearMirror && this.input1.justPressed('interact')) {
