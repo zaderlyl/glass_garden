@@ -218,5 +218,27 @@ export const STORAGE_KEYS = {
   BEST_TIME_PREFIX: 'glass_garden_best_time_', // suivi du mode : « ..._solo », « ..._multi »
 };
 
+// * Les quatre directions du jeu (vue du dessus) : le vecteur (x, y) de chacune et l'angle d'un sprite dessiné vers la DROITE
+// qu'on veut orienter dans cette direction (en radians : un quart de tour = Math.PI / 2).
+export const DIRECTION_VECTORS = {
+  right: { x: 1, y: 0, angle: 0 },
+  down: { x: 0, y: 1, angle: Math.PI / 2 },
+  left: { x: -1, y: 0, angle: Math.PI },
+  up: { x: 0, y: -1, angle: -Math.PI / 2 },
+};
+
+// * Les balles. balle.png est une bande de 33 images de 16 x 16 pixels (528 x 16), pas une image seule :
+// images 0 à 5 = le projectile en vol (dessiné vers la droite), 6 à 15 = l'impact (explosion),
+// 16 à 32 = un rayon qui grandit puis s'efface (inutilisé pour l'instant). Les numéros sont dans FLY_ANIM et HIT_ANIM.
+export const BULLET = {
+  KEY: 'bullet',
+  FRAME_SIZE: 16,
+  FIRST_FRAME: 0, // l'image du projectile en vol
+  SPEED: 600, // pixels par seconde
+  START_OFFSET: 24, // distance entre le centre du joueur et l'endroit où la balle apparaît, en pixels
+  LIFETIME_MS: 1200, // au bout de ce temps, la balle explose toute seule (sinon elle volerait indéfiniment)
+  FLY_ANIM: { KEY: 'bullet_fly', FIRST_FRAME: 0, LAST_FRAME: 5, FRAME_RATE: 18 }, // en boucle
+  HIT_ANIM: { KEY: 'bullet_hit', FIRST_FRAME: 6, LAST_FRAME: 15, FRAME_RATE: 24 }, // une seule fois, puis la balle disparaît
+};
 // Marge (en pixels) entre les éléments d'interface et le bord de l'écran
 export const UI_MARGIN = 24;
