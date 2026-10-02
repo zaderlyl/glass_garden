@@ -67,11 +67,14 @@ export const DIRECTION_VECTORS = {
 
 // * Les balles. balle.png est une bande de 33 images de 16 x 16 pixels (528 x 16), pas une image seule :
 // images 0 à 5 = le projectile en vol (dessiné vers la droite), 6 à 15 = l'impact (explosion),
-// 16 à 32 = un rayon qui grandit puis s'efface (inutilisé pour l'instant).
+// 16 à 32 = un rayon qui grandit puis s'efface (inutilisé pour l'instant). Les numéros sont dans FLY_ANIM et HIT_ANIM.
 export const BULLET = {
   KEY: 'bullet',
   FRAME_SIZE: 16,
   FIRST_FRAME: 0, // l'image du projectile en vol
   SPEED: 600, // pixels par seconde
   START_OFFSET: 24, // distance entre le centre du joueur et l'endroit où la balle apparaît, en pixels
+  LIFETIME_MS: 1200, // au bout de ce temps, la balle explose toute seule (sinon elle volerait indéfiniment)
+  FLY_ANIM: { KEY: 'bullet_fly', FIRST_FRAME: 0, LAST_FRAME: 5, FRAME_RATE: 18 }, // en boucle
+  HIT_ANIM: { KEY: 'bullet_hit', FIRST_FRAME: 6, LAST_FRAME: 15, FRAME_RATE: 24 }, // une seule fois, puis la balle disparaît
 };
