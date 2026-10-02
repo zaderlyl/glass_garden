@@ -76,6 +76,16 @@ export default class InputManager {
   }
 
   /**
+   * Le nom de la touche d'une action DANS LE MODE ACTUEL (ex. 'I' en arcade, 'E' en pc).
+   * Sert à écrire une aide à l'écran qui ne ment pas : le texte suit le mode au lieu de citer une touche en dur.
+   * @param {string} action  Nom de l'action (ex. 'interact')
+   * @returns {string}
+   */
+  getKeyLabel(action) {
+    return BINDINGS[getControlMode()][this.playerId][action];
+  }
+
+  /**
    * Vrai uniquement à l'image où l'action vient d'être appuyée (un seul déclenchement).
    * Différent d'isDown, qui reste vrai tant que la touche est maintenue.
    * @param {string} action  Nom de l'action (ex. 'interact')
