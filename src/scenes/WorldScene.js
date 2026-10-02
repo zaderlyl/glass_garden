@@ -3,6 +3,7 @@ import timer from '../systems/TimerSystem.js';
 import { RecolteEtoiles } from '../systems/RecolteEtoiles.js';
 import { areAllStarsCollected } from '../systems/StarSystem.js';
 import { createBulletAnimations, explodeBullet, shoot } from '../systems/fonctionTir.js';
+import { preloadCrate, createCrates } from '../systems/CrateSystem.js';
 import { isMirrorUsed, markMirrorUsed, shouldMirrorDisappear } from '../systems/MirrorSystem.js';
 import { applyTint } from '../systems/TintSystem.js';
 import { pickVariant } from '../utils/helpers.js';
@@ -64,6 +65,7 @@ export default class WorldScene extends Phaser.Scene {
     this.load.tilemapTiledJSON(this.mapKey, this.mapPath);
     this.load.image(ASSETS.TILESET_GARDEN, 'assets/images/tilesets/tileset_garden.png');
     this.load.image('etoile', 'assets/images/sprites/Etoile.png');
+    preloadCrate(this);
     this.load.image(ASSETS.TILESET_DECO, 'assets/images/tilesets/tileset_deco.png');
 
     // * Les balles : balle.png est une bande de 33 images de 16 x 16 pixels, chargée comme un spritesheet
@@ -322,6 +324,9 @@ export default class WorldScene extends Phaser.Scene {
 
     // * Les étoiles de ce monde, posées dans Tiled (le joueur existe déjà : l'étoile a besoin de lui)
     this.createStars(map);
+
+    // * Les caisses de ce monde, posées dans Tiled (le joueur et le groupe de balles existent déjà)
+    this.crates = createCrates(this, map, this.player, this.bullets);
 
     // * La teinte du monde, posée en dernier : tous les calques et les sprites d'eau existent. Le jardin n'en a pas.
     applyTint(map, this.waterSprites, WORLD_TINTS[this.getWorldName()]);

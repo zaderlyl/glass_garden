@@ -56,13 +56,26 @@ La **création** des cibles (image, place, nombre de vies) n'est pas dans ce fic
 addTargetCollision(this, this.bullets, this.targets);
 ```
 
-**Pour la branche `feature/cibles`** (`fonctionCibles.js`) : la propriété doit s'appeler `hitPoints` (et non `pointsVie`, les noms de code sont en anglais), et sa propre fonction `hit` peut être supprimée : `hitTarget` fait déjà ce travail.
+### Les caisses (`src/systems/CrateSystem.js`)
+
+Les cibles du jeu sont des **caisses**, posées dans Tiled. Elles bloquent le joueur comme un mur, et chaque balle qui les touche leur retire une vie.
+
+**Dans Tiled**, dans le calque d'objets `objects` :
+1. Insérer un objet **Point** (posé au centre de la caisse, comme les étoiles ; un rectangle marche aussi).
+2. Lui donner la classe **`crate`**.
+3. Facultatif : une propriété personnalisée **`hitPoints`** (entier) = nombre de tirs pour la casser. Sans elle, 1 tir.
+
+**Dans le code** : `preloadCrate(scene)` dans `preload()` et `createCrates(scene, map, player, bullets)` dans `create()` (déjà fait dans `WorldScene`, donc tous les mondes en héritent : une carte sans objet `crate` n'a pas de caisse). Les réglages sont dans `CRATE` (`constants.js`) : clé de la texture, chemin de l'image (`boite1.png`, nom provisoire : il n'y a que `PATH` à changer), classe Tiled, vies par défaut.
+
+La collision balle-caisse est celle des cibles (`addTargetCollision`). Une caisse **disparaît** simplement quand elle est cassée : une animation reste à faire.
+
+**Le premier fichier de la branche** (`fonctionCibles.js`) venait d'un jeu de plateforme (code hors de toute fonction, variables inexistantes, fonction `hit` écrite deux fois, position des cibles au hasard avec un rebond). `CrateSystem.js` le remplace.
 
 ## Ce qui reste à faire
 
 - **Où peut-on tirer ?** Pour l'instant dans tous les mondes, pour tester. Le GDD ne prévoit le tir que pour les mondes 2 et 4 : à décider, et à limiter si besoin (par exemple avec une propriété du monde).
-- **Le monde 4** : placer les cibles (boîtes), choisir laquelle cache l'étoile.
-- **Une animation de destruction** des cibles (pour l'instant elles disparaissent simplement).
+- **Le monde 4** : placer les caisses dans la carte, et choisir laquelle cache l'étoile (par exemple une propriété `contains` sur l'objet Tiled).
+- **Une animation de destruction** des caisses (pour l'instant elles disparaissent simplement).
 - **Les ennemis du monde 2** : les balles devront aussi pouvoir les toucher. `hitTarget` devrait s'y appliquer tel quel.
 - Une balle qui sort de l'écran n'explose qu'à la fin de sa durée de vie : si besoin, ajouter un test de position.
 
