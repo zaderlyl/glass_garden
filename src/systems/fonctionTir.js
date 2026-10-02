@@ -16,6 +16,7 @@ else if (cursors.right.isDown) {
 
 function tirer(player) {
   var boutonFeu;
+  cursors = this.input.keyboard.createCursorKeys();
   boutonFeu = this.input.keyboard.addKey('A');
   var groupeBullets;
   groupeBullets = this.physics.add.group();
