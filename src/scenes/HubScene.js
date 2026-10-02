@@ -1,5 +1,5 @@
 import InputManager from '../systems/InputManager.js';
-import { createBulletAnimations } from '../systems/fonctionTir.js';
+import { createBulletAnimations, shoot } from '../systems/fonctionTir.js';
 import {
   SCENES,
   ASSETS,
@@ -65,6 +65,9 @@ export default class HubScene extends Phaser.Scene {
     this.player = this.physics.add.sprite(spawn.x, spawn.y, ASSETS.PLAYER_1, PLAYER.FRAMES.DOWN);
     this.player.setCollideWorldBounds(true);
 
+    // * Dans quelle direction regarde le joueur ? C'est la direction des tirs. Il commence de face (vers le bas).
+    this.facing = 'down';
+
     // * La boîte de collision est plus petite que l'image et placée au niveau des pieds :
     // le joueur peut passer « devant » un mur sans que sa tête ne le bloque
     this.player.body.setSize(PLAYER.HITBOX.WIDTH, PLAYER.HITBOX.HEIGHT);
@@ -129,10 +132,25 @@ export default class HubScene extends Phaser.Scene {
 
     // * On change l'image selon la direction. À l'arrêt, on garde la dernière image.
     // En diagonale, la direction horizontale est prioritaire.
-    if (x > 0) this.player.setFrame(PLAYER.FRAMES.RIGHT);
-    else if (x < 0) this.player.setFrame(PLAYER.FRAMES.LEFT);
-    else if (y < 0) this.player.setFrame(PLAYER.FRAMES.UP);
-    else if (y > 0) this.player.setFrame(PLAYER.FRAMES.DOWN);
+    // * On retient aussi la direction regardée (this.facing) : à l'arrêt, le joueur tire toujours dans la dernière direction.
+    if (x > 0) {
+      this.player.setFrame(PLAYER.FRAMES.RIGHT);
+      this.facing = 'right';
+    } else if (x < 0) {
+      this.player.setFrame(PLAYER.FRAMES.LEFT);
+      this.facing = 'left';
+    } else if (y < 0) {
+      this.player.setFrame(PLAYER.FRAMES.UP);
+      this.facing = 'up';
+    } else if (y > 0) {
+      this.player.setFrame(PLAYER.FRAMES.DOWN);
+      this.facing = 'down';
+    }
+
+    // * Tir : une balle par appui, dans la direction regardée
+    if (this.input1.justPressed('shoot')) {
+      shoot(this, this.bullets, this.player, this.facing);
+    }
 
     // * On donne une vitesse (en pixels par seconde) : c'est la physique Phaser qui déplace
     // le joueur et qui l'arrête contre les murs

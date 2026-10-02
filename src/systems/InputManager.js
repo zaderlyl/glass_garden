@@ -25,18 +25,20 @@
 //   update() {
 //     const move = this.input1.getMove();              // { x: -1..1, y: -1..1 }
 //     if (this.input1.justPressed('interact')) { ... } // une seule fois par appui
+//     if (this.input1.justPressed('shoot')) { ... }    // tirer
 //   }
 //
-// TODO(équipe): ajouter les actions courir, tirer, lampe, pause
+// TODO(équipe): ajouter les actions courir, lampe, pause
 // TODO(équipe): brancher les boutons de la borne (joystick + 6 boutons par joueur)
 // =====================================================================================
 
 // * Association action -> touche (noms de touches Phaser), pour chaque joueur.
 // ? Les touches du joueur 2 sont provisoires : à valider avec l'équipe et la borne.
 // ? La touche E (interagir) n'est PAS définitive : elle dépendra des boutons de la borne d'arcade.
+// ? La touche A (tirer) non plus : en arcade ce sera un des six boutons (O prévu).
 const BINDINGS = {
-  1: { up: 'Z', down: 'S', left: 'Q', right: 'D', interact: 'E' },
-  2: { up: 'UP', down: 'DOWN', left: 'LEFT', right: 'RIGHT', interact: 'ENTER' },
+  1: { up: 'Z', down: 'S', left: 'Q', right: 'D', interact: 'E', shoot: 'A' },
+  2: { up: 'UP', down: 'DOWN', left: 'LEFT', right: 'RIGHT', interact: 'ENTER', shoot: 'SPACE' },
 };
 
 export default class InputManager {
