@@ -282,15 +282,15 @@
          "tilewidth":32
         }, 
         {
-         "columns":20,
+         "columns":40,
          "firstgid":33,
          "image":"..\/images\/tilesets\/tileset_deco.png",
          "imageheight":2016,
-         "imagewidth":640,
+         "imagewidth":1280,
          "margin":0,
          "name":"tileset_deco",
          "spacing":0,
-         "tilecount":1260,
+         "tilecount":2520,
          "tileheight":32,
          "tilewidth":32
         }],
