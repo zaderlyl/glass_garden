@@ -4,6 +4,7 @@ import HubScene from './scenes/HubScene.js';
 import World1Scene from './scenes/World1Scene.js';
 import World2Scene from './scenes/World2Scene.js';
 import World3Scene from './scenes/World3Scene.js';
+import World4Scene from './scenes/World4Scene.js';
 import UIScene from './scenes/UIScene.js';
 import { GAME_WIDTH, GAME_HEIGHT, COLORS } from './utils/constants.js';
 
@@ -33,5 +34,5 @@ export default {
   // * La première scène de la liste est celle qui démarre
   // PreloadScene charge les cartes de tous les mondes, puis démarre le jardin.
   // ? Elle démarre HubScene directement le temps de développer le joueur. Le menu redeviendra la scène suivante.
-  scene: [PreloadScene, HubScene, MenuScene, World1Scene, World2Scene, World3Scene, UIScene],
+  scene: [PreloadScene, HubScene, MenuScene, World1Scene, World2Scene, World3Scene, World4Scene, UIScene],
 };
