@@ -27,6 +27,7 @@ import {
   COLORS,
   FONT_FAMILY,
   FONT_SIZE,
+  SMOKE,
 } from '../utils/constants.js';
 
 /**
@@ -328,8 +329,45 @@ export default class WorldScene extends Phaser.Scene {
     // * Les caisses de ce monde, posées dans Tiled (le joueur et le groupe de balles existent déjà)
     this.crates = createCrates(this, map, this.player, this.bullets);
 
+    // * La fumée des cheminées, posée dans Tiled
+    this.createSmokes(map);
+
     // * La teinte du monde, posée en dernier : tous les calques et les sprites d'eau existent. Le jardin n'en a pas.
     applyTint(map, this.waterSprites, WORLD_TINTS[this.getWorldName()]);
+  }
+
+  /**
+   * * Crée une fumée à la position de chaque objet de classe « smoke » du calque « objects » (le point se place
+   * en haut de la cheminée). Elle passe devant le joueur, comme le décor du dessus. Une carte sans objet « smoke »
+   * n'a pas de fumée. Les réglages (durée, vitesse, vent) sont dans SMOKE (constants.js).
+   */
+  createSmokes(map) {
+    const smokes = map
+      .getObjectLayer('objects')
+      .objects.filter((object) => (object.class || object.type) === 'smoke');
+    if (smokes.length === 0) return;
+
+    // La texture d'une bouffée : un petit carré (pixel art), créé une seule fois pour toute la partie
+    if (!this.textures.exists(SMOKE.TEXTURE)) {
+      const puff = this.make.graphics({ x: 0, y: 0, add: false });
+      puff.fillStyle(SMOKE.COLOR, 1);
+      puff.fillRect(0, 0, SMOKE.PUFF_SIZE, SMOKE.PUFF_SIZE);
+      puff.generateTexture(SMOKE.TEXTURE, SMOKE.PUFF_SIZE, SMOKE.PUFF_SIZE);
+      puff.destroy();
+    }
+
+    smokes.forEach((object) => {
+      this.add
+        .particles(object.x, object.y, SMOKE.TEXTURE, {
+          lifespan: SMOKE.LIFESPAN_MS,
+          frequency: SMOKE.FREQUENCY_MS,
+          speedY: { min: -SMOKE.RISE_SPEED.MAX, max: -SMOKE.RISE_SPEED.MIN },
+          speedX: { min: SMOKE.DRIFT_X.MIN, max: SMOKE.DRIFT_X.MAX },
+          alpha: { start: SMOKE.START_ALPHA, end: 0 },
+          scale: { start: SMOKE.SCALE.START, end: SMOKE.SCALE.END },
+        })
+        .setDepth(DEPTH.ABOVE_PLAYER);
+    });
   }
 
   /**

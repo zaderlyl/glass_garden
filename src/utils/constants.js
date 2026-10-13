@@ -188,6 +188,19 @@ export const DEPTH = {
   UI: 20,
 };
 
+// * Fumée de cheminée : des objets de classe « smoke » posés dans Tiled (point = le haut de la cheminée)
+export const SMOKE = {
+  TEXTURE: 'smoke_puff', // texture générée par le code (carré de PUFF_SIZE pixels)
+  PUFF_SIZE: 4,
+  COLOR: 0xc9ced8,
+  LIFESPAN_MS: 2600, // durée de vie d'une bouffée
+  FREQUENCY_MS: 420, // une bouffée toutes les ... millisecondes
+  RISE_SPEED: { MIN: 14, MAX: 24 }, // pixels par seconde vers le haut
+  DRIFT_X: { MIN: 2, MAX: 10 }, // dérive vers la droite (vent léger)
+  START_ALPHA: 0.7,
+  SCALE: { START: 1, END: 2.6 },
+};
+
 // Couleurs
 export const COLORS = {
   BACKGROUND: '#2f6b3a',
