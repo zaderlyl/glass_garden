@@ -29,11 +29,27 @@ from PIL import Image
 RACINE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MANIFESTE = os.path.join(RACINE, 'assets', 'tilesets', 'deco.json')
 T = 32                      # taille d'une tuile, en pixels
-COLONNES = 20               # largeur de la feuille, en tuiles
+COLONNES = 40               # largeur de la feuille, en tuiles (2 x 20 : le patron à gauche, les variantes d'arbre à droite)
 HAUT_MIN = 10               # hauteur minimale d'une section de monde, en lignes
 ARBRE = (0, 0, 3, 3)        # patron d'une section de monde : (colonne, ligne, largeur, hauteur)
 ENSEMBLE_COL = 4
+# Variantes d'arbre, à droite de chaque section de monde : type -> (colonne, ligne dans la section)
+VAR_ANCRES = {
+    'arbre_cime': (20, 0), 'arbre_base': (24, 0), 'arbre_demi_bas': (24, 2),
+    'arbre_colle_haut': (28, 0), 'arbre_colle_milieu': (32, 0), 'arbre_colle_bas': (36, 0),
+    'arbre_demi_haut': (20, 4), 'arbre_demi_gauche': (24, 4), 'arbre_demi_droite': (27, 4),
+}
 BANDE = (0, 3, 4)           # les petits décors : colonne de départ, ligne de départ, largeur en tuiles
+
+
+def charger_sources(m):
+    """Les images « source » du manifeste (éléments pas encore placés dans la feuille)."""
+    sources = {}
+    for e in m['elements']:
+        if 'source' in e:
+            chemin = e['source'] if os.path.isabs(e['source']) else os.path.join(RACINE, e['source'])
+            sources[e['nom']] = Image.open(chemin).convert('RGBA')
+    return sources
 
 
 def charger():
@@ -70,6 +86,10 @@ def rangement(m, images_sources):
                 elif e['type'] == 'ensemble':
                     placements[e['nom']] = (ENSEMBLE_COL, base)
                     hauteur = max(hauteur, h)
+                elif e['type'] in VAR_ANCRES:
+                    vc, vl = VAR_ANCRES[e['type']]
+                    placements[e['nom']] = (vc, base + vl)
+                    hauteur = max(hauteur, vl + h)
                 else:   # petit décor : étagères dans la bande de gauche
                     if x + w > BANDE[2]: x, y, h_etagere = 0, y + h_etagere, 0
                     placements[e['nom']] = (BANDE[0] + x, base + BANDE[1] + y)
@@ -89,6 +109,7 @@ def taille(e, images_sources):
 
 def construire(m, images_sources):
     ancienne = Image.open(chemin_image(m)).convert('RGBA')
+    anciennes_colonnes = m.get('colonnes', COLONNES)
     sections, placements, lignes = rangement(m, images_sources)
     nouvelle = Image.new('RGBA', (COLONNES * T, lignes * T), (0, 0, 0, 0))
     correspondance = {}     # ancien numéro de tuile -> nouveau numéro (numéros de la feuille, de 0 à N-1)
@@ -97,17 +118,19 @@ def construire(m, images_sources):
         w, h = taille(e, images_sources)
         if 'source' in e:
             nouvelle.alpha_composite(images_sources[e['nom']], (nc * T, nl * T))
-            continue
-        c, l = e['rect'][0], e['rect'][1]
-        nouvelle.alpha_composite(ancienne.crop((c * T, l * T, (c + w) * T, (l + h) * T)), (nc * T, nl * T))
-        for dy in range(h):
-            for dx in range(w):
-                correspondance[(c + dx) + (l + dy) * COLONNES] = (nc + dx) + (nl + dy) * COLONNES
+        else:
+            c, l = e['rect'][0], e['rect'][1]
+            nouvelle.alpha_composite(ancienne.crop((c * T, l * T, (c + w) * T, (l + h) * T)), (nc * T, nl * T))
+        if 'rect' in e and e['rect'][2] == w and e['rect'][3] == h:      # un élément remplacé garde ses numéros dans les cartes
+            c, l = e['rect'][0], e['rect'][1]
+            for dy in range(h):
+                for dx in range(w):
+                    correspondance[(c + dx) + (l + dy) * anciennes_colonnes] = (nc + dx) + (nl + dy) * COLONNES
     return ancienne, nouvelle, sections, placements, correspondance
 
 
 def pixels_opaques(im):
-    return sum(1 for p in im.getdata() if p[3] > 0)
+    return sum(im.getchannel('A').histogram()[1:])
 
 
 def lire_gid_deco(texte, est_json):
@@ -142,14 +165,17 @@ def remapper_carte(chemin, correspondance, nouvelle_taille, appliquer):
 
     if est_json:
         texte = re.sub(r'("data":\s*\[)(.*?)(\])', lambda mo: mo.group(1) + sur_bloc(mo.group(2)) + mo.group(3), texte, flags=re.S)
-        texte = re.sub(r'("image":\s*"[^"]*tileset_deco\.png",\s*"imageheight":\s*)\d+', lambda mo: mo.group(1) + str(nouvelle_taille[1]), texte)
+        texte = re.sub(r'("image":\s*"[^"]*tileset_deco\.png",\s*"imageheight":\s*)\d+(,\s*"imagewidth":\s*)\d+',
+                       lambda mo: mo.group(1) + str(nouvelle_taille[1]) + mo.group(2) + str(nouvelle_taille[0]), texte)
+        texte = re.sub(r'("columns":\s*)\d+(,\s*"firstgid":\s*\d+,\s*"image":\s*"[^"]*tileset_deco\.png")', lambda mo: mo.group(1) + str(nouvelle_taille[0] // T) + mo.group(2), texte)
         texte = re.sub(r'("name":\s*"tileset_deco",\s*"spacing":\s*0,\s*"tilecount":\s*)\d+',
                        lambda mo: mo.group(1) + str(nouvelle_taille[0] * nouvelle_taille[1] // (T * T)), texte)
     else:
         texte = re.sub(r'(<data encoding="csv">)(.*?)(</data>)', lambda mo: mo.group(1) + sur_bloc(mo.group(2)) + mo.group(3), texte, flags=re.S)
         n = nouvelle_taille[0] * nouvelle_taille[1] // (T * T)
-        texte = re.sub(r'(<tileset firstgid="\d+" name="tileset_deco" tilewidth="32" tileheight="32" tilecount=")\d+', lambda mo: mo.group(1) + str(n), texte)
-        texte = re.sub(r'(<image source="[^"]*tileset_deco\.png" width="\d+" height=")\d+', lambda mo: mo.group(1) + str(nouvelle_taille[1]), texte)
+        texte = re.sub(r'(<tileset firstgid="\d+" name="tileset_deco" tilewidth="32" tileheight="32" tilecount=")\d+(" columns=")\d+',
+                       lambda mo: mo.group(1) + str(n) + mo.group(2) + str(nouvelle_taille[0] // T), texte)
+        texte = re.sub(r'(<image source="[^"]*tileset_deco\.png" width=")\d+(" height=")\d+', lambda mo: mo.group(1) + str(nouvelle_taille[0]) + mo.group(2) + str(nouvelle_taille[1]), texte)
     if appliquer:
         with open(chemin, 'w', encoding='utf-8') as f:
             f.write(texte)
@@ -157,19 +183,19 @@ def remapper_carte(chemin, correspondance, nouvelle_taille, appliquer):
 
 
 def cmd_liste(m):
-    sections, placements, lignes = rangement(m, {})
+    sections, placements, lignes = rangement(m, charger_sources(m))
     print(f'Feuille : {COLONNES} colonnes x {lignes} lignes = {COLONNES * T} x {lignes * T} pixels')
     for monde, base, h in sections:
         print(f'\n[{monde}]  lignes {base} à {base + h - 1}')
         for e in m['elements']:
             if e['monde'] == monde:
                 c, l = placements[e['nom']]
-                w, hh = taille(e, {})
+                w, hh = taille(e, charger_sources(m))
                 print(f"   {e['nom']:<28} {e['type']:<9} colonne {c:>2}, ligne {l:>3}   ({w} x {hh})")
 
 
 def cmd_reconstruire(m, appliquer, images_sources=None):
-    images_sources = images_sources or {}
+    images_sources = charger_sources(m) if images_sources is None else images_sources
     ancienne, nouvelle, sections, placements, correspondance = construire(m, images_sources)
     if appliquer is False:
         apercu = '/tmp/apercu_tileset_deco.png'
@@ -186,7 +212,7 @@ def cmd_reconstruire(m, appliquer, images_sources=None):
         sys.exit(f'ERREUR : {attendu} pixels attendus, {obtenu} obtenus (des éléments se chevauchent). Rien n\'a été modifié.')
     non_classes = pixels_opaques(ancienne) - sum(
         pixels_opaques(ancienne.crop((e['rect'][0] * T, e['rect'][1] * T, (e['rect'][0] + e['rect'][2]) * T, (e['rect'][1] + e['rect'][3]) * T)))
-        for e in m['elements'] if 'source' not in e)
+        for e in m['elements'] if 'rect' in e)
     if non_classes:
         sys.exit(f'ERREUR : {non_classes} pixels de la feuille actuelle ne sont dans AUCUN élément du manifeste '
                  f'(ils seraient perdus). Ajoute-les à assets/tilesets/deco.json. Rien n\'a été modifié.')
@@ -206,6 +232,7 @@ def cmd_reconstruire(m, appliquer, images_sources=None):
     nouvelle.save(chemin_image(m))
     for chemin in sorted(glob.glob(os.path.join(RACINE, 'assets', 'maps', '*.json')) + glob.glob(os.path.join(RACINE, 'assets', 'maps', '*.tmx'))):
         remapper_carte(chemin, correspondance, taille_nv, True)
+    m['colonnes'] = COLONNES
     for e in m['elements']:
         c, l = placements[e['nom']]
         w, h = taille(e, images_sources)
@@ -223,8 +250,8 @@ def cmd_ajouter(m, image, monde, nom, appliquer):
     if any(e['nom'] == nom for e in m['elements']):
         sys.exit(f'Un élément s\'appelle déjà « {nom} ».')
     im = Image.open(image).convert('RGBA')
-    m['elements'].append({'nom': nom, 'monde': monde, 'type': 'petit', 'source': os.path.abspath(image)})
-    cmd_reconstruire(m, appliquer, {nom: im})
+    m['elements'].append({'nom': nom, 'monde': monde, 'type': 'petit', 'source': os.path.relpath(os.path.abspath(image), RACINE)})
+    cmd_reconstruire(m, appliquer, {**charger_sources(m), nom: im})
 
 
 def main():
