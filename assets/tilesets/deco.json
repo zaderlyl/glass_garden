@@ -1,0 +1,246 @@
+{
+ "image": "assets/images/tilesets/tileset_deco.png",
+ "colonnes": 20,
+ "ordre": [
+  "jardin",
+  "nuit",
+  "reve",
+  "automne",
+  "apocalypse",
+  "magie",
+  "commun"
+ ],
+ "elements": [
+  {
+   "nom": "arbre_jardin",
+   "monde": "jardin",
+   "type": "arbre",
+   "rect": [
+    0,
+    0,
+    3,
+    3
+   ]
+  },
+  {
+   "nom": "ensemble_jardin",
+   "monde": "jardin",
+   "type": "ensemble",
+   "rect": [
+    4,
+    0,
+    14,
+    10
+   ]
+  },
+  {
+   "nom": "pot_fleurs_1",
+   "monde": "jardin",
+   "type": "petit",
+   "rect": [
+    0,
+    3,
+    1,
+    1
+   ]
+  },
+  {
+   "nom": "pot_fleurs_2",
+   "monde": "jardin",
+   "type": "petit",
+   "rect": [
+    1,
+    3,
+    1,
+    1
+   ]
+  },
+  {
+   "nom": "herbes_hautes",
+   "monde": "jardin",
+   "type": "petit",
+   "rect": [
+    2,
+    3,
+    1,
+    1
+   ]
+  },
+  {
+   "nom": "carottes",
+   "monde": "jardin",
+   "type": "petit",
+   "rect": [
+    3,
+    3,
+    1,
+    1
+   ]
+  },
+  {
+   "nom": "guirlande_herbes",
+   "monde": "jardin",
+   "type": "petit",
+   "rect": [
+    0,
+    4,
+    2,
+    1
+   ]
+  },
+  {
+   "nom": "arbre_nuit",
+   "monde": "nuit",
+   "type": "arbre",
+   "rect": [
+    0,
+    10,
+    3,
+    3
+   ]
+  },
+  {
+   "nom": "ensemble_nuit",
+   "monde": "nuit",
+   "type": "ensemble",
+   "rect": [
+    4,
+    10,
+    14,
+    10
+   ]
+  },
+  {
+   "nom": "guirlande_lune",
+   "monde": "nuit",
+   "type": "petit",
+   "rect": [
+    0,
+    13,
+    2,
+    1
+   ]
+  },
+  {
+   "nom": "ensemble_reve",
+   "monde": "reve",
+   "type": "ensemble",
+   "rect": [
+    4,
+    20,
+    14,
+    9
+   ]
+  },
+  {
+   "nom": "nuage",
+   "monde": "reve",
+   "type": "petit",
+   "rect": [
+    0,
+    23,
+    1,
+    1
+   ]
+  },
+  {
+   "nom": "arbre_automne",
+   "monde": "automne",
+   "type": "arbre",
+   "rect": [
+    0,
+    30,
+    3,
+    3
+   ]
+  },
+  {
+   "nom": "ensemble_automne",
+   "monde": "automne",
+   "type": "ensemble",
+   "rect": [
+    4,
+    30,
+    14,
+    10
+   ]
+  },
+  {
+   "nom": "arbre_apocalypse",
+   "monde": "apocalypse",
+   "type": "arbre",
+   "rect": [
+    0,
+    40,
+    3,
+    3
+   ]
+  },
+  {
+   "nom": "ensemble_apocalypse",
+   "monde": "apocalypse",
+   "type": "ensemble",
+   "rect": [
+    4,
+    40,
+    14,
+    10
+   ]
+  },
+  {
+   "nom": "arbre_magie",
+   "monde": "magie",
+   "type": "arbre",
+   "rect": [
+    0,
+    50,
+    3,
+    3
+   ]
+  },
+  {
+   "nom": "ensemble_magie",
+   "monde": "magie",
+   "type": "ensemble",
+   "rect": [
+    4,
+    50,
+    14,
+    10
+   ]
+  },
+  {
+   "nom": "guirlandes_et_caisses",
+   "monde": "commun",
+   "type": "petit",
+   "rect": [
+    0,
+    60,
+    4,
+    2
+   ]
+  },
+  {
+   "nom": "zone_de_terre",
+   "monde": "commun",
+   "type": "petit",
+   "rect": [
+    4,
+    60,
+    3,
+    3
+   ]
+  },
+  {
+   "nom": "legumes",
+   "monde": "commun",
+   "type": "petit",
+   "rect": [
+    7,
+    60,
+    2,
+    2
+   ]
+  }
+ ]
+}
