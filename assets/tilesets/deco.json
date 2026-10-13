@@ -967,6 +967,61 @@
     14,
     7
    ]
+  },
+  {
+   "nom": "chemin_reve_discret",
+   "monde": "reve",
+   "type": "chemin_discret",
+   "rect": [
+    40,
+    20,
+    4,
+    4
+   ]
+  },
+  {
+   "nom": "chemin_reve_standard",
+   "monde": "reve",
+   "type": "chemin_standard",
+   "rect": [
+    44,
+    20,
+    4,
+    4
+   ]
+  },
+  {
+   "nom": "chemin_reve_pale",
+   "monde": "reve",
+   "type": "chemin_pale",
+   "rect": [
+    48,
+    20,
+    4,
+    4
+   ]
+  },
+  {
+   "nom": "chemin_reve_caillouteux",
+   "monde": "reve",
+   "type": "chemin_caillouteux",
+   "rect": [
+    52,
+    20,
+    4,
+    4
+   ]
+  },
+  {
+   "nom": "chemin_reve_fleuri",
+   "monde": "reve",
+   "type": "chemin_herbeux",
+   "rect": [
+    56,
+    20,
+    4,
+    4
+   ]
   }
  ]
 }
