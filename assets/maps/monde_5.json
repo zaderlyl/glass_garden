@@ -116,19 +116,6 @@
                  "width":0,
                  "x":578.702,
                  "y":134.012
-                }, 
-                {
-                 "height":0,
-                 "id":7,
-                 "name":"cheminee",
-                 "opacity":1,
-                 "point":true,
-                 "rotation":0,
-                 "type":"smoke",
-                 "visible":true,
-                 "width":0,
-                 "x":232,
-                 "y":138
                 }],
          "opacity":1,
          "type":"objectgroup",

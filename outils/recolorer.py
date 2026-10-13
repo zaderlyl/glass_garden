@@ -51,6 +51,11 @@ MONDES = {
         'stone': (0.60, 0.20, 0.50, 0.82),
         'water': (0.48, 0.65, 0.36, 0.64),
     },
+    'nuit': {                                   # vert sapin nocturne, pierre gris-bleu, eau bleu nuit
+        'grass': (0.42, 0.30, 0.12, 0.28),
+        'stone': (0.58, 0.18, 0.34, 0.60),
+        'water': (0.62, 0.50, 0.14, 0.34),
+    },
 }
 
 

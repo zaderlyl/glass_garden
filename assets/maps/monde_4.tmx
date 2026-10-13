@@ -73,9 +73,6 @@
   <object id="6" name="star" type="star" x="578.702" y="134.012">
    <point/>
   </object>
-  <object id="7" name="cheminee" type="smoke" x="232" y="138">
-   <point/>
-  </object>
  </objectgroup>
  <layer id="3" name="decor_below" width="40" height="22">
   <data encoding="csv">

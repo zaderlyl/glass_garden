@@ -95,13 +95,17 @@ export const TINTS = {
 // Un monde absent de cette table garde ses couleurs d'origine : c'est le cas du jardin (le monde normal).
 // TODO(équipe): définir la teinte de chaque monde quand les mondes seront créés (monde 1 = la nuit)
 export const WORLD_TINTS = {
-  world_1: 'magic', // ! TEST : remettre 'night' (le monde 1 est la nuit)
 };
 
 // * Images recolorées d'un monde (fabriquées par outils/recolorer.py) : le tileset de construction et l'eau animée
 // remplacent les originaux dans ce monde. Un monde absent de cette table garde les images d'origine.
 // Pas de teinte (WORLD_TINTS) en plus : elle multiplierait une seconde fois les couleurs.
 export const WORLD_ART = {
+  world_1: {
+    suffix: '@nuit',
+    tileset: 'assets/images/tilesets/tileset_garden_nuit.png',
+    water: 'assets/images/sprites/water_spritesheet_nuit.png',
+  },
   world_2: {
     suffix: '@reve', // ajouté aux clés des textures et des animations de ce monde
     tileset: 'assets/images/tilesets/tileset_garden_reve.png',
