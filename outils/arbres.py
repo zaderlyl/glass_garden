@@ -10,15 +10,10 @@ Pour chaque arbre (3 x 3 tuiles, 96 x 96 pixels), on produit :
     colle_haut   }  trois pièces pour des arbres COLLÉS en hauteur (murs de forêt), cimes qui se recouvrent :
     colle_milieu }  haut (2 lignes), puis le milieu (1 ligne) autant de fois qu'on veut, puis le bas (2 lignes)
     colle_bas    }
-    foret        un BLOC de forêt dense en quinconce (12 x 7 tuiles), pour faire les LIMITES de la carte. C'est la forêt
-                 idéale (l'arbre empilé sur plusieurs couches, rangée du haut d'abord) découpée en tuiles : tout se
-                 raccorde par construction. À sélectionner en bloc dans Tiled. Règle d'extension (vérifiée) :
-                   colonnes 0-2 = bord gauche, 3-4 = intérieur à répéter, 8-11 = bord droit
-                   lignes   0-2 = bord haut,   3-4 = intérieur à répéter, 5-6  = bord bas (avec les troncs)
-                 Pour répéter l'intérieur, alterne ligne 3, ligne 4, ligne 3… et FINIS toujours par la ligne 4 juste
-                 avant le bord bas (lignes 5-6) ; de même, finis par la colonne 4 juste avant le bord droit. Pour une
-                 limite de carte (le bord de la carte coupe la forêt), n'utilise que l'intérieur plus le bord qui regarde
-                 la clairière (bord bas pour une forêt en haut de la carte).
+    foret_auto   l'AUTOTUILE COMPLÈTE de forêt dense en quinconce : 34 tuiles (bloc de 7 x 5), communes aux 5 mondes,
+                 qui couvrent TOUTES les formes de forêt (bords, coins, creux, arbres isolés sur le quadrillage).
+                 Le choix des tuiles est fait par outils/foret.py à partir d'une zone dessinée dans Tiled. La table
+                 « situation -> tuile » est dans assets/tilesets/foret.json.
     demi_haut    arbre coupé par le haut de la carte (on voit sa moitié basse)
     demi_bas     arbre coupé par le bas de la carte (on voit sa moitié haute)
     demi_gauche  arbre coupé par le bord droit de la carte (on voit sa moitié gauche)
@@ -32,6 +27,9 @@ Relancer « generer » régénère les variantes (si tu retouches un arbre entie
 """
 import json, os, sys
 from PIL import Image
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import foret_logique as FL
 
 RACINE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MANIFESTE = os.path.join(RACINE, 'assets', 'tilesets', 'deco.json')
@@ -106,7 +104,6 @@ def variantes(t):
         'colle_haut': p.crop((0, 0, 96, 2 * PERIODE)),                          # 2 lignes
         'colle_milieu': p.crop((0, 2 * PERIODE, 96, 3 * PERIODE)),              # 1 ligne, à répéter
         'colle_bas': p.crop((0, n * PERIODE, 96, n * PERIODE + 2 * PERIODE)),   # 2 lignes, avec le tronc
-        'foret': foret_ideale(t, 5, 5),
         'demi_haut': demi_haut, 'demi_bas': demi_bas, 'demi_gauche': demi_gauche, 'demi_droite': demi_droite,
     }
 
@@ -130,6 +127,26 @@ def generer():
             existant = next((e for e in m['elements'] if e['nom'] == nom), None)
             if existant: existant['source'] = chemin
             else: m['elements'].append({'nom': nom, 'monde': arbre['monde'], 'type': 'arbre_' + nom_v, 'source': chemin})
+    # l'autotuile de forêt : une table commune aux mondes, un bloc de tuiles par monde
+    arbres = {}
+    for arbre in [e for e in m['elements'] if e['type'] == 'arbre']:
+        c, l, w, h = arbre['rect']
+        arbres[arbre['monde']] = feuille.crop((c * T, l * T, (c + w) * T, (l + h) * T))
+    cles, index = FL.table(arbres)
+    for e in m['elements']:                      # l'ancien bloc rectangulaire est remplacé par l'autotuile
+        if e['type'] == 'arbre_foret': e['supprime'] = True
+    m['elements'] = [e for e in m['elements'] if not (e.get('supprime') and 'rect' not in e)]
+    for monde, im in arbres.items():
+        nom = f'arbre_{monde}_foret_auto'
+        chemin = os.path.join(DOSSIER, nom + '.png')
+        FL.bloc(im, cles).save(os.path.join(RACINE, chemin))
+        existant = next((e for e in m['elements'] if e['nom'] == nom), None)
+        if existant: existant['source'] = chemin
+        else: m['elements'].append({'nom': nom, 'monde': monde, 'type': 'arbre_foret_auto', 'source': chemin})
+    with open(os.path.join(RACINE, 'assets', 'tilesets', 'foret.json'), 'w', encoding='utf-8') as f:
+        json.dump({'largeur_bloc': FL.LARGEUR_BLOC, 'nb_tuiles': len(cles), 'cles': [list(c) for c in cles],
+                   'index': [[px, py, mq, k] for (px, py, mq), k in sorted(index.items())]}, f, indent=1)
+        f.write('\n')
     with open(MANIFESTE, 'w', encoding='utf-8') as f:
         json.dump(m, f, ensure_ascii=False, indent=1); f.write('\n')
     print(f"Variantes générées dans {DOSSIER}. Lance ensuite : python3 outils/tileset.py reconstruire --appliquer")

@@ -39,7 +39,7 @@ VAR_ANCRES = {
     'arbre_cime': (20, 0), 'arbre_base': (24, 0), 'arbre_demi_bas': (24, 2),
     'arbre_colle_haut': (28, 0), 'arbre_colle_milieu': (32, 0), 'arbre_colle_bas': (36, 0),
     'arbre_demi_haut': (20, 4), 'arbre_demi_gauche': (20, 7), 'arbre_demi_droite': (23, 7),
-    'arbre_foret': (26, 3),
+    'arbre_foret_auto': (26, 3),
 }
 BANDE = (0, 3, 4)           # les petits décors : colonne de départ, ligne de départ, largeur en tuiles
 
