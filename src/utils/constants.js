@@ -101,6 +101,11 @@ export const WORLD_ART = {
     tileset: 'assets/images/tilesets/tileset_garden_reve.png',
     water: 'assets/images/sprites/water_spritesheet_reve.png',
   },
+  world_3: {
+    suffix: '@automne',
+    tileset: 'assets/images/tilesets/tileset_garden_automne.png',
+    water: 'assets/images/sprites/water_spritesheet_automne.png',
+  },
 };
 
 // * Clés des assets : le nom sous lequel Phaser retrouve un fichier chargé

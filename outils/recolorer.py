@@ -36,6 +36,11 @@ MONDES = {
         'stone': (0.72, 0.20, 0.72, 0.96),
         'water': (0.56, 0.60, 0.62, 0.84),
     },
+    'automne': {                                # olive chaud, pierre beige, eau bleu ardoise sombre
+        'grass': (0.14, 0.42, 0.30, 0.56),
+        'stone': (0.09, 0.20, 0.48, 0.84),
+        'water': (0.58, 0.35, 0.20, 0.40),
+    },
 }
 
 
