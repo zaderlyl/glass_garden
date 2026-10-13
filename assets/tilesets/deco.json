@@ -736,6 +736,61 @@
     2,
     3
    ]
+  },
+  {
+   "nom": "arbre_jardin_angle",
+   "monde": "jardin",
+   "type": "arbre_angle",
+   "rect": [
+    32,
+    2,
+    3,
+    1
+   ]
+  },
+  {
+   "nom": "arbre_nuit_angle",
+   "monde": "nuit",
+   "type": "arbre_angle",
+   "rect": [
+    32,
+    12,
+    3,
+    1
+   ]
+  },
+  {
+   "nom": "arbre_automne_angle",
+   "monde": "automne",
+   "type": "arbre_angle",
+   "rect": [
+    32,
+    32,
+    3,
+    1
+   ]
+  },
+  {
+   "nom": "arbre_apocalypse_angle",
+   "monde": "apocalypse",
+   "type": "arbre_angle",
+   "rect": [
+    32,
+    42,
+    3,
+    1
+   ]
+  },
+  {
+   "nom": "arbre_magie_angle",
+   "monde": "magie",
+   "type": "arbre_angle",
+   "rect": [
+    32,
+    52,
+    3,
+    1
+   ]
   }
  ]
 }

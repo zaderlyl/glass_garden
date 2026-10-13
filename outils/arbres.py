@@ -10,6 +10,8 @@ Pour chaque arbre (3 x 3 tuiles, 96 x 96 pixels), on produit :
     colle_haut   }  trois pièces pour des arbres COLLÉS en hauteur (murs de forêt), cimes qui se recouvrent :
     colle_milieu }  haut (2 lignes), puis le milieu (1 ligne) autant de fois qu'on veut, puis le bas (2 lignes)
     colle_bas    }
+    angle        raccord entre DEUX arbres côte à côte (3 x 1) : le creux entre leurs cimes, avec le tronc d'un
+                 troisième arbre situé plus haut, au fond. Se pose au point de contact des deux cimes.
     demi_haut    arbre coupé par le haut de la carte (on voit sa moitié basse)
     demi_bas     arbre coupé par le bas de la carte (on voit sa moitié haute)
     demi_gauche  arbre coupé par le bord droit de la carte (on voit sa moitié gauche)
@@ -31,6 +33,7 @@ T = 32
 Y_CIME = 77            # la cime s'arrête à y = 77 : en dessous, c'est le tronc visible (même découpe pour les 5 mondes)
 PERIODE = 32           # décalage entre deux arbres collés en hauteur (1 tuile) : les cimes se recouvrent
 Y_MILIEU, X_MILIEU = 48, 48    # lignes de coupe des demi-arbres (le centre de la cime)
+FOND_ANGLE = -40               # de combien l'arbre du fond est remonté, pour que son tronc apparaisse dans le creux
 
 
 def transparent(w, h):
@@ -48,6 +51,14 @@ def base(t):
     bas = t.crop((0, Y_CIME, 96, 96))
     im.alpha_composite(bas, (0, Y_CIME - 64))
     return im
+
+
+def angle(t):
+    """Deux arbres côte à côte (cimes tangentes) et un troisième plus haut, derrière, centré sur le creux."""
+    toile = transparent(160, 160)
+    toile.alpha_composite(t, (32, 32 + FOND_ANGLE))      # l'arbre du fond d'abord : les deux de devant le recouvrent
+    toile.alpha_composite(t, (0, 32)); toile.alpha_composite(t, (64, 32))
+    return toile.crop((32, 64, 128, 96))                  # la ligne de tuiles qui contient le creux, centrée sur lui
 
 
 def pile(t, n=6):
@@ -70,6 +81,7 @@ def variantes(t):
         'colle_haut': p.crop((0, 0, 96, 2 * PERIODE)),                          # 2 lignes
         'colle_milieu': p.crop((0, 2 * PERIODE, 96, 3 * PERIODE)),              # 1 ligne, à répéter
         'colle_bas': p.crop((0, n * PERIODE, 96, n * PERIODE + 2 * PERIODE)),   # 2 lignes, avec le tronc
+        'angle': angle(t),
         'demi_haut': demi_haut, 'demi_bas': demi_bas, 'demi_gauche': demi_gauche, 'demi_droite': demi_droite,
     }
 
