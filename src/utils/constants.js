@@ -83,7 +83,6 @@ export const TINTS = {
   night: { grass: 0x5560a0, stone: 0x6070a8, water: 0x4060b0 },
   autumn: { grass: 0xd89a50, stone: 0xe0b080, water: 0xc09050 },
   magic: { grass: 0xc060e0, stone: 0xe080c0, water: 0xff90d0 },
-  dream: { grass: 0xd8e8d0, stone: 0xf4eef8, water: 0xd0c8f4 }, // rêve : herbe verte pastel, pierre blanche, eau bleu-lilas
 };
 
 // * Quelle teinte pour quel monde (le nom du monde est celui de la table WORLDS).
@@ -91,7 +90,17 @@ export const TINTS = {
 // TODO(équipe): définir la teinte de chaque monde quand les mondes seront créés (monde 1 = la nuit)
 export const WORLD_TINTS = {
   world_1: 'magic', // ! TEST : remettre 'night' (le monde 1 est la nuit)
-  world_2: 'dream',
+};
+
+// * Images recolorées d'un monde (fabriquées par outils/recolorer.py) : le tileset de construction et l'eau animée
+// remplacent les originaux dans ce monde. Un monde absent de cette table garde les images d'origine.
+// Pas de teinte (WORLD_TINTS) en plus : elle multiplierait une seconde fois les couleurs.
+export const WORLD_ART = {
+  world_2: {
+    suffix: '@reve', // ajouté aux clés des textures et des animations de ce monde
+    tileset: 'assets/images/tilesets/tileset_garden_reve.png',
+    water: 'assets/images/sprites/water_spritesheet_reve.png',
+  },
 };
 
 // * Clés des assets : le nom sous lequel Phaser retrouve un fichier chargé

@@ -28,6 +28,7 @@ import {
   FONT_FAMILY,
   FONT_SIZE,
   SMOKE,
+  WORLD_ART,
 } from '../utils/constants.js';
 
 /**
@@ -65,6 +66,13 @@ export default class WorldScene extends Phaser.Scene {
     // la construction (sol, murs, eau) et les décors
     this.load.tilemapTiledJSON(this.mapKey, this.mapPath);
     this.load.image(ASSETS.TILESET_GARDEN, 'assets/images/tilesets/tileset_garden.png');
+
+    // * Les images recolorées de ce monde, s'il en a (voir WORLD_ART) : sous des clés à part, pour ne pas toucher aux originaux
+    const art = WORLD_ART[this.getWorldName()];
+    if (art) {
+      this.load.image(ASSETS.TILESET_GARDEN + art.suffix, art.tileset);
+      this.load.spritesheet(ASSETS.WATER + art.suffix, art.water, { frameWidth: TILE_SIZE, frameHeight: TILE_SIZE });
+    }
     this.load.image('etoile', 'assets/images/sprites/Etoile.png');
     preloadCrate(this);
     this.load.image(ASSETS.TILESET_DECO, 'assets/images/tilesets/tileset_deco.png');
@@ -200,8 +208,10 @@ export default class WorldScene extends Phaser.Scene {
     // Les textures sont donc toujours les originales.
     // ? Les palettes (PaletteSystem.js, getPaletteTexture) ne sont plus appelées : pour les réactiver, l'eau et le tileset
     // de construction repasseraient par getPaletteTexture, avec WORLD_PALETTES.
-    const waterTexture = ASSETS.WATER;
-    const animationSuffix = '';
+    const art = WORLD_ART[this.getWorldName()];
+    const animationSuffix = art ? art.suffix : '';
+    const waterTexture = ASSETS.WATER + animationSuffix;
+    const gardenTexture = ASSETS.TILESET_GARDEN + animationSuffix;
 
     this.createTileAnimations(waterTexture, animationSuffix);
     this.createMirrorAnimation();
@@ -213,7 +223,7 @@ export default class WorldScene extends Phaser.Scene {
     // Une carte peut utiliser plusieurs tilesets : on les passe tous à chaque calque, qui prend dans chacun
     // les tuiles qu'il utilise. Un tileset absent de la carte renvoie null : filter(Boolean) l'écarte.
     const tilesets = [
-      map.addTilesetImage('tileset_garden', ASSETS.TILESET_GARDEN),
+      map.addTilesetImage('tileset_garden', gardenTexture),
       map.addTilesetImage('tileset_deco', ASSETS.TILESET_DECO),
     ].filter(Boolean);
 
