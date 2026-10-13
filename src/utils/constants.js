@@ -124,7 +124,7 @@ export const ASSETS = {
 // Elles sont listées ici pour que le jeu connaisse TOUTES les cartes dès le démarrage (par exemple pour compter les étoiles).
 // ! Un monde ajouté dans WORLDS doit aussi l'être ici, et inversement.
 export const WORLD_MAPS = {
-  hub: { key: ASSETS.HUB_MAP, path: 'assets/maps/hub_test_arbres.json' },
+  hub: { key: ASSETS.HUB_MAP, path: 'assets/maps/hub_test.json' },
   world_1: { key: ASSETS.WORLD_1_MAP, path: 'assets/maps/monde_1.json' },
   world_2: { key: ASSETS.WORLD_2_MAP, path: 'assets/maps/monde_2.json' },
 };
