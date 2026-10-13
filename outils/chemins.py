@@ -45,6 +45,20 @@ VARIATIONS = {
     'herbeux':     dict(corps='#756566', rim='#4a3e4e', grains=['#5f5260', '#8a7b7e'], herbe=['#3e8948', '#265c42']),
 }
 
+# Chemins du RÊVE (pierre de nuage) : un liseré blanc bosselé de 2 à 3 pixels autour d'un corps lilas clair, des petits galets
+# lilas, quelques éclats. Couleurs relevées sur la planche de référence. Les fichiers s'appellent chemin_reve_<variation>.png.
+# Le liseré « bosselé » suit une fonction périodique (période 32) dans les deux sens : il se raccorde entre les tuiles.
+_NUAGE = dict(style='nuage', corps='#e9cff0', corps2='#efd8f4', liseré='#a289b2', blanc='#fdf0fb', blanc2='#fcebfa',
+              galet='#d6bae4', galet_clair='#f6e9fb', galet_fonce='#a289b2', eclat='#ffffff', eclat2='#fff3b0')
+VARIATIONS.update({
+    'reve_discret':     dict(_NUAGE, corps='#ecd6f1', corps2='#efdcf3', galets=2, eclats=1),
+    'reve_standard':    dict(_NUAGE, galets=4, eclats=2),
+    'reve_pale':        dict(_NUAGE, corps='#fbeef9', corps2='#fdf3fb', blanc='#ffffff', blanc2='#fdf6fc', liseré='#8b72b5',
+                             galet='#e9d3f3', galets=3, eclats=3),
+    'reve_caillouteux': dict(_NUAGE, galets=7, eclats=1, galet='#a9c4f0', galet_clair='#dbe8fc', galet_fonce='#7f9bd0'),
+    'reve_fleuri':      dict(_NUAGE, galets=2, eclats=1, fleurs=['#f48fb8', '#fdf3b0', '#ffffff']),
+})
+
 
 def bruit(x, phase):
     """Décalage entier (-1, 0 ou 1) du bord à la position x. PÉRIODIQUE de période 32 : x = 31 et x = 32 sont voisins."""
@@ -92,8 +106,63 @@ def profondeur(m, maxi=4):
     return p
 
 
+def bosse(xt, yt):
+    """Valeur -1..1, PÉRIODIQUE (32) dans les deux sens : décide où le liseré blanc gagne ou perd un pixel."""
+    return np.sin(2 * np.pi * (3 * xt / T + 0.2)) * np.sin(2 * np.pi * (2 * yt / T + 0.45)) + 0.6 * np.sin(2 * np.pi * (5 * (xt + yt) / T))
+
+
+def tuile_nuage(k, nom, graine):
+    v = VARIATIONS[nom]
+    rng = random.Random(graine * 131 + k)
+    m = masque(k)
+    prof = profondeur(m, 8)
+    yy, xx = np.mgrid[0:N, 0:N]
+    b = bosse((xx - PAD) % T, (yy - PAD) % T)
+    img = np.zeros((N, N, 4), np.uint8)
+    corps, corps2, blanc, blanc2 = hx(v['corps']), hx(v['corps2']), hx(v['blanc']), hx(v['blanc2'])
+    img[m] = corps
+    for (y, x) in np.argwhere(m & (prof >= 4)):                     # le corps a deux tons, en petites plaques
+        if (x // 2 + y // 3) % 3 == 0: img[y, x] = corps2
+    epais = 2 + (b > 0.25)                                           # le liseré blanc : 2 pixels, 3 là où la bosse est positive
+    blanc_zone = m & (prof >= 2) & (prof <= epais + 1)
+    img[blanc_zone] = blanc
+    for (y, x) in np.argwhere(blanc_zone):
+        if (x + 2 * y) % 5 == 0: img[y, x] = blanc2
+    img[m & (prof == 1)] = hx(v['liseré'])                           # le trait extérieur, 1 pixel
+    loin_bord = lambda y, x: PAD + 3 <= y < PAD + T - 3 and PAD + 3 <= x < PAD + T - 3
+    profonds = [(y, x) for (y, x) in np.argwhere(prof >= 5) if loin_bord(y, x)]
+    rng.shuffle(profonds)
+    galet, clair, fonce = hx(v['galet']), hx(v['galet_clair']), hx(v['galet_fonce'])
+    forme = [(0, 1), (0, 2), (0, 3), (1, 0), (1, 1), (1, 2), (1, 3), (1, 4), (2, 1), (2, 2), (2, 3)]     # un galet de 5 x 3
+    pris = []
+    for (y, x) in profonds:
+        if len(pris) >= v['galets'] + (k % 2): break
+        if any(abs(y - a) < 6 and abs(x - c) < 7 for a, c in pris): continue
+        if all(y + dy < N and x + dx < N and m[y + dy, x + dx] and prof[y + dy, x + dx] >= 4 for dy, dx in forme):
+            for dy, dx in forme: img[y + dy, x + dx] = galet
+            for dy, dx in ((0, 1), (0, 2), (1, 1)): img[y + dy, x + dx] = clair                              # reflet en haut à gauche
+            for dy, dx in ((2, 2), (2, 3), (1, 4)): img[y + dy, x + dx] = fonce                              # ombre en bas à droite
+            pris.append((y, x))
+    if 'fleurs' in v:                                                  # chemin fleuri : de minuscules fleurs en croix de 3 pixels
+        rng.shuffle(profonds); fl = [hx(c) for c in v['fleurs']]; nb = 0
+        for (y, x) in profonds:
+            if nb >= 4 + k % 3: break
+            if any(abs(y - a) < 6 and abs(x - c) < 6 for a, c in pris): continue
+            if y + 2 < N and x + 2 < N and all(prof[y + dy, x + dx] >= 4 for dy, dx in ((0, 1), (1, 0), (1, 1), (1, 2), (2, 1))):
+                couleur = rng.choice(fl[:2]); img[y, x + 1] = couleur; img[y + 1, x] = couleur; img[y + 1, x + 2] = couleur; img[y + 2, x + 1] = couleur
+                img[y + 1, x + 1] = fl[1] if couleur is not fl[1] else fl[0]
+                pris.append((y, x)); nb += 1
+    eclats = [(y, x) for (y, x) in np.argwhere(prof >= 4) if loin_bord(y, x) and tuple(img[y, x][:3]) in (tuple(corps[:3]), tuple(corps2[:3]))]
+    rng.shuffle(eclats)
+    for (y, x), c in zip(eclats[:v['eclats'] + 1], (hx(v['eclat']), hx(v['eclat2']), hx(v['eclat']))):
+        img[y, x] = c
+    return Image.fromarray(img[PAD:PAD + T, PAD:PAD + T], 'RGBA')
+
+
 def tuile(k, nom, graine):
     v = VARIATIONS[nom]
+    if v.get('style') == 'nuage':
+        return tuile_nuage(k, nom, graine)
     rng = random.Random(graine * 131 + k)
     m = masque(k)
     prof = profondeur(m)

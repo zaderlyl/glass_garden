@@ -11,6 +11,7 @@ export const SCENES = {
   MENU: 'MenuScene',
   HUB: 'HubScene',
   WORLD_1: 'World1Scene',
+  WORLD_2: 'World2Scene',
   UI: 'UIScene',
 };
 
@@ -23,6 +24,7 @@ export const NORMAL_WORLD = 'hub';
 export const WORLDS = {
   hub: SCENES.HUB,
   world_1: SCENES.WORLD_1,
+  world_2: SCENES.WORLD_2,
 };
 
 // * La couleur d'origine de l'eau principale dans les images (elle sert de référence aux palettes ci-dessous)
@@ -90,11 +92,23 @@ export const WORLD_TINTS = {
   world_1: 'magic', // ! TEST : remettre 'night' (le monde 1 est la nuit)
 };
 
+// * Images recolorées d'un monde (fabriquées par outils/recolorer.py) : le tileset de construction et l'eau animée
+// remplacent les originaux dans ce monde. Un monde absent de cette table garde les images d'origine.
+// Pas de teinte (WORLD_TINTS) en plus : elle multiplierait une seconde fois les couleurs.
+export const WORLD_ART = {
+  world_2: {
+    suffix: '@reve', // ajouté aux clés des textures et des animations de ce monde
+    tileset: 'assets/images/tilesets/tileset_garden_reve.png',
+    water: 'assets/images/sprites/water_spritesheet_reve.png',
+  },
+};
+
 // * Clés des assets : le nom sous lequel Phaser retrouve un fichier chargé
 export const ASSETS = {
   PLAYER_1: 'player_1',
   HUB_MAP: 'hub_map',
   WORLD_1_MAP: 'world_1_map',
+  WORLD_2_MAP: 'world_2_map',
   TILESET_GARDEN: 'tileset_garden', // la construction : sol, murs, eau
   TILESET_DECO: 'tileset_deco', // les décors
   WATER: 'water',
@@ -107,6 +121,7 @@ export const ASSETS = {
 export const WORLD_MAPS = {
   hub: { key: ASSETS.HUB_MAP, path: 'assets/maps/hub_test.json' },
   world_1: { key: ASSETS.WORLD_1_MAP, path: 'assets/maps/monde_1.json' },
+  world_2: { key: ASSETS.WORLD_2_MAP, path: 'assets/maps/monde_2.json' },
 };
 
 // * Les deux façons de jouer : « arcade » (joystick et boutons de la borne) ou « pc » (clavier).
