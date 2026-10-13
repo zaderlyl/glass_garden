@@ -73,9 +73,6 @@
   <object id="6" name="star" type="star" x="780.3" y="415.488">
    <point/>
   </object>
-  <object id="7" name="cheminee" type="smoke" x="232" y="138">
-   <point/>
-  </object>
   <object id="12" name="crate" type="crate" x="386.448" y="310.57">
    <properties>
     <property name="hitPoints" type="int" value="3"/>

@@ -119,19 +119,6 @@
                 }, 
                 {
                  "height":0,
-                 "id":7,
-                 "name":"cheminee",
-                 "opacity":1,
-                 "point":true,
-                 "rotation":0,
-                 "type":"smoke",
-                 "visible":true,
-                 "width":0,
-                 "x":232,
-                 "y":138
-                }, 
-                {
-                 "height":0,
                  "id":12,
                  "name":"crate",
                  "opacity":1,
