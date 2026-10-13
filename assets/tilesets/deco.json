@@ -791,6 +791,36 @@
     14,
     7
    ]
+  },
+  {
+   "nom": "chemin_nuit_discret",
+   "monde": "nuit",
+   "type": "chemin_discret",
+   "source": "assets/tilesets/sources/chemins/chemin_discret.png"
+  },
+  {
+   "nom": "chemin_nuit_standard",
+   "monde": "nuit",
+   "type": "chemin_standard",
+   "source": "assets/tilesets/sources/chemins/chemin_standard.png"
+  },
+  {
+   "nom": "chemin_nuit_pale",
+   "monde": "nuit",
+   "type": "chemin_pale",
+   "source": "assets/tilesets/sources/chemins/chemin_pale.png"
+  },
+  {
+   "nom": "chemin_nuit_caillouteux",
+   "monde": "nuit",
+   "type": "chemin_caillouteux",
+   "source": "assets/tilesets/sources/chemins/chemin_caillouteux.png"
+  },
+  {
+   "nom": "chemin_nuit_herbeux",
+   "monde": "nuit",
+   "type": "chemin_herbeux",
+   "source": "assets/tilesets/sources/chemins/chemin_herbeux.png"
   }
  ]
 }

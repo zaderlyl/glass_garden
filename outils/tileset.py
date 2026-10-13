@@ -32,7 +32,7 @@ from PIL import Image
 RACINE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MANIFESTE = os.path.join(RACINE, 'assets', 'tilesets', 'deco.json')
 T = 32                      # taille d'une tuile, en pixels
-COLONNES = 40               # largeur de la feuille, en tuiles (2 x 20 : le patron à gauche, les variantes d'arbre à droite)
+COLONNES = 60               # largeur de la feuille, en tuiles (3 x 20 : le patron, les variantes d'arbre, les chemins de terre)
 HAUT_MIN = 10               # hauteur minimale d'une section de monde, en lignes
 ARBRE = (0, 0, 3, 3)        # patron d'une section de monde : (colonne, ligne, largeur, hauteur)
 ENSEMBLE_COL = 4
@@ -42,6 +42,9 @@ VAR_ANCRES = {
     'arbre_colle_haut': (28, 0), 'arbre_colle_milieu': (32, 0), 'arbre_colle_bas': (36, 0),
     'arbre_demi_haut': (20, 4), 'arbre_demi_gauche': (20, 7), 'arbre_demi_droite': (23, 7),
     'arbre_foret_auto': (26, 3),
+    # chemins de terre (planches 4 x 4, outils/chemins.py) : à droite des variantes d'arbre
+    'chemin_discret': (40, 0), 'chemin_standard': (44, 0), 'chemin_pale': (48, 0),
+    'chemin_caillouteux': (52, 0), 'chemin_herbeux': (56, 0),
 }
 BANDE = (0, 3, 4)           # les petits décors : colonne de départ, ligne de départ, largeur en tuiles
 
