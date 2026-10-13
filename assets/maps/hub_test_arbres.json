@@ -74,6 +74,24 @@
                  "width":0,
                  "x":578.702,
                  "y":134.012
+                }, 
+                {
+                 "height":64,
+                 "id":7,
+                 "name":"world_2",
+                 "opacity":1,
+                 "properties":[
+                        {
+                         "name":"type",
+                         "type":"string",
+                         "value":""
+                        }],
+                 "rotation":0,
+                 "type":"mirror",
+                 "visible":true,
+                 "width":32,
+                 "x":448.485,
+                 "y":255.649
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -143,7 +161,7 @@
   }
  ],
  "nextlayerid": 9,
- "nextobjectid":7,
+ "nextobjectid":8,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.0",

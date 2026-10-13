@@ -36,6 +36,21 @@ MONDES = {
         'stone': (0.72, 0.20, 0.72, 0.96),
         'water': (0.56, 0.60, 0.62, 0.84),
     },
+    'automne': {                                # olive chaud, pierre beige, eau bleu ardoise sombre
+        'grass': (0.14, 0.42, 0.30, 0.56),
+        'stone': (0.09, 0.20, 0.48, 0.84),
+        'water': (0.58, 0.35, 0.20, 0.40),
+    },
+    'apocalypse': {                             # poussière jaunâtre, pierre grise, eau verte toxique
+        'grass': (0.15, 0.22, 0.30, 0.52),
+        'stone': (0.10, 0.10, 0.38, 0.66),
+        'water': (0.24, 0.55, 0.20, 0.42),
+    },
+    'magie': {                                  # bleu nuit, pierre gris-bleu, eau turquoise lumineuse
+        'grass': (0.62, 0.32, 0.18, 0.36),
+        'stone': (0.60, 0.20, 0.50, 0.82),
+        'water': (0.48, 0.65, 0.36, 0.64),
+    },
 }
 
 
