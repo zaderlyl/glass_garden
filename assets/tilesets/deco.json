@@ -738,58 +738,58 @@
    ]
   },
   {
-   "nom": "arbre_jardin_foret",
+   "nom": "arbre_jardin_foret_auto",
    "monde": "jardin",
-   "type": "arbre_foret",
+   "type": "arbre_foret_auto",
    "rect": [
     26,
     3,
-    12,
-    7
+    7,
+    5
    ]
   },
   {
-   "nom": "arbre_nuit_foret",
+   "nom": "arbre_nuit_foret_auto",
    "monde": "nuit",
-   "type": "arbre_foret",
+   "type": "arbre_foret_auto",
    "rect": [
     26,
     13,
-    12,
-    7
+    7,
+    5
    ]
   },
   {
-   "nom": "arbre_automne_foret",
+   "nom": "arbre_automne_foret_auto",
    "monde": "automne",
-   "type": "arbre_foret",
+   "type": "arbre_foret_auto",
    "rect": [
     26,
     33,
-    12,
-    7
+    7,
+    5
    ]
   },
   {
-   "nom": "arbre_apocalypse_foret",
+   "nom": "arbre_apocalypse_foret_auto",
    "monde": "apocalypse",
-   "type": "arbre_foret",
+   "type": "arbre_foret_auto",
    "rect": [
     26,
     43,
-    12,
-    7
+    7,
+    5
    ]
   },
   {
-   "nom": "arbre_magie_foret",
+   "nom": "arbre_magie_foret_auto",
    "monde": "magie",
-   "type": "arbre_foret",
+   "type": "arbre_foret_auto",
    "rect": [
     26,
     53,
-    12,
-    7
+    7,
+    5
    ]
   }
  ]
