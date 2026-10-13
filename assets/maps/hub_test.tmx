@@ -70,7 +70,7 @@
     <property name="type" value=""/>
    </properties>
   </object>
-  <object id="6" name="star" type="star" x="578.702" y="134.012">
+  <object id="6" name="star" type="star" x="780.3" y="415.488">
    <point/>
   </object>
   <object id="7" name="cheminee" type="smoke" x="232" y="138">
