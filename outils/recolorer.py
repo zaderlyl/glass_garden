@@ -46,6 +46,11 @@ MONDES = {
         'stone': (0.10, 0.10, 0.38, 0.66),
         'water': (0.24, 0.55, 0.20, 0.42),
     },
+    'magie': {                                  # bleu nuit, pierre gris-bleu, eau turquoise lumineuse
+        'grass': (0.62, 0.32, 0.18, 0.36),
+        'stone': (0.60, 0.20, 0.50, 0.82),
+        'water': (0.48, 0.65, 0.36, 0.64),
+    },
 }
 
 

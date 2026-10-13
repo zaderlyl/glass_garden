@@ -115,6 +115,11 @@ export const WORLD_ART = {
     tileset: 'assets/images/tilesets/tileset_garden_apocalypse.png',
     water: 'assets/images/sprites/water_spritesheet_apocalypse.png',
   },
+  world_5: {
+    suffix: '@magie',
+    tileset: 'assets/images/tilesets/tileset_garden_magie.png',
+    water: 'assets/images/sprites/water_spritesheet_magie.png',
+  },
 };
 
 // * Clés des assets : le nom sous lequel Phaser retrouve un fichier chargé
