@@ -12,6 +12,7 @@ export const SCENES = {
   HUB: 'HubScene',
   WORLD_1: 'World1Scene',
   WORLD_2: 'World2Scene',
+  WORLD_3: 'World3Scene',
   UI: 'UIScene',
 };
 
@@ -25,6 +26,7 @@ export const WORLDS = {
   hub: SCENES.HUB,
   world_1: SCENES.WORLD_1,
   world_2: SCENES.WORLD_2,
+  world_3: SCENES.WORLD_3,
 };
 
 // * La couleur d'origine de l'eau principale dans les images (elle sert de référence aux palettes ci-dessous)
@@ -114,6 +116,7 @@ export const ASSETS = {
   HUB_MAP: 'hub_map',
   WORLD_1_MAP: 'world_1_map',
   WORLD_2_MAP: 'world_2_map',
+  WORLD_3_MAP: 'world_3_map',
   TILESET_GARDEN: 'tileset_garden', // la construction : sol, murs, eau
   TILESET_DECO: 'tileset_deco', // les décors
   WATER: 'water',
@@ -127,6 +130,7 @@ export const WORLD_MAPS = {
   hub: { key: ASSETS.HUB_MAP, path: 'assets/maps/hub_test.json' },
   world_1: { key: ASSETS.WORLD_1_MAP, path: 'assets/maps/monde_1.json' },
   world_2: { key: ASSETS.WORLD_2_MAP, path: 'assets/maps/monde_2.json' },
+  world_3: { key: ASSETS.WORLD_3_MAP, path: 'assets/maps/monde_3.json' },
 };
 
 // * Les deux façons de jouer : « arcade » (joystick et boutons de la borne) ou « pc » (clavier).
