@@ -41,6 +41,11 @@ MONDES = {
         'stone': (0.09, 0.20, 0.48, 0.84),
         'water': (0.58, 0.35, 0.20, 0.40),
     },
+    'apocalypse': {                             # poussière jaunâtre, pierre grise, eau verte toxique
+        'grass': (0.15, 0.22, 0.30, 0.52),
+        'stone': (0.10, 0.10, 0.38, 0.66),
+        'water': (0.24, 0.55, 0.20, 0.42),
+    },
 }
 
 
