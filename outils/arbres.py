@@ -10,8 +10,15 @@ Pour chaque arbre (3 x 3 tuiles, 96 x 96 pixels), on produit :
     colle_haut   }  trois pièces pour des arbres COLLÉS en hauteur (murs de forêt), cimes qui se recouvrent :
     colle_milieu }  haut (2 lignes), puis le milieu (1 ligne) autant de fois qu'on veut, puis le bas (2 lignes)
     colle_bas    }
-    angle        raccord entre DEUX arbres côte à côte (3 x 1) : le creux entre leurs cimes, avec le tronc d'un
-                 troisième arbre situé plus haut, au fond. Se pose au point de contact des deux cimes.
+    foret        un BLOC de forêt dense en quinconce (12 x 7 tuiles), pour faire les LIMITES de la carte. C'est la forêt
+                 idéale (l'arbre empilé sur plusieurs couches, rangée du haut d'abord) découpée en tuiles : tout se
+                 raccorde par construction. À sélectionner en bloc dans Tiled. Règle d'extension (vérifiée) :
+                   colonnes 0-2 = bord gauche, 3-4 = intérieur à répéter, 8-11 = bord droit
+                   lignes   0-2 = bord haut,   3-4 = intérieur à répéter, 5-6  = bord bas (avec les troncs)
+                 Pour répéter l'intérieur, alterne ligne 3, ligne 4, ligne 3… et FINIS toujours par la ligne 4 juste
+                 avant le bord bas (lignes 5-6) ; de même, finis par la colonne 4 juste avant le bord droit. Pour une
+                 limite de carte (le bord de la carte coupe la forêt), n'utilise que l'intérieur plus le bord qui regarde
+                 la clairière (bord bas pour une forêt en haut de la carte).
     demi_haut    arbre coupé par le haut de la carte (on voit sa moitié basse)
     demi_bas     arbre coupé par le bas de la carte (on voit sa moitié haute)
     demi_gauche  arbre coupé par le bord droit de la carte (on voit sa moitié gauche)
@@ -61,6 +68,24 @@ def angle(t):
     return toile.crop((32, 64, 128, 96))                  # la ligne de tuiles qui contient le creux, centrée sur lui
 
 
+def jonction(t):
+    """Deux arbres côte à côte (période de 2 tuiles) : seule la colonne du milieu change, c'est le mélange des deux."""
+    toile = transparent(160, 96)
+    toile.alpha_composite(t, (0, 0)); toile.alpha_composite(t, (64, 0))
+    return toile.crop((64, 0, 96, 96))
+
+
+def foret_ideale(t, rangees, arbres):
+    """La forêt dense en quinconce, telle que le moteur la dessinerait avec l'arbre posé sur plusieurs couches :
+    période de 2 tuiles en largeur et de 1 tuile en hauteur, une rangée sur deux décalée d'une tuile ; les rangées du
+    bas passent devant celles du haut."""
+    toile = transparent(64 * (arbres - 1) + 32 + 96, 32 * (rangees - 1) + 96)
+    for r in range(rangees):
+        for k in range(arbres):
+            toile.alpha_composite(t, (k * 64 + (32 if r % 2 else 0), r * 32))
+    return toile
+
+
 def pile(t, n=6):
     hauteur = PERIODE * (n - 1) + 96
     toile = transparent(96, hauteur)
@@ -81,7 +106,7 @@ def variantes(t):
         'colle_haut': p.crop((0, 0, 96, 2 * PERIODE)),                          # 2 lignes
         'colle_milieu': p.crop((0, 2 * PERIODE, 96, 3 * PERIODE)),              # 1 ligne, à répéter
         'colle_bas': p.crop((0, n * PERIODE, 96, n * PERIODE + 2 * PERIODE)),   # 2 lignes, avec le tronc
-        'angle': angle(t),
+        'foret': foret_ideale(t, 5, 5),
         'demi_haut': demi_haut, 'demi_bas': demi_bas, 'demi_gauche': demi_gauche, 'demi_droite': demi_droite,
     }
 
@@ -91,6 +116,10 @@ def generer():
         m = json.load(f)
     feuille = Image.open(os.path.join(RACINE, m['image'])).convert('RGBA')
     os.makedirs(os.path.join(RACINE, DOSSIER), exist_ok=True)
+    for e in m['elements']:                      # anciennes pièces remplacées par le bloc de forêt
+        if e['type'] in ('arbre_angle', 'arbre_jonction'):
+            e['supprime'] = True
+    m['elements'] = [e for e in m['elements'] if not (e.get('supprime') and 'rect' not in e)]
     for arbre in [e for e in m['elements'] if e['type'] == 'arbre']:
         c, l, w, h = arbre['rect']
         t = feuille.crop((c * T, l * T, (c + w) * T, (l + h) * T))
