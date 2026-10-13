@@ -22,7 +22,9 @@ Comment la zone devient des arbres :
   * au bord de la carte, la zone est PROLONGÉE vers l'extérieur : une forêt dessinée contre le bord continue au-delà
     (c'est ce qu'il faut pour une limite de carte) ;
   * un arbre isolé : une seule case dessinée (ou deux) suffit à en planter un.
-Les tuiles viennent de l'autotuile de forêt (34 tuiles, assets/tilesets/foret.json), la même pour les 5 mondes :
+  * les COINS DU BAS sont complétés : le quinconce laisse un coin bas-gauche ou bas-droit ouvert au bout de la rangée
+    du bas ; le script y plante l'arbre qui manque, pour que le bas de la forêt soit droit et fermé.
+Les tuiles viennent de l'autotuile de forêt (34 tuiles rangées par rôle, assets/tilesets/foret.json), la même pour les 5 mondes :
 --monde choisit seulement de quelle section de la feuille on prend les tuiles.
 """
 import argparse, json, os, re, sys
@@ -39,7 +41,9 @@ TABLE = os.path.join(RACINE, 'assets', 'tilesets', 'foret.json')
 def charger_table():
     with open(TABLE, encoding='utf-8') as f:
         d = json.load(f)
-    return {(px, py, mq): k for px, py, mq, k in d['index']}
+    index = {(px, py, mq): k for px, py, mq, k in d['index']}
+    positions = {int(k): tuple(v) for k, v in d['positions'].items()}
+    return index, positions
 
 
 def bloc_du_monde(monde):
@@ -102,20 +106,20 @@ def ecrire_couche(chemin, grille, largeur):
 
 def planter(chemin, monde, ecrire=True):
     largeur, hauteur, zone, premier, colonnes = lire_carte(chemin)
-    index = charger_table()
+    index, positions = charger_table()
     c0, l0, colonnes_feuille = bloc_du_monde(monde)
     if colonnes != colonnes_feuille:
         sys.exit(f'La carte décrit tileset_deco avec {colonnes} colonnes, la feuille en a {colonnes_feuille} : '
                  f'rouvre la carte dans Tiled ou lance outils/tileset.py reconstruire --appliquer.')
     slots = FL.couche(zone, largeur, hauteur, index)
-    grille = [[0 if k is None else premier + (l0 + k // FL.LARGEUR_BLOC) * colonnes + (c0 + k % FL.LARGEUR_BLOC)
+    grille = [[0 if k is None else premier + (l0 + positions[k][1]) * colonnes + (c0 + positions[k][0])
                for k in ligne] for ligne in slots]
     if ecrire:
         ecrire_couche(chemin, grille, largeur)
-    return largeur, hauteur, slots, (c0, l0)
+    return largeur, hauteur, slots, (c0, l0), positions
 
 
-def apercu(slots, origine, sortie):
+def apercu(slots, origine, positions, sortie):
     with open(MANIFESTE, encoding='utf-8') as f:
         m = json.load(f)
     feuille = Image.open(os.path.join(RACINE, m['image'])).convert('RGBA')
@@ -127,7 +131,7 @@ def apercu(slots, origine, sortie):
     for y, ligne in enumerate(slots):
         for x, k in enumerate(ligne):
             if k is not None:
-                c, r = origine[0] + k % FL.LARGEUR_BLOC, origine[1] + k // FL.LARGEUR_BLOC
+                c, r = origine[0] + positions[k][0], origine[1] + positions[k][1]
                 im.alpha_composite(feuille.crop((c * 32, r * 32, c * 32 + 32, r * 32 + 32)), (x * 32, y * 32))
     im.save(sortie)
 
@@ -138,11 +142,11 @@ def main():
     p.add_argument('--monde', default='jardin', help='section de la feuille d\'où viennent les tuiles (défaut : jardin)')
     p.add_argument('--apercu', help='écrit aussi une image de la forêt obtenue')
     a = p.parse_args()
-    largeur, hauteur, slots, origine = planter(a.carte, a.monde)
+    largeur, hauteur, slots, origine, positions = planter(a.carte, a.monde)
     n = sum(1 for ligne in slots for k in ligne if k is not None)
     print(f'Forêt plantée : {n} cases remplies sur {largeur * hauteur} dans le calque « foret » de {os.path.basename(a.carte)}.')
     if a.apercu:
-        apercu(slots, origine, a.apercu); print('Aperçu :', a.apercu)
+        apercu(slots, origine, positions, a.apercu); print('Aperçu :', a.apercu)
 
 
 if __name__ == '__main__':

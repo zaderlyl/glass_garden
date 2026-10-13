@@ -10,8 +10,11 @@ Pour chaque arbre (3 x 3 tuiles, 96 x 96 pixels), on produit :
     colle_haut   }  trois pièces pour des arbres COLLÉS en hauteur (murs de forêt), cimes qui se recouvrent :
     colle_milieu }  haut (2 lignes), puis le milieu (1 ligne) autant de fois qu'on veut, puis le bas (2 lignes)
     colle_bas    }
-    foret_auto   l'AUTOTUILE COMPLÈTE de forêt dense en quinconce : 34 tuiles (bloc de 7 x 5), communes aux 5 mondes,
+    foret_auto   l'AUTOTUILE COMPLÈTE de forêt dense en quinconce : 34 tuiles (échantillon de 14 x 7), communes aux 5 mondes,
                  qui couvrent TOUTES les formes de forêt (bords, coins, creux, arbres isolés sur le quadrillage).
+                 Elles sont rangées sous la forme d'un ÉCHANTILLON DE FORÊT (14 x 7 cases, 15 vrais arbres : isolés,
+                 en groupe, en bloc, en masse dense) : on y lit des arbres, pas des fragments. L'échantillon est défini
+                 dans outils/foret_logique.py (EXEMPLE_ARBRES) ; chaque tuile y est retrouvée à sa première apparition.
                  Le choix des tuiles est fait par outils/foret.py à partir d'une zone dessinée dans Tiled. La table
                  « situation -> tuile » est dans assets/tilesets/foret.json.
     demi_haut    arbre coupé par le haut de la carte (on voit sa moitié basse)
@@ -133,18 +136,22 @@ def generer():
         c, l, w, h = arbre['rect']
         arbres[arbre['monde']] = feuille.crop((c * T, l * T, (c + w) * T, (l + h) * T))
     cles, index = FL.table(arbres)
+    positions = FL.exemple_positions(index)
     for e in m['elements']:                      # l'ancien bloc rectangulaire est remplacé par l'autotuile
         if e['type'] == 'arbre_foret': e['supprime'] = True
     m['elements'] = [e for e in m['elements'] if not (e.get('supprime') and 'rect' not in e)]
     for monde, im in arbres.items():
         nom = f'arbre_{monde}_foret_auto'
         chemin = os.path.join(DOSSIER, nom + '.png')
-        FL.bloc(im, cles).save(os.path.join(RACINE, chemin))
+        FL.exemple_image(im).save(os.path.join(RACINE, chemin))
         existant = next((e for e in m['elements'] if e['nom'] == nom), None)
         if existant: existant['source'] = chemin
         else: m['elements'].append({'nom': nom, 'monde': monde, 'type': 'arbre_foret_auto', 'source': chemin})
     with open(os.path.join(RACINE, 'assets', 'tilesets', 'foret.json'), 'w', encoding='utf-8') as f:
-        json.dump({'largeur_bloc': FL.LARGEUR_BLOC, 'nb_tuiles': len(cles), 'cles': [list(c) for c in cles],
+        json.dump({'bloc': [FL.LARGEUR_BLOC, FL.HAUTEUR_BLOC], 'nb_tuiles': len(cles),
+                   'exemple_arbres': [list(a) for a in FL.EXEMPLE_ARBRES],
+                   'positions': {str(k): list(positions[k]) for k in range(len(cles))},
+                   'cles': [list(c) for c in cles],
                    'index': [[px, py, mq, k] for (px, py, mq), k in sorted(index.items())]}, f, indent=1)
         f.write('\n')
     with open(MANIFESTE, 'w', encoding='utf-8') as f:

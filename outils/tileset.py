@@ -23,6 +23,8 @@ Commandes (sans --appliquer, l'outil ne modifie RIEN : il montre le plan et écr
     python3 outils/tileset.py ajouter image.png --monde nuit --nom lanterne [--appliquer]
 
 ⚠ Fais un commit avant d'utiliser --appliquer : c'est ta sauvegarde (git restore pour revenir en arrière).
+⚠ Ferme tes cartes dans Tiled avant --appliquer : l'outil réécrit les numéros de tuile dans les fichiers de cartes
+  (seulement ceux qui changent), et Tiled écraserait le résultat à sa prochaine sauvegarde.
 """
 import argparse, glob, json, os, re, sys
 from PIL import Image
@@ -146,6 +148,7 @@ def remapper_carte(chemin, correspondance, nouvelle_taille, appliquer):
     est_json = chemin.endswith('.json')
     with open(chemin, encoding='utf-8') as f:
         texte = f.read()
+    original = texte
     premier = lire_gid_deco(texte, est_json)
     if premier is None:
         return 0, set()
@@ -178,7 +181,7 @@ def remapper_carte(chemin, correspondance, nouvelle_taille, appliquer):
         texte = re.sub(r'(<tileset firstgid="\d+" name="tileset_deco" tilewidth="32" tileheight="32" tilecount=")\d+(" columns=")\d+',
                        lambda mo: mo.group(1) + str(n) + mo.group(2) + str(nouvelle_taille[0] // T), texte)
         texte = re.sub(r'(<image source="[^"]*tileset_deco\.png" width=")\d+(" height=")\d+', lambda mo: mo.group(1) + str(nouvelle_taille[0]) + mo.group(2) + str(nouvelle_taille[1]), texte)
-    if appliquer:
+    if appliquer and texte != original:          # on ne touche pas aux fichiers qui n'ont rien à changer (Tiled ouvert, mtime...)
         with open(chemin, 'w', encoding='utf-8') as f:
             f.write(texte)
     return changees, inconnus
