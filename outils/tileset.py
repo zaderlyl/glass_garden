@@ -13,6 +13,7 @@ Chaque section de monde a le même patron (20 colonnes) :
 Le fichier assets/tilesets/deco.json décrit chaque élément : son nom, son monde, son type et son rectangle (colonne,
 ligne, largeur, hauteur) en tuiles. C'est la SEULE source de vérité : on ne déplace jamais une tuile à la main.
 
+Pour SUPPRIMER un élément : ajoute "supprime": true dans deco.json puis lance reconstruire --appliquer.
 Quand une section grandit ou qu'on réorganise, les tuiles changent de numéro : l'outil recalcule tout seul le numéro
 des tuiles dans TOUTES les cartes (assets/maps/*.json et *.tmx), sans reformater les fichiers.
 
@@ -37,8 +38,8 @@ ENSEMBLE_COL = 4
 VAR_ANCRES = {
     'arbre_cime': (20, 0), 'arbre_base': (24, 0), 'arbre_demi_bas': (24, 2),
     'arbre_colle_haut': (28, 0), 'arbre_colle_milieu': (32, 0), 'arbre_colle_bas': (36, 0),
-    'arbre_angle': (32, 2),
-    'arbre_demi_haut': (20, 4), 'arbre_demi_gauche': (24, 4), 'arbre_demi_droite': (27, 4),
+    'arbre_demi_haut': (20, 4), 'arbre_demi_gauche': (20, 7), 'arbre_demi_droite': (23, 7),
+    'arbre_foret': (26, 3),
 }
 BANDE = (0, 3, 4)           # les petits décors : colonne de départ, ligne de départ, largeur en tuiles
 
@@ -67,7 +68,7 @@ def rangement(m, images_sources):
     sections, placements = [], {}
     base = 0
     for monde in m['ordre']:
-        els = [e for e in m['elements'] if e['monde'] == monde]
+        els = [e for e in m['elements'] if e['monde'] == monde and not e.get('supprime')]
         if monde == 'commun':
             # section « commun » : rangement en étagères sur toute la largeur de la feuille
             x = y = h_etagere = 0
@@ -114,7 +115,7 @@ def construire(m, images_sources):
     sections, placements, lignes = rangement(m, images_sources)
     nouvelle = Image.new('RGBA', (COLONNES * T, lignes * T), (0, 0, 0, 0))
     correspondance = {}     # ancien numéro de tuile -> nouveau numéro (numéros de la feuille, de 0 à N-1)
-    for e in m['elements']:
+    for e in [e for e in m['elements'] if not e.get('supprime')]:
         nc, nl = placements[e['nom']]
         w, h = taille(e, images_sources)
         if 'source' in e:
@@ -203,7 +204,7 @@ def cmd_reconstruire(m, appliquer, images_sources=None):
         nouvelle.save(apercu)
     # contrôle : aucun pixel ne doit être perdu ni inventé
     attendu = 0
-    for e in m['elements']:
+    for e in [e for e in m['elements'] if not e.get('supprime')]:
         if 'source' in e: attendu += pixels_opaques(images_sources[e['nom']])
         else:
             c, l, w, h = e['rect']
@@ -234,6 +235,7 @@ def cmd_reconstruire(m, appliquer, images_sources=None):
     for chemin in sorted(glob.glob(os.path.join(RACINE, 'assets', 'maps', '*.json')) + glob.glob(os.path.join(RACINE, 'assets', 'maps', '*.tmx'))):
         remapper_carte(chemin, correspondance, taille_nv, True)
     m['colonnes'] = COLONNES
+    m['elements'] = [e for e in m['elements'] if not e.get('supprime')]
     for e in m['elements']:
         c, l = placements[e['nom']]
         w, h = taille(e, images_sources)

@@ -324,8 +324,8 @@
    "monde": "jardin",
    "type": "arbre_demi_gauche",
    "rect": [
-    24,
-    4,
+    20,
+    7,
     2,
     3
    ]
@@ -335,8 +335,8 @@
    "monde": "jardin",
    "type": "arbre_demi_droite",
    "rect": [
-    27,
-    4,
+    23,
+    7,
     2,
     3
    ]
@@ -423,8 +423,8 @@
    "monde": "nuit",
    "type": "arbre_demi_gauche",
    "rect": [
-    24,
-    14,
+    20,
+    17,
     2,
     3
    ]
@@ -434,8 +434,8 @@
    "monde": "nuit",
    "type": "arbre_demi_droite",
    "rect": [
-    27,
-    14,
+    23,
+    17,
     2,
     3
    ]
@@ -522,8 +522,8 @@
    "monde": "automne",
    "type": "arbre_demi_gauche",
    "rect": [
-    24,
-    34,
+    20,
+    37,
     2,
     3
    ]
@@ -533,8 +533,8 @@
    "monde": "automne",
    "type": "arbre_demi_droite",
    "rect": [
-    27,
-    34,
+    23,
+    37,
     2,
     3
    ]
@@ -621,8 +621,8 @@
    "monde": "apocalypse",
    "type": "arbre_demi_gauche",
    "rect": [
-    24,
-    44,
+    20,
+    47,
     2,
     3
    ]
@@ -632,8 +632,8 @@
    "monde": "apocalypse",
    "type": "arbre_demi_droite",
    "rect": [
-    27,
-    44,
+    23,
+    47,
     2,
     3
    ]
@@ -720,8 +720,8 @@
    "monde": "magie",
    "type": "arbre_demi_gauche",
    "rect": [
-    24,
-    54,
+    20,
+    57,
     2,
     3
    ]
@@ -731,65 +731,65 @@
    "monde": "magie",
    "type": "arbre_demi_droite",
    "rect": [
-    27,
-    54,
+    23,
+    57,
     2,
     3
    ]
   },
   {
-   "nom": "arbre_jardin_angle",
+   "nom": "arbre_jardin_foret",
    "monde": "jardin",
-   "type": "arbre_angle",
+   "type": "arbre_foret",
    "rect": [
-    32,
-    2,
+    26,
     3,
-    1
-   ]
-  },
-  {
-   "nom": "arbre_nuit_angle",
-   "monde": "nuit",
-   "type": "arbre_angle",
-   "rect": [
-    32,
     12,
-    3,
-    1
+    7
    ]
   },
   {
-   "nom": "arbre_automne_angle",
+   "nom": "arbre_nuit_foret",
+   "monde": "nuit",
+   "type": "arbre_foret",
+   "rect": [
+    26,
+    13,
+    12,
+    7
+   ]
+  },
+  {
+   "nom": "arbre_automne_foret",
    "monde": "automne",
-   "type": "arbre_angle",
+   "type": "arbre_foret",
    "rect": [
-    32,
-    32,
-    3,
-    1
+    26,
+    33,
+    12,
+    7
    ]
   },
   {
-   "nom": "arbre_apocalypse_angle",
+   "nom": "arbre_apocalypse_foret",
    "monde": "apocalypse",
-   "type": "arbre_angle",
+   "type": "arbre_foret",
    "rect": [
-    32,
-    42,
-    3,
-    1
+    26,
+    43,
+    12,
+    7
    ]
   },
   {
-   "nom": "arbre_magie_angle",
+   "nom": "arbre_magie_foret",
    "monde": "magie",
-   "type": "arbre_angle",
+   "type": "arbre_foret",
    "rect": [
-    32,
-    52,
-    3,
-    1
+    26,
+    53,
+    12,
+    7
    ]
   }
  ]
