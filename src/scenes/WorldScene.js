@@ -38,6 +38,7 @@ import {
   WORLD_ART,
   DIALOGUE,
   STAR_BOUNCE,
+  BUBBLES,
 } from '../utils/constants.js';
 
 /**
@@ -371,8 +372,11 @@ export default class WorldScene extends Phaser.Scene {
       this.stars.forEach((star) => star.disableBody(true, true));
     }
 
-    // * Les bulles à éclater, posées dans Tiled (le joueur existe déjà). Quand elles sont toutes éclatées : étape suivante
-    this.bubbles = createBubbles(this, map, this.player, () => {});
+    // * Les bulles à éclater, posées dans Tiled (le joueur existe déjà). L'étoile du monde est cachée tant qu'il en reste ;
+    // quand elles sont toutes éclatées, elle apparaît au centre de la carte.
+    this.bubbles = createBubbles(this, map, this.player, () => this.revealStarAtCenter(true));
+    if (this.bubbles.total > 0) this.stars.forEach((star) => star.disableBody(true, true));
+    if (this.bubbles.done) this.revealStarAtCenter(false); // bulles déjà éclatées lors d'une visite précédente
 
     // * La boîte de dialogue des personnages (cachée tant qu'on ne parle à personne)
     this.dialogue = new DialogueBox(this);
@@ -442,6 +446,16 @@ export default class WorldScene extends Phaser.Scene {
     if (!star) return;
     const from = { x: npc.x, y: npc.y, headHeight: npc.height * STAR_BOUNCE.HEAD_HEIGHT_RATIO };
     bounceStar(this, star, from, (x, y) => this.isFreeGround(x, y, npc));
+  }
+
+  /** L'étoile du monde apparaît au centre de la carte (récompense des bulles), avec un petit effet de rebond si animated. */
+  revealStarAtCenter(animated) {
+    const star = this.stars[0];
+    if (!star || star.starId === undefined) return;
+    star.enableBody(true, this.map.widthInPixels / 2, this.map.heightInPixels / 2, true, true);
+    if (!animated) return;
+    star.setScale(0);
+    this.tweens.add({ targets: star, scale: 1, duration: BUBBLES.STAR_POP.DURATION_MS, ease: BUBBLES.STAR_POP.EASE });
   }
 
   /** L'étoile peut-elle se poser en ce point du sol ? (ni mur, ni eau, ni miroir, ni personnage, ni hors de la carte) */

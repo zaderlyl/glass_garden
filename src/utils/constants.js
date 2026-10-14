@@ -311,6 +311,7 @@ export const BUBBLES = {
   FLOAT: { AMPLITUDE: 5, DURATION_MS: 1200 }, // la bulle flotte : va-et-vient vertical, en pixels et en millisecondes
   HITBOX_RADIUS: 12, // la zone qui éclate la bulle au contact du joueur
   DEPTH: 9, // devant le joueur, derrière le décor du dessus (10)
+  STAR_POP: { DURATION_MS: 700, EASE: 'Back.easeOut' }, // l'étoile apparaît au centre de la carte en grossissant, avec un petit rebond
 };
 
 // * L'étoile qui saute de la tête du personnage quand l'énigme est résolue (voir StarBounce.js).

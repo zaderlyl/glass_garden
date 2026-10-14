@@ -17,6 +17,12 @@
 
 import { BUBBLES } from '../utils/constants.js';
 
+// Les cartes dont toutes les bulles ont été éclatées, retenues pour toute la partie (une scène est recréée à chaque visite)
+const completedMaps = new Set();
+
+/** Toutes les bulles de cette carte ont-elles déjà été éclatées ? */
+export const isBubblesComplete = (mapKey) => completedMaps.has(mapKey);
+
 /** Charge l'image des bulles (à appeler dans preload). */
 export function preloadBubbles(scene) {
   scene.load.spritesheet(BUBBLES.KEY, BUBBLES.IMAGE, { frameWidth: BUBBLES.FRAME_SIZE, frameHeight: BUBBLES.FRAME_SIZE });
@@ -25,7 +31,8 @@ export function preloadBubbles(scene) {
 /**
  * Crée une bulle à la position de chaque objet « bubble » de la carte.
  * @param {Function} onAllBurst  Appelée quand la dernière bulle a éclaté (jamais appelée s'il n'y a aucune bulle)
- * @returns {{ total: number, burst: number }} le nombre de bulles de la carte et le nombre déjà éclatées
+ * Si toutes les bulles de la carte ont déjà été éclatées lors d'une visite précédente, il n'y en a plus.
+ * @returns {{ total: number, burst: number, done: boolean }} le nombre de bulles, le nombre déjà éclatées, et si c'est fini
  */
 export function createBubbles(scene, map, player, onAllBurst) {
   // * L'animation d'éclatement est globale à tout le jeu : on ne la crée qu'une fois
@@ -39,7 +46,8 @@ export function createBubbles(scene, map, player, onAllBurst) {
   }
 
   const objects = map.getObjectLayer('objects').objects.filter((object) => (object.class || object.type) === 'bubble');
-  const state = { total: objects.length, burst: 0 };
+  if (objects.length > 0 && isBubblesComplete(scene.mapKey)) return { total: 0, burst: 0, done: true };
+  const state = { total: objects.length, burst: 0, done: false };
 
   objects.forEach((object) => {
     const bubble = scene.physics.add.sprite(object.x, object.y, BUBBLES.KEY, 0).setDepth(BUBBLES.DEPTH);
@@ -65,7 +73,10 @@ export function createBubbles(scene, map, player, onAllBurst) {
       bubble.once('animationcomplete', () => bubble.destroy());
 
       state.burst += 1;
-      if (state.burst === state.total) onAllBurst?.();
+      if (state.burst === state.total) {
+        completedMaps.add(scene.mapKey);
+        onAllBurst?.();
+      }
     });
   });
 
