@@ -10,6 +10,7 @@ import { irisClose, irisOpen } from '../systems/TransitionSystem.js';
 import { preloadNpcs, createNpcs } from '../systems/NpcSystem.js';
 import DialogueBox, { isRiddleSolved } from '../systems/DialogueSystem.js';
 import { bounceStar } from '../systems/StarBounce.js';
+import { preloadBubbles, createBubbles } from '../systems/BubbleSystem.js';
 import { DIALOGUES } from '../data/dialogues.js';
 import { pickVariant } from '../utils/helpers.js';
 import {
@@ -93,6 +94,9 @@ export default class WorldScene extends Phaser.Scene {
 
     // * Les images des personnages non joueurs (voir NPCS dans constants.js)
     preloadNpcs(this);
+
+    // * L'image des bulles du monde magique (voir BUBBLES dans constants.js)
+    preloadBubbles(this);
 
     // * Le spritesheet du miroir, découpé en images de 32 x 32 pixels.
     // Un sprite créé sans préciser l'image affiche la première (le miroir entier).
@@ -366,6 +370,9 @@ export default class WorldScene extends Phaser.Scene {
     if (this.npcs.some((npc) => DIALOGUES[npc.npcName]?.riddle && !isRiddleSolved(npc.npcName))) {
       this.stars.forEach((star) => star.disableBody(true, true));
     }
+
+    // * Les bulles à éclater, posées dans Tiled (le joueur existe déjà). Quand elles sont toutes éclatées : étape suivante
+    this.bubbles = createBubbles(this, map, this.player, () => {});
 
     // * La boîte de dialogue des personnages (cachée tant qu'on ne parle à personne)
     this.dialogue = new DialogueBox(this);
