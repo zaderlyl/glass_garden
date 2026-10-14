@@ -136,6 +136,12 @@
                  "name":"caisse",
                  "opacity":1,
                  "point":true,
+                 "properties":[
+                        {
+                         "name":"hasStar",
+                         "type":"bool",
+                         "value":true
+                        }],
                  "rotation":0,
                  "type":"crate",
                  "visible":true,

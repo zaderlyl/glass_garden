@@ -13,6 +13,9 @@
 //   2. Lui donner la classe « crate » (CRATE.TILED_CLASS).
 //   3. Facultatif : une propriété personnalisée « hitPoints » (entier) = nombre de tirs pour la casser.
 //      Sans elle, CRATE.DEFAULT_HIT_POINTS (1).
+//   4. Facultatif : une propriété personnalisée « hasStar » (booléen) cochée sur la caisse qui CACHE l'étoile du monde.
+//      L'étoile reste invisible jusque-là ; quand cette caisse casse, elle appelle scene.onStarCrateBroken(caisse)
+//      (WorldScene la fait sauter de la caisse).
 //
 // * COMMENT L'UTILISER (dans une scène de monde qui a un joueur et un groupe de balles)
 //   import { preloadCrate, createCrates } from '../systems/CrateSystem.js';
@@ -112,6 +115,9 @@ function playHitEffect(scene, crate) {
   scene.time.delayedCall(VFX.DEBRIS_LIFETIME_MS.MAX + 100, () => debris.destroy());
 
   scene.cameras.main.shake(VFX.SHAKE.DURATION_MS, VFX.SHAKE.INTENSITY);
+
+  // * C'était la caisse qui cache l'étoile : la scène la fait apparaître
+  if (crate.hasStar) scene.onStarCrateBroken?.(crate);
 }
 
 /**
@@ -137,6 +143,7 @@ export function createCrates(scene, map, player, bullets) {
 
       const crate = crates.create(x, y, CRATE.KEY);
       crate.hitPoints = getTiledProperty(object, 'hitPoints', CRATE.DEFAULT_HIT_POINTS);
+      crate.hasStar = getTiledProperty(object, 'hasStar', false);
       crate.onHit = () => playHitEffect(scene, crate);
 
       // * La teinte de ce monde, s'il en a une (voir CRATE.WORLD_TINTS)

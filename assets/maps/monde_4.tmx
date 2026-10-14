@@ -77,6 +77,9 @@
    <point/>
   </object>
   <object id="10" name="caisse" type="crate" x="336" y="304">
+   <properties>
+    <property name="hasStar" type="bool" value="true"/>
+   </properties>
    <point/>
   </object>
   <object id="11" name="caisse" type="crate" x="176" y="400">
