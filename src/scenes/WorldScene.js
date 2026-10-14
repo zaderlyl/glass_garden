@@ -10,6 +10,7 @@ import { irisClose, irisOpen } from '../systems/TransitionSystem.js';
 import { preloadNpcs, createNpcs } from '../systems/NpcSystem.js';
 import DialogueBox, { isRiddleSolved } from '../systems/DialogueSystem.js';
 import { bounceStar } from '../systems/StarBounce.js';
+import Dash from '../systems/DashSystem.js';
 import { preloadBubbles, createBubbles } from '../systems/BubbleSystem.js';
 import { DIALOGUES } from '../data/dialogues.js';
 import { pickVariant } from '../utils/helpers.js';
@@ -269,6 +270,7 @@ export default class WorldScene extends Phaser.Scene {
 
     // * Dans quelle direction regarde le joueur ? C'est la direction des tirs. Il commence de face (vers le bas).
     this.facing = 'down';
+    this.dash = new Dash(this, this.player); // le dash du joueur (voir DashSystem.js)
 
     // * La boîte de collision est plus petite que l'image et placée au niveau des pieds :
     // le joueur peut passer « devant » un mur sans que sa tête ne le bloque
@@ -593,7 +595,10 @@ export default class WorldScene extends Phaser.Scene {
 
     // * On donne une vitesse (en pixels par seconde) : c'est la physique Phaser qui déplace
     // le joueur et qui l'arrête contre les murs
-    this.player.setVelocity(x * PLAYER.SPEED, y * PLAYER.SPEED);
+    // * Le dash impose sa propre vitesse tant qu'il dure ; sinon la vitesse normale
+    if (!this.dash.update(this.input1, { x, y }, this.facing)) {
+      this.player.setVelocity(x * PLAYER.SPEED, y * PLAYER.SPEED);
+    }
 
     // * Y a-t-il un miroir assez proche pour interagir ?
     const nearMirror = this.mirrors.find(
