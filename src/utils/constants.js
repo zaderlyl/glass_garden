@@ -221,6 +221,19 @@ export const DASH = {
   EASE_POWER: 1.5, // la forme du ralentissement : 0 = vitesse constante ; plus c'est grand, plus il part fort puis freine tôt
   COOLDOWN_MS: 500, // pause avant de pouvoir recommencer, comptée à partir de la fin du dash
   STRETCH: { ALONG: 1.4, ACROSS: 0.75 }, // l'étirement du personnage au départ du dash : plus long dans le sens du mouvement, plus fin en travers (1 = normal)
+  // * La poussière soulevée au départ et à l'arrivée du dash : de petits carrés beiges qui s'éparpillent et s'estompent
+  DUST: {
+    TEXTURE: 'dust_puff', // texture générée par le code
+    SIZE: 4, // côté d'un carré, en pixels
+    COLOR: 0xe6dcc4,
+    COUNT_START: 7, // nombre de nuages au départ, derrière le joueur
+    COUNT_END: 5, // nombre de nuages à l'arrivée
+    LIFESPAN_MS: 420,
+    SPEED: { MIN: 25, MAX: 70 }, // la vitesse d'éjection, en pixels par seconde
+    ALPHA: 0.75,
+    SCALE: { START: 1, END: 2.4 },
+    FEET_OFFSET: 13, // la poussière part des pieds : cette distance sous le centre du joueur
+  },
   GHOST: { INTERVAL_MS: 30, FADE_MS: 220, ALPHA: 0.5, TINT: 0xaaddff }, // les images fantômes laissées derrière le joueur
 };
 

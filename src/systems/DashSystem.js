@@ -9,6 +9,8 @@
 //
 // Pendant le dash, le personnage est ÉTIRÉ dans le sens du mouvement (puis reprend sa forme). Pour ne pas toucher à sa
 // boîte de collision (qui suit l'échelle du sprite), on cache le vrai sprite et on affiche à sa place une copie étirée.
+//
+// Un petit nuage de poussière se soulève derrière le joueur au départ, et à l'endroit où il s'arrête.
 // Les murs, l'eau et les miroirs bloquent toujours le joueur : c'est la physique qui le déplace, on ne change que sa vitesse.
 //
 // * COMMENT L'UTILISER
@@ -18,6 +20,8 @@
 // =====================================================================================
 
 import { DASH } from '../utils/constants.js';
+
+const { DUST } = DASH;
 
 // Les directions regardées, en vecteurs (pour dasher à l'arrêt)
 const FACING_VECTORS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
@@ -32,6 +36,24 @@ export default class Dash {
     this.nextGhostAt = 0;
     this.direction = [0, 0];
     this.visual = null; // la copie étirée affichée à la place du joueur pendant le dash
+
+    // * La poussière : de petits carrés beiges (une texture générée une fois), éjectés dans le sens opposé au dash
+    if (!scene.textures.exists(DUST.TEXTURE)) {
+      const square = scene.make.graphics({ add: false });
+      square.fillStyle(DUST.COLOR, 1).fillRect(0, 0, DUST.SIZE, DUST.SIZE);
+      square.generateTexture(DUST.TEXTURE, DUST.SIZE, DUST.SIZE);
+      square.destroy();
+    }
+    this.dust = scene.add.particles(0, 0, DUST.TEXTURE, {
+      emitting: false,
+      lifespan: DUST.LIFESPAN_MS,
+      alpha: { start: DUST.ALPHA, end: 0 },
+      scale: { start: DUST.SCALE.START, end: DUST.SCALE.END },
+      // Chaque nuage part à l'opposé du dash, avec un peu de dispersion : vitesse = -direction x vitesse + hasard
+      speedX: { onEmit: () => -this.direction[0] * Phaser.Math.Between(DUST.SPEED.MIN, DUST.SPEED.MAX) + Phaser.Math.Between(-20, 20) },
+      speedY: { onEmit: () => -this.direction[1] * Phaser.Math.Between(DUST.SPEED.MIN, DUST.SPEED.MAX) + Phaser.Math.Between(-20, 20) },
+    });
+    scene.children.moveBelow(this.dust, player); // la poussière passe derrière le joueur
 
     // * L'étirement suit l'horloge, pas update() : si le dash est interrompu (dialogue, transition), le joueur réapparaît
     scene.events.on('update', () => this.updateVisual());
@@ -54,6 +76,7 @@ export default class Dash {
       this.endsAt = now + DASH.DURATION_MS;
       this.readyAt = this.endsAt + DASH.COOLDOWN_MS;
       this.nextGhostAt = now;
+      this.puff(DUST.COUNT_START);
     }
 
     if (now >= this.endsAt) return false;
@@ -74,6 +97,11 @@ export default class Dash {
     return true;
   }
 
+  // Soulève quelques nuages de poussière aux pieds du joueur
+  puff(count) {
+    this.dust.explode(count, this.player.x, this.player.y + DUST.FEET_OFFSET);
+  }
+
   // Affiche la copie étirée du joueur pendant le dash, la retire à la fin
   updateVisual() {
     const now = this.scene.time.now;
@@ -84,6 +112,7 @@ export default class Dash {
         this.visual.destroy();
         this.visual = null;
         this.player.setAlpha(1);
+        this.puff(DUST.COUNT_END);
       }
       return;
     }
