@@ -29,6 +29,9 @@ export default {
     default: 'arcade',
     arcade: {
       gravity: { x: 0, y: 0 },
+      // * Jusqu'à quelle profondeur (en pixels) un joueur qui a pénétré dans un mur est repoussé. Le défaut (16) laisse passer
+      // à travers les murs un joueur qui avance de plus de 16 pixels par image : le début du dash va jusqu'à ~26 pixels.
+      tileBias: 32,
       debug: false, // passer à true pour voir les boîtes de collision pendant le développement
     },
   },
