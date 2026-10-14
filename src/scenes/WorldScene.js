@@ -12,7 +12,7 @@ import DialogueBox, { isRiddleSolved } from '../systems/DialogueSystem.js';
 import { bounceStar } from '../systems/StarBounce.js';
 import Dash from '../systems/DashSystem.js';
 import { preloadBubbles, createBubbles } from '../systems/BubbleSystem.js';
-import { preloadEnemies, createEnemies } from '../systems/EnemySystem.js';
+import { preloadEnemies, createEnemies, updateEnemies } from '../systems/EnemySystem.js';
 import { DIALOGUES } from '../data/dialogues.js';
 import { pickVariant } from '../utils/helpers.js';
 import {
@@ -391,6 +391,11 @@ export default class WorldScene extends Phaser.Scene {
 
     // * Les ennemis, posés dans Tiled
     this.enemies = createEnemies(this, map);
+    // * Les ennemis sont bloqués par les murs, l'eau, les caisses, les personnages, les miroirs et entre eux
+    [this.walls, this.waterBlockers, this.crates, ...this.npcs, ...this.mirrors].filter(Boolean).forEach((obstacle) => {
+      this.physics.add.collider(this.enemies, obstacle);
+    });
+    this.physics.add.collider(this.enemies, this.enemies);
 
     // * La boîte de dialogue des personnages (cachée tant qu'on ne parle à personne)
     this.dialogue = new DialogueBox(this);
@@ -576,6 +581,9 @@ export default class WorldScene extends Phaser.Scene {
       this.winGame();
       return;
     }
+
+    // * Les ennemis vivent à chaque image, sauf pendant un dialogue ou une transition (ils s'arrêtent)
+    updateEnemies(this, this.enemies, this.player, this.dialogue.isOpen || this.transitioning);
 
     // * Pendant la fermeture de l'iris (on a pris un miroir) : le joueur est figé, on ne lit ni les déplacements, ni le tir, ni l'interaction
     if (this.transitioning) {

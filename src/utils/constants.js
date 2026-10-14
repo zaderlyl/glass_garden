@@ -338,6 +338,8 @@ export const ENEMIES = {
     frameCount: 3,
     frames: { left: 0, right: 1, up: 2, down: 0 }, // l'image à afficher selon la direction regardée
     hitbox: { WIDTH: 18, HEIGHT: 14 }, // la zone de collision aux pieds, en pixels
+    speed: 220, // la vitesse de poursuite, en pixels par seconde (le joueur va à 300 : on peut toujours fuir)
+    sight: 280, // à quelle distance il voit le joueur, en pixels
   },
   // La capuche bleue : 4 images de face, jouées en boucle (elle bouge un peu même à l'arrêt)
   capuche: {
@@ -346,9 +348,23 @@ export const ENEMIES = {
     frameCount: 4,
     idle: { KEY: 'capuche_idle', FRAME_RATE: 5 }, // l'animation en boucle
     hitbox: { WIDTH: 18, HEIGHT: 14 },
+    speed: 160, // plus lente que le faucheur
+    sight: 200, // et elle voit moins loin
   },
 };
 export const ENEMY_FRAME_SIZE = 32;
+
+// * Le comportement des ennemis (voir EnemySystem.js) : au repos près de leur point, ils fondent sur le joueur dès qu'ils le voient
+// (distance < sight ET aucun mur entre eux), le perdent s'il s'éloigne ou se cache, vont voir où ils l'ont vu en dernier, puis rentrent.
+export const ENEMY_AI = {
+  LOSE_SIGHT_FACTOR: 1.3, // un ennemi lancé à la poursuite ne lâche le joueur que s'il dépasse sight x ce facteur
+  SEARCH: { WAIT_MS: 1200, MAX_MS: 3500 }, // il attend sur place au dernier endroit vu, et abandonne au bout de MAX_MS (s'il est coincé)
+  ARRIVE_DISTANCE: 8, // à moins de ce nombre de pixels d'un point, il est « arrivé »
+  RETURN_SPEED_FACTOR: 0.7, // il rentre plus calmement qu'il ne poursuit
+  WANDER: { RADIUS: 40, SPEED_FACTOR: 0.35, PAUSE_MS: { MIN: 1200, MAX: 2800 } }, // au repos : il flâne autour de son point
+  LINE_OF_SIGHT_STEP: 12, // on regarde un point tous les 12 pixels entre l'ennemi et le joueur : un mur sur le chemin coupe la vue
+  ALERT: { TEXT: '!', COLOR: '#ff4040', SIZE: '30px', RISE: 16, DURATION_MS: 600 }, // le « ! » qui monte quand il repère le joueur
+};
 
 // * Les bulles du monde magique (voir BubbleSystem.js) : posées dans Tiled par des objets « point » de classe « bubble »
 // (le point est le CENTRE de la bulle). Le joueur les éclate en les touchant ; quand elles sont toutes éclatées,
