@@ -243,6 +243,7 @@ export const NPCS = {
 export const DEPTH = {
   ABOVE_PLAYER: 10, // calque decor_above
   UI: 20,
+  DIALOGUE: 30, // la boîte de dialogue des personnages (devant l'interface)
   TRANSITION: 100, // le calque noir de la transition entre deux mondes (devant tout)
 };
 
@@ -285,6 +286,17 @@ export const FONT_SIZE = {
   STARS: '28px',
   VICTORY: '48px',
   CONTROL_MODE: '20px',
+};
+
+// * Boîte de dialogue des personnages (voir DialogueSystem.js) : un cadre en parchemin en bas de l'écran.
+// Les textes des personnages sont dans src/data/dialogues.js.
+export const DIALOGUE = {
+  INTERACT_DISTANCE: 90, // à quelle distance du personnage on peut lui parler, en pixels
+  BOX: { WIDTH: 1100, HEIGHT: 170, RIDDLE_HEIGHT: 310, BOTTOM_MARGIN: 40, RADIUS: 26, PADDING: 36, BORDER: 5 }, // RIDDLE_HEIGHT : le cadre agrandi d'une énigme
+  MAX_CHOICES: 4, // nombre de réponses d'une énigme (en 2 colonnes)
+  FONT_SIZE: '34px',
+  TYPE_DELAY_MS: 28, // délai entre deux lettres (effet machine à écrire)
+  COLORS: { PAPER: 0xf7e8c2, BORDER: 0xb98a3f, TEXT: '#7a4a12', TAG: 0x7a4a12, TAG_TEXT: '#f7e8c2' },
 };
 
 // * Modes de jeu : chacun a son propre meilleur temps

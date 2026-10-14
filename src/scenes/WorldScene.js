@@ -1,6 +1,6 @@
 import InputManager from '../systems/InputManager.js';
 import timer from '../systems/TimerSystem.js';
-import { RecolteEtoiles } from '../systems/RecolteEtoiles.js';
+import { RecolteEtoiles, recolterEtoile } from '../systems/RecolteEtoiles.js';
 import { areAllStarsCollected } from '../systems/StarSystem.js';
 import { createBulletAnimations, explodeBullet, shoot } from '../systems/fonctionTir.js';
 import { preloadCrate, createCrates } from '../systems/CrateSystem.js';
@@ -8,6 +8,8 @@ import { isMirrorUsed, markMirrorUsed, shouldMirrorDisappear } from '../systems/
 import { applyTint } from '../systems/TintSystem.js';
 import { irisClose, irisOpen } from '../systems/TransitionSystem.js';
 import { preloadNpcs, createNpcs } from '../systems/NpcSystem.js';
+import DialogueBox from '../systems/DialogueSystem.js';
+import { DIALOGUES } from '../data/dialogues.js';
 import { pickVariant } from '../utils/helpers.js';
 import {
   SCENES,
@@ -31,6 +33,7 @@ import {
   FONT_SIZE,
   SMOKE,
   WORLD_ART,
+  DIALOGUE,
 } from '../utils/constants.js';
 
 /**
@@ -353,6 +356,9 @@ export default class WorldScene extends Phaser.Scene {
     // * Les personnages non joueurs, posés dans Tiled (le joueur existe déjà : ils le bloquent comme un mur)
     this.npcs = createNpcs(this, map, this.player);
 
+    // * La boîte de dialogue des personnages (cachée tant qu'on ne parle à personne)
+    this.dialogue = new DialogueBox(this);
+
     // * La teinte du monde, posée en dernier : tous les calques et les sprites d'eau existent. Le jardin n'en a pas.
     applyTint(map, this.waterSprites, WORLD_TINTS[this.getWorldName()]);
 
@@ -405,10 +411,16 @@ export default class WorldScene extends Phaser.Scene {
    * Selon la version de Tiled, la classe s'appelle « class » ou « type » : on lit les deux.
    */
   createStars(map) {
-    map
+    this.stars = map
       .getObjectLayer('objects')
       .objects.filter((object) => (object.class || object.type) === 'star')
-      .forEach((object) => RecolteEtoiles(this.player, this, object.x, object.y));
+      .map((object) => RecolteEtoiles(this.player, this, object.x, object.y))
+      .filter(Boolean); // une étoile déjà prise n'est pas recréée
+  }
+
+  /** Donne au joueur les étoiles de ce monde, sans qu'il les ramasse (récompense de l'énigme). */
+  giveWorldStars() {
+    this.stars.forEach((star) => recolterEtoile(this, star));
   }
 
   // Le nom de ce monde, comme dans la table WORLDS (ex. « hub », « world_1 »)
@@ -502,6 +514,13 @@ export default class WorldScene extends Phaser.Scene {
       return;
     }
 
+    // * Pendant un dialogue : le joueur est figé, les touches servent au dialogue (avancer, choisir une réponse)
+    if (this.dialogue.isOpen) {
+      this.player.setVelocity(0, 0);
+      this.dialogue.update(this.input1);
+      return;
+    }
+
     // * Direction souhaitée, déjà normalisée en diagonale par l'InputManager
     const { x, y } = this.input1.getMove();
 
@@ -538,12 +557,27 @@ export default class WorldScene extends Phaser.Scene {
         INTERACT_DISTANCE,
     );
 
+    // * Y a-t-il un personnage assez proche pour lui parler ?
+    const nearNpc = this.npcs.find(
+      (npc) =>
+        Phaser.Math.Distance.Between(this.player.x, this.player.y, npc.body.center.x, npc.body.center.y) <
+        DIALOGUE.INTERACT_DISTANCE,
+    );
+
     // On ne réécrit pas le texte pendant l'affichage du message d'interaction
     // ? Les touches sont provisoires : à changer avec les boutons de la borne (voir BINDINGS dans InputManager)
     // TODO(équipe): changer le message d'interaction (utiliser une icône de touche au-dessus des miroirs)
     if (!this.messageActive) {
       // * La touche affichée suit le mode de contrôle (I en arcade, E en pc) : l'aide ne ment jamais
-      this.hint.setText(nearMirror ? `${this.input1.getKeyLabel('interact')} : entrer dans le miroir` : '');
+      const key = this.input1.getKeyLabel('interact');
+      this.hint.setText(nearMirror ? `${key} : entrer dans le miroir` : nearNpc ? `${key} : parler` : '');
+    }
+
+    // * Parler à un personnage proche (un miroir proche passe avant)
+    if (nearNpc && !nearMirror && this.input1.justPressed('interact')) {
+      this.hint.setText('');
+      this.dialogue.open(nearNpc.npcName, DIALOGUES[nearNpc.npcName], () => this.giveWorldStars());
+      return;
     }
 
     if (nearMirror && this.input1.justPressed('interact')) {
