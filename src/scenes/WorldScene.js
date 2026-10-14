@@ -7,6 +7,7 @@ import { preloadCrate, createCrates } from '../systems/CrateSystem.js';
 import { isMirrorUsed, markMirrorUsed, shouldMirrorDisappear } from '../systems/MirrorSystem.js';
 import { applyTint } from '../systems/TintSystem.js';
 import { irisClose, irisOpen } from '../systems/TransitionSystem.js';
+import { preloadNpcs, createNpcs } from '../systems/NpcSystem.js';
 import { pickVariant } from '../utils/helpers.js';
 import {
   SCENES,
@@ -83,6 +84,9 @@ export default class WorldScene extends Phaser.Scene {
       frameWidth: BULLET.FRAME_SIZE,
       frameHeight: BULLET.FRAME_SIZE,
     });
+
+    // * Les images des personnages non joueurs (voir NPCS dans constants.js)
+    preloadNpcs(this);
 
     // * Le spritesheet du miroir, découpé en images de 32 x 32 pixels.
     // Un sprite créé sans préciser l'image affiche la première (le miroir entier).
@@ -345,6 +349,9 @@ export default class WorldScene extends Phaser.Scene {
 
     // * La fumée des cheminées, posée dans Tiled
     this.createSmokes(map);
+
+    // * Les personnages non joueurs, posés dans Tiled (le joueur existe déjà : ils le bloquent comme un mur)
+    this.npcs = createNpcs(this, map, this.player);
 
     // * La teinte du monde, posée en dernier : tous les calques et les sprites d'eau existent. Le jardin n'en a pas.
     applyTint(map, this.waterSprites, WORLD_TINTS[this.getWorldName()]);

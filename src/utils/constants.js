@@ -141,6 +141,7 @@ export const ASSETS = {
   TILESET_DECO: 'tileset_deco', // les décors
   WATER: 'water',
   MIRROR: 'mirror',
+  NPC_ENIGME: 'pnj_enigme', // le personnage de l'énigme (voir NPCS)
 };
 
 // * Les cartes de chaque monde : la clé Phaser et le fichier JSON exporté de Tiled. Le nom du monde est celui de WORLDS.
@@ -227,6 +228,16 @@ export const MIRROR_VANISH = { KEY: 'mirror_vanish', FIRST_FRAME: 0, LAST_FRAME:
 
 // Durée d'affichage d'un message d'interaction, en millisecondes
 export const MESSAGE_DURATION_MS = 2000;
+
+// * Les personnages non joueurs (PNJ) : posés dans Tiled par un objet « point » de classe « npc », dont le NOM est la clé de cette table.
+// Le point marque l'endroit où le personnage a les pieds (le bas de l'image, centré). La zone de blocage est un petit rectangle aux pieds.
+export const NPCS = {
+  enigme: {
+    key: ASSETS.NPC_ENIGME,
+    image: 'assets/images/sprites/pnj_enigme.png',
+    hitbox: { WIDTH: 36, HEIGHT: 14 }, // la zone qui bloque le joueur, en pixels
+  },
+};
 
 // * Ordre d'affichage : plus la valeur est grande, plus l'élément est devant
 export const DEPTH = {
