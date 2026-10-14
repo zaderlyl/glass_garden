@@ -12,7 +12,7 @@
 // * COMMENT L'UTILISER
 //   import { irisClose, irisOpen } from '../systems/TransitionSystem.js';
 //   irisClose(this, mirror.x, mirror.y, () => this.scene.start(...));
-//   irisOpen(this, mirror.x, mirror.y);
+//   irisOpen(this, mirror.x, mirror.y, () => { /* le monde est entièrement visible */ });
 // =====================================================================================
 
 import { GAME_WIDTH, GAME_HEIGHT, DEPTH, TRANSITION } from '../utils/constants.js';
@@ -53,8 +53,9 @@ export function irisClose(scene, x, y, onComplete) {
 }
 
 /** Ouvre un cercle depuis le point (x, y) : l'écran noir laisse apparaître le monde, puis le calque est retiré. */
-export function irisOpen(scene, x, y) {
-  const cover = animateIris(scene, x, y, 0, fullRadius(x, y), TRANSITION.IRIS_OPEN_MS, TRANSITION.IRIS_OPEN_EASE, () =>
-    cover.destroy(),
-  );
+export function irisOpen(scene, x, y, onComplete) {
+  const cover = animateIris(scene, x, y, 0, fullRadius(x, y), TRANSITION.IRIS_OPEN_MS, TRANSITION.IRIS_OPEN_EASE, () => {
+    cover.destroy();
+    onComplete?.();
+  });
 }

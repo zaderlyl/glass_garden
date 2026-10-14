@@ -273,6 +273,7 @@ export default class WorldScene extends Phaser.Scene {
     // * Au retour dans le jardin, le miroir pris pour partir est marqué « utilisé » AVANT de créer les miroirs.
     // Si c'est le cas, vanishingWorld contient son nom : ce miroir va jouer son animation de disparition.
     const vanishingWorld = this.markReturnMirrorUsed();
+    let vanishingMirror = null; // le miroir qui disparaît, s'il y en a un (son animation attend la fin de l'iris)
 
     map
       .getObjectLayer('objects')
@@ -297,13 +298,14 @@ export default class WorldScene extends Phaser.Scene {
         const collider = this.physics.add.collider(this.player, mirror);
 
         if (vanishing) {
-          // * Il joue son animation de disparition. Il n'est PAS ajouté à this.mirrors : on ne peut plus l'utiliser.
+          // * Il va jouer son animation de disparition. Il n'est PAS ajouté à this.mirrors : on ne peut plus l'utiliser.
           // Quand l'animation est finie, on détruit le miroir et sa collision pour de bon.
-          mirror.play(MIRROR_VANISH.KEY);
+          // L'animation démarre quand l'iris est entièrement ouvert (voir la fin de create), pour qu'on la voie.
           mirror.once('animationcomplete', () => {
             collider.destroy();
             mirror.destroy();
           });
+          vanishingMirror = mirror;
           return;
         }
 
@@ -347,10 +349,12 @@ export default class WorldScene extends Phaser.Scene {
     // * La teinte du monde, posée en dernier : tous les calques et les sprites d'eau existent. Le jardin n'en a pas.
     applyTint(map, this.waterSprites, WORLD_TINTS[this.getWorldName()]);
 
-    // * Arrivée par un miroir : le cercle s'ouvre depuis le miroir d'arrivée (ou depuis le joueur s'il a disparu)
+    // * Arrivée par un miroir : le cercle s'ouvre depuis le miroir d'arrivée (ou depuis celui qui disparaît).
+    // Le joueur n'est pas figé pendant l'ouverture : il peut déjà bouger. Sans miroir d'origine (premier lancement),
+    // il n'y a pas de transition.
     if (this.fromWorld) {
-      const arrival = this.mirrors.find((mirror) => mirror.world === this.fromWorld) || this.player;
-      irisOpen(this, arrival.x, arrival.y); // le joueur n'est pas figé pendant l'ouverture : il peut déjà bouger
+      const arrival = this.mirrors.find((mirror) => mirror.world === this.fromWorld) || vanishingMirror || this.player;
+      irisOpen(this, arrival.x, arrival.y, () => vanishingMirror?.play(MIRROR_VANISH.KEY));
     }
   }
 
