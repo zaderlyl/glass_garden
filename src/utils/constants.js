@@ -143,6 +143,8 @@ export const ASSETS = {
   MIRROR: 'mirror',
   NPC_ENIGME: 'pnj_enigme', // le personnage de l'énigme (voir NPCS)
   BUBBLE: 'bulle', // les bulles du monde magique (voir BUBBLES)
+  ENEMY_FAUCHEUR: 'ennemi_faucheur', // les ennemis du monde du rêve (voir ENEMIES)
+  ENEMY_CAPUCHE: 'ennemi_capuche',
 };
 
 // * Les cartes de chaque monde : la clé Phaser et le fichier JSON exporté de Tiled. Le nom du monde est celui de WORLDS.
@@ -325,6 +327,28 @@ export const DIALOGUE = {
   TYPE_DELAY_MS: 28, // délai entre deux lettres (effet machine à écrire)
   COLORS: { PAPER: 0xf7e8c2, BORDER: 0xb98a3f, TEXT: '#7a4a12', TAG: 0x7a4a12, TAG_TEXT: '#f7e8c2' },
 };
+
+// * Les ennemis (voir EnemySystem.js) : posés dans Tiled par un objet « point » de classe « enemy », dont le NOM est la clé de
+// cette table. Le point marque l'endroit où l'ennemi a les pieds (le bas de l'image, centré). Chaque image fait 32 x 32 pixels.
+export const ENEMIES = {
+  // Le faucheur : 3 images de la feuille (faux à gauche, faux à droite, de dos)
+  faucheur: {
+    key: ASSETS.ENEMY_FAUCHEUR,
+    image: 'assets/images/sprites/ennemi_faucheur.png',
+    frameCount: 3,
+    frames: { left: 0, right: 1, up: 2, down: 0 }, // l'image à afficher selon la direction regardée
+    hitbox: { WIDTH: 18, HEIGHT: 14 }, // la zone de collision aux pieds, en pixels
+  },
+  // La capuche bleue : 4 images de face, jouées en boucle (elle bouge un peu même à l'arrêt)
+  capuche: {
+    key: ASSETS.ENEMY_CAPUCHE,
+    image: 'assets/images/sprites/ennemi_capuche.png',
+    frameCount: 4,
+    idle: { KEY: 'capuche_idle', FRAME_RATE: 5 }, // l'animation en boucle
+    hitbox: { WIDTH: 18, HEIGHT: 14 },
+  },
+};
+export const ENEMY_FRAME_SIZE = 32;
 
 // * Les bulles du monde magique (voir BubbleSystem.js) : posées dans Tiled par des objets « point » de classe « bubble »
 // (le point est le CENTRE de la bulle). Le joueur les éclate en les touchant ; quand elles sont toutes éclatées,

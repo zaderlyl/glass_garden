@@ -12,6 +12,7 @@ import DialogueBox, { isRiddleSolved } from '../systems/DialogueSystem.js';
 import { bounceStar } from '../systems/StarBounce.js';
 import Dash from '../systems/DashSystem.js';
 import { preloadBubbles, createBubbles } from '../systems/BubbleSystem.js';
+import { preloadEnemies, createEnemies } from '../systems/EnemySystem.js';
 import { DIALOGUES } from '../data/dialogues.js';
 import { pickVariant } from '../utils/helpers.js';
 import {
@@ -99,6 +100,9 @@ export default class WorldScene extends Phaser.Scene {
 
     // * L'image des bulles du monde magique (voir BUBBLES dans constants.js)
     preloadBubbles(this);
+
+    // * Les images des ennemis (voir ENEMIES dans constants.js)
+    preloadEnemies(this);
 
     // * Le spritesheet du miroir, découpé en images de 32 x 32 pixels.
     // Un sprite créé sans préciser l'image affiche la première (le miroir entier).
@@ -384,6 +388,9 @@ export default class WorldScene extends Phaser.Scene {
     this.bubbles = createBubbles(this, map, this.player, () => this.revealStarAtCenter(true));
     if (this.bubbles.total > 0) this.stars.forEach((star) => star.disableBody(true, true));
     if (this.bubbles.done) this.revealStarAtCenter(false); // bulles déjà éclatées lors d'une visite précédente
+
+    // * Les ennemis, posés dans Tiled
+    this.enemies = createEnemies(this, map);
 
     // * La boîte de dialogue des personnages (cachée tant qu'on ne parle à personne)
     this.dialogue = new DialogueBox(this);
