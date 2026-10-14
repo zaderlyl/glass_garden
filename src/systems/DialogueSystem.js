@@ -19,6 +19,9 @@ import { GAME_WIDTH, GAME_HEIGHT, DEPTH, FONT_FAMILY, DIALOGUE } from '../utils/
 // Les énigmes résolues, retenues pour toute la partie (une scène est recréée à chaque visite d'un monde)
 const solvedRiddles = new Set();
 
+/** L'énigme de ce personnage est-elle résolue ? */
+export const isRiddleSolved = (id) => solvedRiddles.has(id);
+
 export default class DialogueBox {
   constructor(scene) {
     this.scene = scene;

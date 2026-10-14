@@ -1,6 +1,6 @@
 import InputManager from '../systems/InputManager.js';
 import timer from '../systems/TimerSystem.js';
-import { RecolteEtoiles, recolterEtoile } from '../systems/RecolteEtoiles.js';
+import { RecolteEtoiles } from '../systems/RecolteEtoiles.js';
 import { areAllStarsCollected } from '../systems/StarSystem.js';
 import { createBulletAnimations, explodeBullet, shoot } from '../systems/fonctionTir.js';
 import { preloadCrate, createCrates } from '../systems/CrateSystem.js';
@@ -8,10 +8,12 @@ import { isMirrorUsed, markMirrorUsed, shouldMirrorDisappear } from '../systems/
 import { applyTint } from '../systems/TintSystem.js';
 import { irisClose, irisOpen } from '../systems/TransitionSystem.js';
 import { preloadNpcs, createNpcs } from '../systems/NpcSystem.js';
-import DialogueBox from '../systems/DialogueSystem.js';
+import DialogueBox, { isRiddleSolved } from '../systems/DialogueSystem.js';
+import { bounceStar } from '../systems/StarBounce.js';
 import { DIALOGUES } from '../data/dialogues.js';
 import { pickVariant } from '../utils/helpers.js';
 import {
+  GAME_WIDTH,
   SCENES,
   ASSETS,
   TILE_SIZE,
@@ -34,6 +36,7 @@ import {
   SMOKE,
   WORLD_ART,
   DIALOGUE,
+  STAR_BOUNCE,
 } from '../utils/constants.js';
 
 /**
@@ -227,6 +230,7 @@ export default class WorldScene extends Phaser.Scene {
 
     // * On construit la carte à partir du JSON Tiled
     const map = this.make.tilemap({ key: this.mapKey });
+    this.map = map;
 
     // ! Le 1er nom est celui du tileset DANS Tiled, le 2e est la clé de l'image à utiliser.
     // Une carte peut utiliser plusieurs tilesets : on les passe tous à chaque calque, qui prend dans chacun
@@ -244,6 +248,8 @@ export default class WorldScene extends Phaser.Scene {
     // * L'eau : créée ici, entre le décor du dessous et les murs, pour passer sous le joueur
     const waterBlockers = this.createAnimatedTiles(map, tilesets, waterTexture, animationSuffix);
     const walls = map.createLayer('walls', tilesets);
+    this.walls = walls; // gardés pour savoir où l'étoile de l'énigme peut se poser (voir isFreeGround)
+    this.waterBlockers = waterBlockers;
 
     // * Toute tuile posée dans le calque « walls » devient un obstacle (-1 = case vide)
     walls.setCollisionByExclusion([-1]);
@@ -356,6 +362,11 @@ export default class WorldScene extends Phaser.Scene {
     // * Les personnages non joueurs, posés dans Tiled (le joueur existe déjà : ils le bloquent comme un mur)
     this.npcs = createNpcs(this, map, this.player);
 
+    // * Une étoile gardée par une énigme n'apparaît qu'une fois l'énigme résolue (elle saute alors de la tête du personnage)
+    if (this.npcs.some((npc) => DIALOGUES[npc.npcName]?.riddle && !isRiddleSolved(npc.npcName))) {
+      this.stars.forEach((star) => star.disableBody(true, true));
+    }
+
     // * La boîte de dialogue des personnages (cachée tant qu'on ne parle à personne)
     this.dialogue = new DialogueBox(this);
 
@@ -418,9 +429,22 @@ export default class WorldScene extends Phaser.Scene {
       .filter(Boolean); // une étoile déjà prise n'est pas recréée
   }
 
-  /** Donne au joueur les étoiles de ce monde, sans qu'il les ramasse (récompense de l'énigme). */
-  giveWorldStars() {
-    this.stars.forEach((star) => recolterEtoile(this, star));
+  /** L'étoile du monde saute de la tête du personnage (récompense de l'énigme), puis le joueur la ramasse. */
+  revealWorldStar(npc) {
+    const star = this.stars.find((s) => !s.active);
+    if (!star) return;
+    const from = { x: npc.x, y: npc.y, headHeight: npc.height * STAR_BOUNCE.HEAD_HEIGHT_RATIO };
+    bounceStar(this, star, from, (x, y) => this.isFreeGround(x, y, npc));
+  }
+
+  /** L'étoile peut-elle se poser en ce point du sol ? (ni mur, ni eau, ni miroir, ni personnage, ni hors de la carte) */
+  isFreeGround(x, y, npc) {
+    const margin = 20;
+    if (x < margin || y < margin || x > GAME_WIDTH - margin || y > this.map.heightInPixels - margin) return false;
+    if (this.walls.hasTileAtWorldXY(x, y)) return false;
+    if (this.waterBlockers?.getChildren().some((zone) => Math.abs(zone.x - x) <= 20 && Math.abs(zone.y - y) <= 20)) return false;
+    if (this.mirrors.some((mirror) => Phaser.Math.Distance.Between(x, y, mirror.x, mirror.y) < 40)) return false;
+    return !this.npcs.some((other) => Math.abs(other.x - x) < 34 && y > other.y - 24 && y < other.y + 12);
   }
 
   // Le nom de ce monde, comme dans la table WORLDS (ex. « hub », « world_1 »)
@@ -576,7 +600,7 @@ export default class WorldScene extends Phaser.Scene {
     // * Parler à un personnage proche (un miroir proche passe avant)
     if (nearNpc && !nearMirror && this.input1.justPressed('interact')) {
       this.hint.setText('');
-      this.dialogue.open(nearNpc.npcName, DIALOGUES[nearNpc.npcName], () => this.giveWorldStars());
+      this.dialogue.open(nearNpc.npcName, DIALOGUES[nearNpc.npcName], () => this.revealWorldStar(nearNpc));
       return;
     }
 

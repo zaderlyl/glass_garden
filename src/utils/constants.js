@@ -299,6 +299,20 @@ export const DIALOGUE = {
   COLORS: { PAPER: 0xf7e8c2, BORDER: 0xb98a3f, TEXT: '#7a4a12', TAG: 0x7a4a12, TAG_TEXT: '#f7e8c2' },
 };
 
+// * L'étoile qui saute de la tête du personnage quand l'énigme est résolue (voir StarBounce.js).
+// Une direction au hasard (un chemin libre), puis des rebonds de plus en plus petits, comme une vraie balle.
+export const STAR_BOUNCE = {
+  HEAD_HEIGHT_RATIO: 0.85, // la hauteur de la tête, en part de la hauteur de l'image du personnage
+  LAUNCH_SPEED: 300, // la vitesse vers le haut au départ, en pixels par seconde
+  GRAVITY: 1100, // pixels par seconde au carré
+  RESTITUTION: 0.55, // chaque rebond repart avec 55 % de la vitesse de l'impact
+  MIN_BOUNCE_SPEED: 90, // en dessous, l'étoile ne rebondit plus : elle s'arrête
+  SPEED: { MIN: 85, MAX: 115 }, // la vitesse de déplacement au sol, en pixels par seconde (la distance reste courte)
+  SPIN_DEG_PER_S: 300, // l'étoile tourne sur elle-même en l'air
+  DEPTH: 9, // devant le joueur, derrière le décor du dessus (10)
+  DIRECTIONS: 24, // combien de directions on essaie (réparties sur le cercle) pour trouver un chemin libre
+};
+
 // * Modes de jeu : chacun a son propre meilleur temps
 export const GAME_MODES = {
   SOLO: 'solo',
