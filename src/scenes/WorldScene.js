@@ -6,7 +6,7 @@ import { createBulletAnimations, explodeBullet, shoot } from '../systems/fonctio
 import { preloadCrate, createCrates } from '../systems/CrateSystem.js';
 import { isMirrorUsed, markMirrorUsed, shouldMirrorDisappear } from '../systems/MirrorSystem.js';
 import { applyTint } from '../systems/TintSystem.js';
-import { irisClose } from '../systems/TransitionSystem.js';
+import { irisClose, irisOpen } from '../systems/TransitionSystem.js';
 import { pickVariant } from '../utils/helpers.js';
 import {
   SCENES,
@@ -346,6 +346,12 @@ export default class WorldScene extends Phaser.Scene {
 
     // * La teinte du monde, posée en dernier : tous les calques et les sprites d'eau existent. Le jardin n'en a pas.
     applyTint(map, this.waterSprites, WORLD_TINTS[this.getWorldName()]);
+
+    // * Arrivée par un miroir : le cercle s'ouvre depuis le miroir d'arrivée (ou depuis le joueur s'il a disparu)
+    if (this.fromWorld) {
+      const arrival = this.mirrors.find((mirror) => mirror.world === this.fromWorld) || this.player;
+      irisOpen(this, arrival.x, arrival.y);
+    }
   }
 
   /**

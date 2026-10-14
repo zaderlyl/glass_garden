@@ -235,10 +235,12 @@ export const DEPTH = {
   TRANSITION: 100, // le calque noir de la transition entre deux mondes (devant tout)
 };
 
-// * Transition entre deux mondes : un « iris », un cercle noir qui se referme sur le miroir pris (voir TransitionSystem.js)
+// * Transition entre deux mondes : un « iris », un cercle noir qui se referme sur le miroir pris puis s'ouvre sur le miroir d'arrivée (voir TransitionSystem.js)
 export const TRANSITION = {
   IRIS_CLOSE_MS: 600, // durée de la fermeture du cercle
-  IRIS_EASE: 'Quad.easeIn', // le cercle accélère en se refermant
+  IRIS_CLOSE_EASE: 'Quad.easeIn', // le cercle accélère en se refermant
+  IRIS_OPEN_MS: 600, // durée de l'ouverture du cercle
+  IRIS_OPEN_EASE: 'Quad.easeOut', // le cercle ralentit en s'ouvrant
   COLOR: 0x000000,
 };
 
