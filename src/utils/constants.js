@@ -142,6 +142,7 @@ export const ASSETS = {
   WATER: 'water',
   MIRROR: 'mirror',
   NPC_ENIGME: 'pnj_enigme', // le personnage de l'énigme (voir NPCS)
+  BUBBLE: 'bulle', // les bulles du monde magique (voir BUBBLES)
 };
 
 // * Les cartes de chaque monde : la clé Phaser et le fichier JSON exporté de Tiled. Le nom du monde est celui de WORLDS.
@@ -297,6 +298,22 @@ export const DIALOGUE = {
   FONT_SIZE: '34px',
   TYPE_DELAY_MS: 28, // délai entre deux lettres (effet machine à écrire)
   COLORS: { PAPER: 0xf7e8c2, BORDER: 0xb98a3f, TEXT: '#7a4a12', TAG: 0x7a4a12, TAG_TEXT: '#f7e8c2' },
+};
+
+// * Les bulles du monde magique (voir BubbleSystem.js) : posées dans Tiled par des objets « point » de classe « bubble »
+// (le point est le CENTRE de la bulle). Le joueur les éclate en les touchant ; quand elles sont toutes éclatées,
+// l'étoile du monde apparaît. L'image est une bande de 32 x 32 : la bulle entière (image 0), puis son éclatement.
+export const BUBBLES = {
+  KEY: ASSETS.BUBBLE,
+  IMAGE: 'assets/images/sprites/bulle.png',
+  FRAME_SIZE: 32,
+  BURST: { KEY: 'bubble_burst', FIRST_FRAME: 1, LAST_FRAME: 6, FRAME_RATE: 16 }, // l'animation d'éclatement
+  // La bulle flotte et dérive doucement autour de son point : un balancement horizontal et un vertical de rythmes différents
+  // (ça trace une petite boucle irrégulière). Amplitudes en pixels, vitesses en radians par seconde (6,28 = un tour par seconde).
+  FLOAT: { AMPLITUDE_X: 10, AMPLITUDE_Y: 6, SPEED_X: 1.3, SPEED_Y: 2.1 },
+  HITBOX_RADIUS: 12, // la zone qui éclate la bulle au contact du joueur
+  DEPTH: 9, // devant le joueur, derrière le décor du dessus (10)
+  STAR_POP: { DURATION_MS: 700, EASE: 'Back.easeOut' }, // l'étoile apparaît au centre de la carte en grossissant, avec un petit rebond
 };
 
 // * L'étoile qui saute de la tête du personnage quand l'énigme est résolue (voir StarBounce.js).
