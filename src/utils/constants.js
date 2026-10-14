@@ -141,6 +141,7 @@ export const ASSETS = {
   TILESET_DECO: 'tileset_deco', // les décors
   WATER: 'water',
   MIRROR: 'mirror',
+  NPC_ENIGME: 'pnj_enigme', // le personnage de l'énigme (voir NPCS)
 };
 
 // * Les cartes de chaque monde : la clé Phaser et le fichier JSON exporté de Tiled. Le nom du monde est celui de WORLDS.
@@ -228,10 +229,21 @@ export const MIRROR_VANISH = { KEY: 'mirror_vanish', FIRST_FRAME: 0, LAST_FRAME:
 // Durée d'affichage d'un message d'interaction, en millisecondes
 export const MESSAGE_DURATION_MS = 2000;
 
+// * Les personnages non joueurs (PNJ) : posés dans Tiled par un objet « point » de classe « npc », dont le NOM est la clé de cette table.
+// Le point marque l'endroit où le personnage a les pieds (le bas de l'image, centré). La zone de blocage est un petit rectangle aux pieds.
+export const NPCS = {
+  enigme: {
+    key: ASSETS.NPC_ENIGME,
+    image: 'assets/images/sprites/pnj_enigme.png',
+    hitbox: { WIDTH: 36, HEIGHT: 14 }, // la zone qui bloque le joueur, en pixels
+  },
+};
+
 // * Ordre d'affichage : plus la valeur est grande, plus l'élément est devant
 export const DEPTH = {
   ABOVE_PLAYER: 10, // calque decor_above
   UI: 20,
+  DIALOGUE: 30, // la boîte de dialogue des personnages (devant l'interface)
   TRANSITION: 100, // le calque noir de la transition entre deux mondes (devant tout)
 };
 
@@ -274,6 +286,31 @@ export const FONT_SIZE = {
   STARS: '28px',
   VICTORY: '48px',
   CONTROL_MODE: '20px',
+};
+
+// * Boîte de dialogue des personnages (voir DialogueSystem.js) : un cadre en parchemin en bas de l'écran.
+// Les textes des personnages sont dans src/data/dialogues.js.
+export const DIALOGUE = {
+  INTERACT_DISTANCE: 90, // à quelle distance du personnage on peut lui parler, en pixels
+  BOX: { WIDTH: 1100, HEIGHT: 170, RIDDLE_HEIGHT: 310, BOTTOM_MARGIN: 40, RADIUS: 26, PADDING: 36, BORDER: 5 }, // RIDDLE_HEIGHT : le cadre agrandi d'une énigme
+  MAX_CHOICES: 4, // nombre de réponses d'une énigme (en 2 colonnes)
+  FONT_SIZE: '34px',
+  TYPE_DELAY_MS: 28, // délai entre deux lettres (effet machine à écrire)
+  COLORS: { PAPER: 0xf7e8c2, BORDER: 0xb98a3f, TEXT: '#7a4a12', TAG: 0x7a4a12, TAG_TEXT: '#f7e8c2' },
+};
+
+// * L'étoile qui saute de la tête du personnage quand l'énigme est résolue (voir StarBounce.js).
+// Une direction au hasard (un chemin libre), puis des rebonds de plus en plus petits, comme une vraie balle.
+export const STAR_BOUNCE = {
+  HEAD_HEIGHT_RATIO: 0.85, // la hauteur de la tête, en part de la hauteur de l'image du personnage
+  LAUNCH_SPEED: 300, // la vitesse vers le haut au départ, en pixels par seconde
+  GRAVITY: 1100, // pixels par seconde au carré
+  RESTITUTION: 0.55, // chaque rebond repart avec 55 % de la vitesse de l'impact
+  MIN_BOUNCE_SPEED: 90, // en dessous, l'étoile ne rebondit plus : elle s'arrête
+  SPEED: { MIN: 85, MAX: 115 }, // la vitesse de déplacement au sol, en pixels par seconde (la distance reste courte)
+  SPIN_DEG_PER_S: 300, // l'étoile tourne sur elle-même en l'air
+  DEPTH: 9, // devant le joueur, derrière le décor du dessus (10)
+  DIRECTIONS: 24, // combien de directions on essaie (réparties sur le cercle) pour trouver un chemin libre
 };
 
 // * Modes de jeu : chacun a son propre meilleur temps

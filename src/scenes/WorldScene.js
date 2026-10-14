@@ -7,8 +7,13 @@ import { preloadCrate, createCrates } from '../systems/CrateSystem.js';
 import { isMirrorUsed, markMirrorUsed, shouldMirrorDisappear } from '../systems/MirrorSystem.js';
 import { applyTint } from '../systems/TintSystem.js';
 import { irisClose, irisOpen } from '../systems/TransitionSystem.js';
+import { preloadNpcs, createNpcs } from '../systems/NpcSystem.js';
+import DialogueBox, { isRiddleSolved } from '../systems/DialogueSystem.js';
+import { bounceStar } from '../systems/StarBounce.js';
+import { DIALOGUES } from '../data/dialogues.js';
 import { pickVariant } from '../utils/helpers.js';
 import {
+  GAME_WIDTH,
   SCENES,
   ASSETS,
   TILE_SIZE,
@@ -30,6 +35,8 @@ import {
   FONT_SIZE,
   SMOKE,
   WORLD_ART,
+  DIALOGUE,
+  STAR_BOUNCE,
 } from '../utils/constants.js';
 
 /**
@@ -83,6 +90,9 @@ export default class WorldScene extends Phaser.Scene {
       frameWidth: BULLET.FRAME_SIZE,
       frameHeight: BULLET.FRAME_SIZE,
     });
+
+    // * Les images des personnages non joueurs (voir NPCS dans constants.js)
+    preloadNpcs(this);
 
     // * Le spritesheet du miroir, découpé en images de 32 x 32 pixels.
     // Un sprite créé sans préciser l'image affiche la première (le miroir entier).
@@ -220,6 +230,7 @@ export default class WorldScene extends Phaser.Scene {
 
     // * On construit la carte à partir du JSON Tiled
     const map = this.make.tilemap({ key: this.mapKey });
+    this.map = map;
 
     // ! Le 1er nom est celui du tileset DANS Tiled, le 2e est la clé de l'image à utiliser.
     // Une carte peut utiliser plusieurs tilesets : on les passe tous à chaque calque, qui prend dans chacun
@@ -237,6 +248,8 @@ export default class WorldScene extends Phaser.Scene {
     // * L'eau : créée ici, entre le décor du dessous et les murs, pour passer sous le joueur
     const waterBlockers = this.createAnimatedTiles(map, tilesets, waterTexture, animationSuffix);
     const walls = map.createLayer('walls', tilesets);
+    this.walls = walls; // gardés pour savoir où l'étoile de l'énigme peut se poser (voir isFreeGround)
+    this.waterBlockers = waterBlockers;
 
     // * Toute tuile posée dans le calque « walls » devient un obstacle (-1 = case vide)
     walls.setCollisionByExclusion([-1]);
@@ -346,6 +359,17 @@ export default class WorldScene extends Phaser.Scene {
     // * La fumée des cheminées, posée dans Tiled
     this.createSmokes(map);
 
+    // * Les personnages non joueurs, posés dans Tiled (le joueur existe déjà : ils le bloquent comme un mur)
+    this.npcs = createNpcs(this, map, this.player);
+
+    // * Une étoile gardée par une énigme n'apparaît qu'une fois l'énigme résolue (elle saute alors de la tête du personnage)
+    if (this.npcs.some((npc) => DIALOGUES[npc.npcName]?.riddle && !isRiddleSolved(npc.npcName))) {
+      this.stars.forEach((star) => star.disableBody(true, true));
+    }
+
+    // * La boîte de dialogue des personnages (cachée tant qu'on ne parle à personne)
+    this.dialogue = new DialogueBox(this);
+
     // * La teinte du monde, posée en dernier : tous les calques et les sprites d'eau existent. Le jardin n'en a pas.
     applyTint(map, this.waterSprites, WORLD_TINTS[this.getWorldName()]);
 
@@ -398,10 +422,29 @@ export default class WorldScene extends Phaser.Scene {
    * Selon la version de Tiled, la classe s'appelle « class » ou « type » : on lit les deux.
    */
   createStars(map) {
-    map
+    this.stars = map
       .getObjectLayer('objects')
       .objects.filter((object) => (object.class || object.type) === 'star')
-      .forEach((object) => RecolteEtoiles(this.player, this, object.x, object.y));
+      .map((object) => RecolteEtoiles(this.player, this, object.x, object.y))
+      .filter(Boolean); // une étoile déjà prise n'est pas recréée
+  }
+
+  /** L'étoile du monde saute de la tête du personnage (récompense de l'énigme), puis le joueur la ramasse. */
+  revealWorldStar(npc) {
+    const star = this.stars.find((s) => !s.active);
+    if (!star) return;
+    const from = { x: npc.x, y: npc.y, headHeight: npc.height * STAR_BOUNCE.HEAD_HEIGHT_RATIO };
+    bounceStar(this, star, from, (x, y) => this.isFreeGround(x, y, npc));
+  }
+
+  /** L'étoile peut-elle se poser en ce point du sol ? (ni mur, ni eau, ni miroir, ni personnage, ni hors de la carte) */
+  isFreeGround(x, y, npc) {
+    const margin = 20;
+    if (x < margin || y < margin || x > GAME_WIDTH - margin || y > this.map.heightInPixels - margin) return false;
+    if (this.walls.hasTileAtWorldXY(x, y)) return false;
+    if (this.waterBlockers?.getChildren().some((zone) => Math.abs(zone.x - x) <= 20 && Math.abs(zone.y - y) <= 20)) return false;
+    if (this.mirrors.some((mirror) => Phaser.Math.Distance.Between(x, y, mirror.x, mirror.y) < 40)) return false;
+    return !this.npcs.some((other) => Math.abs(other.x - x) < 34 && y > other.y - 24 && y < other.y + 12);
   }
 
   // Le nom de ce monde, comme dans la table WORLDS (ex. « hub », « world_1 »)
@@ -495,6 +538,13 @@ export default class WorldScene extends Phaser.Scene {
       return;
     }
 
+    // * Pendant un dialogue : le joueur est figé, les touches servent au dialogue (avancer, choisir une réponse)
+    if (this.dialogue.isOpen) {
+      this.player.setVelocity(0, 0);
+      this.dialogue.update(this.input1);
+      return;
+    }
+
     // * Direction souhaitée, déjà normalisée en diagonale par l'InputManager
     const { x, y } = this.input1.getMove();
 
@@ -531,12 +581,27 @@ export default class WorldScene extends Phaser.Scene {
         INTERACT_DISTANCE,
     );
 
+    // * Y a-t-il un personnage assez proche pour lui parler ?
+    const nearNpc = this.npcs.find(
+      (npc) =>
+        Phaser.Math.Distance.Between(this.player.x, this.player.y, npc.body.center.x, npc.body.center.y) <
+        DIALOGUE.INTERACT_DISTANCE,
+    );
+
     // On ne réécrit pas le texte pendant l'affichage du message d'interaction
     // ? Les touches sont provisoires : à changer avec les boutons de la borne (voir BINDINGS dans InputManager)
     // TODO(équipe): changer le message d'interaction (utiliser une icône de touche au-dessus des miroirs)
     if (!this.messageActive) {
       // * La touche affichée suit le mode de contrôle (I en arcade, E en pc) : l'aide ne ment jamais
-      this.hint.setText(nearMirror ? `${this.input1.getKeyLabel('interact')} : entrer dans le miroir` : '');
+      const key = this.input1.getKeyLabel('interact');
+      this.hint.setText(nearMirror ? `${key} : entrer dans le miroir` : nearNpc ? `${key} : parler` : '');
+    }
+
+    // * Parler à un personnage proche (un miroir proche passe avant)
+    if (nearNpc && !nearMirror && this.input1.justPressed('interact')) {
+      this.hint.setText('');
+      this.dialogue.open(nearNpc.npcName, DIALOGUES[nearNpc.npcName], () => this.revealWorldStar(nearNpc));
+      return;
     }
 
     if (nearMirror && this.input1.justPressed('interact')) {

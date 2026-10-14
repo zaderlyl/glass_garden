@@ -76,15 +76,15 @@
                 {
                  "height":0,
                  "id":1,
-                 "name":"spawn",
+                 "name":"enigme",
                  "opacity":1,
                  "point":true,
                  "rotation":0,
-                 "type":"spawn",
+                 "type":"npc",
                  "visible":true,
                  "width":0,
-                 "x":621.685,
-                 "y":374.19
+                 "x":546.95018804243,
+                 "y":442.89781099325
                 }, 
                 {
                  "height":64,
@@ -116,6 +116,19 @@
                  "width":0,
                  "x":578.702,
                  "y":134.012
+                }, 
+                {
+                 "height":0,
+                 "id":9,
+                 "name":"spawn",
+                 "opacity":1,
+                 "point":true,
+                 "rotation":0,
+                 "type":"spawn",
+                 "visible":true,
+                 "width":0,
+                 "x":630.424300867888,
+                 "y":358.003857280617
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -256,7 +269,7 @@
          "y":0
         }],
  "nextlayerid":8,
- "nextobjectid":9,
+ "nextobjectid":10,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.0",
