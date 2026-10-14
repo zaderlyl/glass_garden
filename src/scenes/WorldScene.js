@@ -194,7 +194,7 @@ export default class WorldScene extends Phaser.Scene {
     // ! Sinon un message encore affiché au moment de partir bloquerait le texte d'aide au retour
     this.messageActive = false;
     this.gameWon = false;
-    this.transitioning = false; // vrai pendant le passage par un miroir : le joueur est figé (voir update)
+    this.transitioning = false; // vrai pendant la FERMETURE de l'iris, quand on prend un miroir : le joueur est figé (voir update)
     this.waterSprites = []; // les sprites de l'eau animée de CETTE visite (remplis par createAnimatedTiles)
 
     // * Le chronomètre et son affichage sont globaux : ils ne dépendent pas du monde.
@@ -350,10 +350,7 @@ export default class WorldScene extends Phaser.Scene {
     // * Arrivée par un miroir : le cercle s'ouvre depuis le miroir d'arrivée (ou depuis le joueur s'il a disparu)
     if (this.fromWorld) {
       const arrival = this.mirrors.find((mirror) => mirror.world === this.fromWorld) || this.player;
-      this.transitioning = true;
-      irisOpen(this, arrival.x, arrival.y, () => {
-        this.transitioning = false;
-      });
+      irisOpen(this, arrival.x, arrival.y); // le joueur n'est pas figé pendant l'ouverture : il peut déjà bouger
     }
   }
 
@@ -488,7 +485,7 @@ export default class WorldScene extends Phaser.Scene {
       return;
     }
 
-    // * Pendant le passage par un miroir : le joueur est figé, on ne lit ni les déplacements, ni le tir, ni l'interaction
+    // * Pendant la fermeture de l'iris (on a pris un miroir) : le joueur est figé, on ne lit ni les déplacements, ni le tir, ni l'interaction
     if (this.transitioning) {
       this.player.setVelocity(0, 0);
       return;
