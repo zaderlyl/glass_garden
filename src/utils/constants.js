@@ -400,6 +400,10 @@ export const CRATE = {
   FRAME_SIZE: 32, // l'image fait 32 x 32 pixels, comme une tuile
   TILED_CLASS: 'crate', // la classe de l'objet dans Tiled
   DEFAULT_HIT_POINTS: 1, // nombre de tirs pour la casser, si l'objet Tiled n'a pas de propriété « hitPoints »
+  // * Une teinte par monde (le nom du monde est celui de WORLDS) : elle multiplie les couleurs de la caisse, pour qu'elle
+  // aille avec l'ambiance du monde (comme les teintes des mondes, voir TINTS). Un monde absent garde l'orange d'origine.
+  // Les éclats de bois prennent la même teinte.
+  WORLD_TINTS: { world_4: 0x8a7a66 }, // apocalypse : bois brun cendré, usé
   // * Effets visuels (VFX). Éclat blanc à chaque coup qui ne casse pas, gerbe d'éclats de bois quand elle casse.
   VFX: {
     DEBRIS_KEY: 'crate_debris', // texture générée par le code : un petit carré blanc, coloré par les teintes ci-dessous

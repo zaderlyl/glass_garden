@@ -68,6 +68,15 @@ function ensureDebrisTexture(scene) {
 }
 
 /**
+ * Multiplie deux couleurs (0xRRGGBB), comme le fait une teinte Phaser. Sans teinte (undefined), la couleur reste telle quelle.
+ */
+function multiplyColors(color, tint) {
+  if (tint === undefined) return color;
+  const channel = (shift) => Math.round((((color >> shift) & 0xff) * ((tint >> shift) & 0xff)) / 255);
+  return (channel(16) << 16) | (channel(8) << 8) | channel(0);
+}
+
+/**
  * L'effet d'un coup reçu par une caisse : un éclat blanc, ou la casse si c'était le dernier coup.
  * Appelé par hitTarget AVANT que la caisse ne soit détruite : elle a encore sa position et ses points de vie à jour.
  * @param {Phaser.Scene} scene
@@ -79,7 +88,11 @@ function playHitEffect(scene, crate) {
   if (crate.hitPoints > 0) {
     // * Elle tient encore : un éclat blanc très court
     crate.setTintFill(0xffffff);
-    scene.time.delayedCall(VFX.HIT_FLASH_MS, () => crate.active && crate.clearTint());
+    scene.time.delayedCall(VFX.HIT_FLASH_MS, () => {
+      if (!crate.active) return;
+      crate.clearTint();
+      if (crate.worldTint !== undefined) crate.setTint(crate.worldTint); // elle reprend la teinte de son monde
+    });
     return;
   }
 
@@ -89,7 +102,7 @@ function playHitEffect(scene, crate) {
     angle: { min: 0, max: 360 },
     lifespan: { min: VFX.DEBRIS_LIFETIME_MS.MIN, max: VFX.DEBRIS_LIFETIME_MS.MAX },
     scale: { start: 1, end: 0 },
-    tint: VFX.DEBRIS_COLORS,
+    tint: VFX.DEBRIS_COLORS.map((color) => multiplyColors(color, crate.worldTint)),
     emitting: false,
   });
   debris.setDepth(VFX.DEBRIS_DEPTH);
@@ -125,6 +138,10 @@ export function createCrates(scene, map, player, bullets) {
       const crate = crates.create(x, y, CRATE.KEY);
       crate.hitPoints = getTiledProperty(object, 'hitPoints', CRATE.DEFAULT_HIT_POINTS);
       crate.onHit = () => playHitEffect(scene, crate);
+
+      // * La teinte de ce monde, s'il en a une (voir CRATE.WORLD_TINTS)
+      crate.worldTint = CRATE.WORLD_TINTS[scene.getWorldName()];
+      if (crate.worldTint !== undefined) crate.setTint(crate.worldTint);
     });
 
   scene.physics.add.collider(player, crates);
