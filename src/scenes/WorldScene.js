@@ -6,6 +6,7 @@ import { createBulletAnimations, explodeBullet, shoot } from '../systems/fonctio
 import { preloadCrate, createCrates } from '../systems/CrateSystem.js';
 import { isMirrorUsed, markMirrorUsed, shouldMirrorDisappear } from '../systems/MirrorSystem.js';
 import { applyTint } from '../systems/TintSystem.js';
+import { irisClose, irisOpen } from '../systems/TransitionSystem.js';
 import { pickVariant } from '../utils/helpers.js';
 import {
   SCENES,
@@ -193,6 +194,7 @@ export default class WorldScene extends Phaser.Scene {
     // ! Sinon un message encore affiché au moment de partir bloquerait le texte d'aide au retour
     this.messageActive = false;
     this.gameWon = false;
+    this.transitioning = false; // vrai pendant la FERMETURE de l'iris, quand on prend un miroir : le joueur est figé (voir update)
     this.waterSprites = []; // les sprites de l'eau animée de CETTE visite (remplis par createAnimatedTiles)
 
     // * Le chronomètre et son affichage sont globaux : ils ne dépendent pas du monde.
@@ -271,6 +273,7 @@ export default class WorldScene extends Phaser.Scene {
     // * Au retour dans le jardin, le miroir pris pour partir est marqué « utilisé » AVANT de créer les miroirs.
     // Si c'est le cas, vanishingWorld contient son nom : ce miroir va jouer son animation de disparition.
     const vanishingWorld = this.markReturnMirrorUsed();
+    let vanishingMirror = null; // le miroir qui disparaît, s'il y en a un (son animation attend la fin de l'iris)
 
     map
       .getObjectLayer('objects')
@@ -295,13 +298,14 @@ export default class WorldScene extends Phaser.Scene {
         const collider = this.physics.add.collider(this.player, mirror);
 
         if (vanishing) {
-          // * Il joue son animation de disparition. Il n'est PAS ajouté à this.mirrors : on ne peut plus l'utiliser.
+          // * Il va jouer son animation de disparition. Il n'est PAS ajouté à this.mirrors : on ne peut plus l'utiliser.
           // Quand l'animation est finie, on détruit le miroir et sa collision pour de bon.
-          mirror.play(MIRROR_VANISH.KEY);
+          // L'animation démarre quand l'iris est entièrement ouvert (voir la fin de create), pour qu'on la voie.
           mirror.once('animationcomplete', () => {
             collider.destroy();
             mirror.destroy();
           });
+          vanishingMirror = mirror;
           return;
         }
 
@@ -344,6 +348,14 @@ export default class WorldScene extends Phaser.Scene {
 
     // * La teinte du monde, posée en dernier : tous les calques et les sprites d'eau existent. Le jardin n'en a pas.
     applyTint(map, this.waterSprites, WORLD_TINTS[this.getWorldName()]);
+
+    // * Arrivée par un miroir : le cercle s'ouvre depuis le miroir d'arrivée (ou depuis celui qui disparaît).
+    // Le joueur n'est pas figé pendant l'ouverture : il peut déjà bouger. Sans miroir d'origine (premier lancement),
+    // il n'y a pas de transition.
+    if (this.fromWorld) {
+      const arrival = this.mirrors.find((mirror) => mirror.world === this.fromWorld) || vanishingMirror || this.player;
+      irisOpen(this, arrival.x, arrival.y, () => vanishingMirror?.play(MIRROR_VANISH.KEY));
+    }
   }
 
   /**
@@ -477,6 +489,12 @@ export default class WorldScene extends Phaser.Scene {
       return;
     }
 
+    // * Pendant la fermeture de l'iris (on a pris un miroir) : le joueur est figé, on ne lit ni les déplacements, ni le tir, ni l'interaction
+    if (this.transitioning) {
+      this.player.setVelocity(0, 0);
+      return;
+    }
+
     // * Direction souhaitée, déjà normalisée en diagonale par l'InputManager
     const { x, y } = this.input1.getMove();
 
@@ -528,13 +546,15 @@ export default class WorldScene extends Phaser.Scene {
       if (targetScene) {
         // TODO(équipe): SFX du passage par le miroir, à ajouter au plus vite
         // TODO(équipe): timer global et score, à ajouter au plus vite (ils doivent survivre au changement de scène)
-        // TODO(équipe): VFX du passage par le miroir (fondu, effet visuel), à ajouter plus tard
-        // TODO(équipe): bloquer les touches pendant le changement de monde, à ajouter plus tard
-        // (sans ça, un double appui rapide sur E peut relancer la scène)
         // * On quitte cette scène et on lance celle du monde visé, en lui disant d'où l'on vient.
         // Le nom de ce monde est la clé de WORLDS dont la valeur est notre scène.
         const currentWorld = this.getWorldName();
-        this.scene.start(targetScene, { from: currentWorld });
+
+        // * Transition : le cercle noir se referme SUR LE MIROIR pris, puis on change de scène
+        this.transitioning = true;
+        irisClose(this, nearMirror.x, nearMirror.y, () => {
+          this.scene.start(targetScene, { from: currentWorld });
+        });
       } else {
         // Le miroir existe dans Tiled mais son monde n'est pas encore créé
         this.hint.setText(`Ce monde n'existe pas encore : ${nearMirror.world}`);

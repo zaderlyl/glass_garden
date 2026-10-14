@@ -232,6 +232,16 @@ export const MESSAGE_DURATION_MS = 2000;
 export const DEPTH = {
   ABOVE_PLAYER: 10, // calque decor_above
   UI: 20,
+  TRANSITION: 100, // le calque noir de la transition entre deux mondes (devant tout)
+};
+
+// * Transition entre deux mondes : un « iris », un cercle noir qui se referme sur le miroir pris puis s'ouvre sur le miroir d'arrivée (voir TransitionSystem.js)
+export const TRANSITION = {
+  IRIS_CLOSE_MS: 600, // durée de la fermeture du cercle
+  IRIS_CLOSE_EASE: 'Quad.easeIn', // le cercle accélère en se refermant
+  IRIS_OPEN_MS: 600, // durée de l'ouverture du cercle
+  IRIS_OPEN_EASE: 'Quad.easeOut', // le cercle ralentit en s'ouvrant
+  COLOR: 0x000000,
 };
 
 // * Fumée de cheminée : des objets de classe « smoke » posés dans Tiled (point = le haut de la cheminée)
