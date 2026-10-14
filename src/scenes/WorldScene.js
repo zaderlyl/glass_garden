@@ -374,6 +374,11 @@ export default class WorldScene extends Phaser.Scene {
       this.stars.forEach((star) => star.disableBody(true, true));
     }
 
+    // * Une étoile cachée dans une caisse (propriété « hasStar ») n'apparaît qu'à la casse de cette caisse
+    if (this.crates.getChildren().some((crate) => crate.hasStar)) {
+      this.stars.forEach((star) => star.disableBody(true, true));
+    }
+
     // * Les bulles à éclater, posées dans Tiled (le joueur existe déjà). L'étoile du monde est cachée tant qu'il en reste ;
     // quand elles sont toutes éclatées, elle apparaît au centre de la carte.
     this.bubbles = createBubbles(this, map, this.player, () => this.revealStarAtCenter(true));
@@ -447,7 +452,16 @@ export default class WorldScene extends Phaser.Scene {
     const star = this.stars.find((s) => !s.active);
     if (!star) return;
     const from = { x: npc.x, y: npc.y, headHeight: npc.height * STAR_BOUNCE.HEAD_HEIGHT_RATIO };
-    bounceStar(this, star, from, (x, y) => this.isFreeGround(x, y, npc));
+    bounceStar(this, star, from, (x, y) => this.isFreeGround(x, y));
+  }
+
+  /** La caisse qui cachait l'étoile vient de casser : l'étoile en saute et rebondit, puis le joueur la ramasse. */
+  onStarCrateBroken(crate) {
+    const star = this.stars.find((s) => !s.active);
+    if (!star) return;
+    // Elle part du centre de la caisse (la caisse fait 32 pixels : le sol est 16 sous son centre, l'étoile à 20 au-dessus)
+    const from = { x: crate.x, y: crate.y + 16, headHeight: 20 + 16 };
+    bounceStar(this, star, from, (x, y) => this.isFreeGround(x, y));
   }
 
   /** L'étoile du monde apparaît au centre de la carte (récompense des bulles), avec un petit effet de rebond si animated. */
@@ -460,13 +474,14 @@ export default class WorldScene extends Phaser.Scene {
     this.tweens.add({ targets: star, scale: 1, duration: BUBBLES.STAR_POP.DURATION_MS, ease: BUBBLES.STAR_POP.EASE });
   }
 
-  /** L'étoile peut-elle se poser en ce point du sol ? (ni mur, ni eau, ni miroir, ni personnage, ni hors de la carte) */
-  isFreeGround(x, y, npc) {
+  /** L'étoile peut-elle se poser en ce point du sol ? (ni mur, ni eau, ni miroir, ni caisse, ni personnage, ni hors de la carte) */
+  isFreeGround(x, y) {
     const margin = 20;
     if (x < margin || y < margin || x > GAME_WIDTH - margin || y > this.map.heightInPixels - margin) return false;
     if (this.walls.hasTileAtWorldXY(x, y)) return false;
     if (this.waterBlockers?.getChildren().some((zone) => Math.abs(zone.x - x) <= 20 && Math.abs(zone.y - y) <= 20)) return false;
     if (this.mirrors.some((mirror) => Phaser.Math.Distance.Between(x, y, mirror.x, mirror.y) < 40)) return false;
+    if (this.crates.getChildren().some((crate) => crate.active && crate.hitPoints > 0 && Math.abs(crate.x - x) < 22 && Math.abs(crate.y - y) < 22)) return false;
     return !this.npcs.some((other) => Math.abs(other.x - x) < 34 && y > other.y - 24 && y < other.y + 12);
   }
 
