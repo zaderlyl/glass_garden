@@ -194,7 +194,7 @@ export default class WorldScene extends Phaser.Scene {
     // ! Sinon un message encore affiché au moment de partir bloquerait le texte d'aide au retour
     this.messageActive = false;
     this.gameWon = false;
-    this.transitioning = false; // vrai pendant le passage par un miroir (évite de le déclencher deux fois)
+    this.transitioning = false; // vrai pendant le passage par un miroir : le joueur est figé (voir update)
     this.waterSprites = []; // les sprites de l'eau animée de CETTE visite (remplis par createAnimatedTiles)
 
     // * Le chronomètre et son affichage sont globaux : ils ne dépendent pas du monde.
@@ -350,7 +350,10 @@ export default class WorldScene extends Phaser.Scene {
     // * Arrivée par un miroir : le cercle s'ouvre depuis le miroir d'arrivée (ou depuis le joueur s'il a disparu)
     if (this.fromWorld) {
       const arrival = this.mirrors.find((mirror) => mirror.world === this.fromWorld) || this.player;
-      irisOpen(this, arrival.x, arrival.y);
+      this.transitioning = true;
+      irisOpen(this, arrival.x, arrival.y, () => {
+        this.transitioning = false;
+      });
     }
   }
 
@@ -485,6 +488,12 @@ export default class WorldScene extends Phaser.Scene {
       return;
     }
 
+    // * Pendant le passage par un miroir : le joueur est figé, on ne lit ni les déplacements, ni le tir, ni l'interaction
+    if (this.transitioning) {
+      this.player.setVelocity(0, 0);
+      return;
+    }
+
     // * Direction souhaitée, déjà normalisée en diagonale par l'InputManager
     const { x, y } = this.input1.getMove();
 
@@ -529,15 +538,13 @@ export default class WorldScene extends Phaser.Scene {
       this.hint.setText(nearMirror ? `${this.input1.getKeyLabel('interact')} : entrer dans le miroir` : '');
     }
 
-    if (nearMirror && !this.transitioning && this.input1.justPressed('interact')) {
+    if (nearMirror && this.input1.justPressed('interact')) {
       // * Le nom du miroir dans Tiled donne le monde visé, la table WORLDS donne sa scène
       const targetScene = WORLDS[nearMirror.world];
 
       if (targetScene) {
         // TODO(équipe): SFX du passage par le miroir, à ajouter au plus vite
         // TODO(équipe): timer global et score, à ajouter au plus vite (ils doivent survivre au changement de scène)
-        // TODO(équipe): bloquer les touches pendant le changement de monde, à ajouter plus tard
-        // (sans ça, un double appui rapide sur E peut relancer la scène)
         // * On quitte cette scène et on lance celle du monde visé, en lui disant d'où l'on vient.
         // Le nom de ce monde est la clé de WORLDS dont la valeur est notre scène.
         const currentWorld = this.getWorldName();
