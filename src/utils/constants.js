@@ -308,7 +308,9 @@ export const BUBBLES = {
   IMAGE: 'assets/images/sprites/bulle.png',
   FRAME_SIZE: 32,
   BURST: { KEY: 'bubble_burst', FIRST_FRAME: 1, LAST_FRAME: 6, FRAME_RATE: 16 }, // l'animation d'éclatement
-  FLOAT: { AMPLITUDE: 5, DURATION_MS: 1200 }, // la bulle flotte : va-et-vient vertical, en pixels et en millisecondes
+  // La bulle flotte et dérive doucement autour de son point : un balancement horizontal et un vertical de rythmes différents
+  // (ça trace une petite boucle irrégulière). Amplitudes en pixels, vitesses en radians par seconde (6,28 = un tour par seconde).
+  FLOAT: { AMPLITUDE_X: 10, AMPLITUDE_Y: 6, SPEED_X: 1.3, SPEED_Y: 2.1 },
   HITBOX_RADIUS: 12, // la zone qui éclate la bulle au contact du joueur
   DEPTH: 9, // devant le joueur, derrière le décor du dessus (10)
   STAR_POP: { DURATION_MS: 700, EASE: 'Back.easeOut' }, // l'étoile apparaît au centre de la carte en grossissant, avec un petit rebond

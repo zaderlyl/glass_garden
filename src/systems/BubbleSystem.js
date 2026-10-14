@@ -7,7 +7,7 @@
 // Une carte sans objet « bubble » n'en a pas.
 // Selon la version de Tiled, la classe s'appelle « class » ou « type » : on lit les deux.
 //
-// Une bulle flotte doucement. Quand le joueur la touche, elle éclate (animation) puis disparaît.
+// Une bulle flotte et dérive doucement autour de son point. Quand le joueur la touche, elle éclate (animation) puis disparaît.
 //
 // * COMMENT L'UTILISER
 //   preloadBubbles(this);                                          // dans preload()
@@ -51,6 +51,18 @@ export function createBubbles(scene, map, player, onAllBurst) {
     });
   }
 
+  const floaters = []; // les bulles qui flottent : { bubble, originX, originY, phase }
+  const updateFloating = (time) => {
+    const { AMPLITUDE_X, AMPLITUDE_Y, SPEED_X, SPEED_Y } = BUBBLES.FLOAT;
+    const seconds = time / 1000;
+    floaters.forEach(({ bubble, originX, originY, phase }) => {
+      if (!bubble.active || bubble.burst) return; // une bulle qui éclate reste où elle est
+      bubble.setPosition(originX + Math.sin(seconds * SPEED_X + phase) * AMPLITUDE_X, originY + Math.sin(seconds * SPEED_Y + phase * 1.7) * AMPLITUDE_Y);
+    });
+  };
+  scene.events.on('update', updateFloating);
+  scene.events.once('shutdown', () => scene.events.off('update', updateFloating));
+
   const objects = map.getObjectLayer('objects').objects.filter((object) => (object.class || object.type) === 'bubble');
   if (objects.length > 0 && isBubblesComplete(scene.mapKey)) {
     currentState = null;
@@ -63,22 +75,13 @@ export function createBubbles(scene, map, player, onAllBurst) {
     const bubble = scene.physics.add.sprite(object.x, object.y, BUBBLES.KEY, 0).setDepth(BUBBLES.DEPTH);
     bubble.body.setCircle(BUBBLES.HITBOX_RADIUS, BUBBLES.FRAME_SIZE / 2 - BUBBLES.HITBOX_RADIUS, BUBBLES.FRAME_SIZE / 2 - BUBBLES.HITBOX_RADIUS);
 
-    // * Elle flotte : un va-et-vient vertical, décalé d'une bulle à l'autre pour qu'elles ne bougent pas toutes ensemble
-    scene.tweens.add({
-      targets: bubble,
-      y: object.y - BUBBLES.FLOAT.AMPLITUDE,
-      duration: BUBBLES.FLOAT.DURATION_MS,
-      ease: 'Sine.easeInOut',
-      yoyo: true,
-      repeat: -1,
-      delay: Math.random() * BUBBLES.FLOAT.DURATION_MS,
-    });
+    // * Elle flotte autour de son point (voir updateFloating) ; la phase au hasard évite qu'elles bougent toutes ensemble
+    floaters.push({ bubble, originX: object.x, originY: object.y, phase: Math.random() * Math.PI * 2 });
 
     scene.physics.add.overlap(player, bubble, () => {
       if (bubble.burst) return;
       bubble.burst = true;
       bubble.body.enable = false; // elle ne peut plus être touchée
-      scene.tweens.killTweensOf(bubble);
       bubble.play(BUBBLES.BURST.KEY);
       bubble.once('animationcomplete', () => bubble.destroy());
 
