@@ -12,7 +12,7 @@ import DialogueBox, { isRiddleSolved } from '../systems/DialogueSystem.js';
 import { bounceStar } from '../systems/StarBounce.js';
 import Dash from '../systems/DashSystem.js';
 import { preloadBubbles, createBubbles } from '../systems/BubbleSystem.js';
-import { preloadEnemies, createEnemies, updateEnemies } from '../systems/EnemySystem.js';
+import { preloadEnemies, createEnemies, updateEnemies, resetEnemies } from '../systems/EnemySystem.js';
 import { DIALOGUES } from '../data/dialogues.js';
 import { pickVariant } from '../utils/helpers.js';
 import {
@@ -41,6 +41,7 @@ import {
   DIALOGUE,
   STAR_BOUNCE,
   BUBBLES,
+  ENEMY_AI,
 } from '../utils/constants.js';
 
 /**
@@ -266,6 +267,8 @@ export default class WorldScene extends Phaser.Scene {
 
     // * Où faire apparaître le joueur ? (voir getSpawnPosition)
     const spawn = this.getSpawnPosition(map);
+    this.spawnPoint = spawn; // pour y renvoyer le joueur quand un ennemi le touche (voir respawnPlayer)
+    this.invulnerableUntil = 0;
 
     // * Le joueur est un sprite « physique » : c'est ce qui permet de le faire entrer en collision
     // Il commence de face (vers le bas), sur le point de départ
@@ -396,6 +399,8 @@ export default class WorldScene extends Phaser.Scene {
       this.physics.add.collider(this.enemies, obstacle);
     });
     this.physics.add.collider(this.enemies, this.enemies);
+    // * Un ennemi qui touche le joueur le renvoie au départ (il ne le bloque pas : ils se traversent)
+    this.physics.add.overlap(this.player, this.enemies, () => this.onEnemyTouch());
 
     // * La boîte de dialogue des personnages (cachée tant qu'on ne parle à personne)
     this.dialogue = new DialogueBox(this);
@@ -465,6 +470,31 @@ export default class WorldScene extends Phaser.Scene {
     if (!star) return;
     const from = { x: npc.x, y: npc.y, headHeight: npc.height * STAR_BOUNCE.HEAD_HEIGHT_RATIO };
     bounceStar(this, star, from, (x, y) => this.isFreeGround(x, y));
+  }
+
+  /** Un ennemi touche le joueur : sauf s'il vient déjà d'être renvoyé (invincible), ou en plein dialogue ou transition. */
+  onEnemyTouch() {
+    if (this.time.now < this.invulnerableUntil || this.dialogue.isOpen || this.transitioning) return;
+    this.respawnPlayer();
+  }
+
+  /** Renvoie le joueur au point de départ du monde, remet les ennemis vivants à leur place, et le rend invincible un instant. */
+  respawnPlayer() {
+    const { INVULNERABLE_MS, BLINK_MS, BLINK_ALPHA, FLASH } = ENEMY_AI.CONTACT;
+
+    this.player.setPosition(this.spawnPoint.x, this.spawnPoint.y);
+    this.player.setVelocity(0, 0);
+    resetEnemies(this.enemies);
+    this.cameras.main.flash(FLASH.DURATION_MS, FLASH.RED, FLASH.GREEN, FLASH.BLUE);
+
+    // * Invincible un court instant : le joueur clignote, puis redevient normal
+    this.invulnerableUntil = this.time.now + INVULNERABLE_MS;
+    this.tweens.killTweensOf(this.player);
+    this.tweens.add({ targets: this.player, alpha: BLINK_ALPHA, duration: BLINK_MS, yoyo: true, repeat: -1 });
+    this.time.delayedCall(INVULNERABLE_MS, () => {
+      this.tweens.killTweensOf(this.player);
+      this.player.setAlpha(1);
+    });
   }
 
   /** La caisse qui cachait l'étoile vient de casser : l'étoile en saute et rebondit, puis le joueur la ramasse. */

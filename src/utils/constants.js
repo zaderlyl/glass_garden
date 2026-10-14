@@ -369,6 +369,9 @@ export const ENEMY_AI = {
   HIT: { FLASH_MS: 80, STUN_MS: 250, KNOCKBACK: 200 },
   // Quand il meurt : un petit nuage de fumée sombre (de petits carrés générés par le code)
   DEATH: { KEY: 'enemy_puff', SIZE: 6, COUNT: 14, COLORS: [0x2a2230, 0x4a3a58, 0x6b5a7a], SPEED: { MIN: 30, MAX: 110 }, LIFETIME_MS: { MIN: 350, MAX: 650 }, DEPTH: 15 },
+  // Quand un ennemi touche le joueur : il est renvoyé au point de départ du monde, les ennemis vivants reprennent leur place, et il est
+  // invincible un court instant (il clignote) pour ne pas être touché aussitôt. Un éclair rouge marque le contact.
+  CONTACT: { INVULNERABLE_MS: 1500, BLINK_MS: 100, BLINK_ALPHA: 0.3, FLASH: { DURATION_MS: 180, RED: 255, GREEN: 60, BLUE: 60 } },
   ALERT: { TEXT: '!', COLOR: '#ff4040', SIZE: '30px', RISE: 16, DURATION_MS: 600 }, // le « ! » qui monte quand il repère le joueur
 };
 

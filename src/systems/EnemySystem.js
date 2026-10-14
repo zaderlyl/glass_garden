@@ -19,6 +19,10 @@
 //   return  il rentre à son point de départ, puis redevient « idle ».
 //   S'il revoit le joueur à n'importe quel moment, il repart en chase.
 //
+// * LE CONTACT
+//   Quand un ennemi touche le joueur, WorldScene le renvoie au point de départ (voir respawnPlayer) et appelle
+//   resetEnemies : les ennemis vivants reprennent leur place et redeviennent calmes. Un ennemi tué ne revient pas.
+//
 // * LES TIRS
 //   Les balles les touchent comme les caisses (voir hitTarget dans fonctionTir.js) : chaque tir retire un point de vie
 //   (hitPoints : ENEMIES, ou la propriété « hitPoints » de l'objet Tiled). Un coup qui ne tue pas fait clignoter l'ennemi en
@@ -252,4 +256,18 @@ function wander(enemy, config, now) {
     return;
   }
   if (moveToward(enemy, enemy.wanderTarget.x, enemy.wanderTarget.y, config.speed * SPEED_FACTOR)) enemy.wanderTarget = null;
+}
+
+/** Remet les ennemis vivants à leur point de départ, calmes : après un contact avec le joueur, tout recommence. */
+export function resetEnemies(enemies) {
+  enemies.getChildren().forEach((enemy) => {
+    enemy.setPosition(enemy.home.x, enemy.home.y);
+    enemy.setVelocity(0, 0);
+    enemy.state = 'idle';
+    enemy.wanderTarget = null;
+    enemy.nextWanderAt = null;
+    enemy.arrivedAt = null;
+    enemy.stunnedUntil = 0;
+    enemy.clearTint();
+  });
 }
