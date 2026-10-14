@@ -3,8 +3,9 @@
 // =====================================================================================
 //
 // Une pression sur la touche de dash lance le joueur dans la direction où il se déplace (sinon dans celle qu'il
-// regarde), à DASH.SPEED_MULTIPLIER fois sa vitesse, pendant DASH.DURATION_MS. Il laisse derrière lui des images
-// fantômes qui s'estompent. Ensuite, une pause (DASH.COOLDOWN_MS) avant de pouvoir recommencer.
+// regarde). Il part très vite puis ralentit jusqu'à s'arrêter, et parcourt toujours DASH.DISTANCE pixels en
+// DASH.DURATION_MS. Il laisse derrière lui des images fantômes qui s'estompent. Ensuite, une pause (DASH.COOLDOWN_MS)
+// avant de pouvoir recommencer.
 // Les murs, l'eau et les miroirs bloquent toujours le joueur : c'est la physique qui le déplace, on ne change que sa vitesse.
 //
 // * COMMENT L'UTILISER
@@ -13,7 +14,7 @@
 //                                                             // (le dash impose alors la vitesse du joueur)
 // =====================================================================================
 
-import { PLAYER, DASH } from '../utils/constants.js';
+import { DASH } from '../utils/constants.js';
 
 // Les directions regardées, en vecteurs (pour dasher à l'arrêt)
 const FACING_VECTORS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
@@ -22,6 +23,7 @@ export default class Dash {
   constructor(scene, player) {
     this.scene = scene;
     this.player = player;
+    this.startedAt = 0; // l'instant où le dash en cours a commencé
     this.endsAt = 0; // l'instant où le dash en cours se termine
     this.readyAt = 0; // l'instant à partir duquel on peut dasher de nouveau
     this.nextGhostAt = 0;
@@ -41,6 +43,7 @@ export default class Dash {
     if (now >= this.endsAt && now >= this.readyAt && input.justPressed('dash')) {
       // * Direction du dash : celle du déplacement, sinon celle qu'on regarde
       this.direction = move.x !== 0 || move.y !== 0 ? [move.x, move.y] : FACING_VECTORS[facing];
+      this.startedAt = now;
       this.endsAt = now + DASH.DURATION_MS;
       this.readyAt = this.endsAt + DASH.COOLDOWN_MS;
       this.nextGhostAt = now;
@@ -48,7 +51,14 @@ export default class Dash {
 
     if (now >= this.endsAt) return false;
 
-    const speed = PLAYER.SPEED * DASH.SPEED_MULTIPLIER;
+    // * La vitesse décroît de la vitesse de départ jusqu'à zéro : speed = start x (1 - progression) ^ puissance.
+    // La distance parcourue est l'intégrale de cette courbe, start x durée / (puissance + 1) : on en déduit la vitesse de
+    // départ pour que le dash fasse toujours DASH.DISTANCE pixels.
+    // On évalue la courbe au MILIEU de l'image qui vient (+ delta / 2) : sinon la vitesse, qui décroît, serait toujours
+    // un peu trop forte et le dash dépasserait sa distance.
+    const progress = (now - this.startedAt + this.scene.game.loop.delta / 2) / DASH.DURATION_MS;
+    const startSpeed = (DASH.DISTANCE * (DASH.EASE_POWER + 1)) / (DASH.DURATION_MS / 1000);
+    const speed = startSpeed * Math.max(1 - progress, 0) ** DASH.EASE_POWER;
     this.player.setVelocity(this.direction[0] * speed, this.direction[1] * speed);
     if (now >= this.nextGhostAt) {
       this.leaveGhost();

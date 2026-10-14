@@ -213,11 +213,13 @@ export const PLAYER = {
   HITBOX: { WIDTH: 20, HEIGHT: 16, OFFSET_X: 6, OFFSET_Y: 16 },
 };
 
-// * Le dash (voir DashSystem.js) : une courte accélération dans la direction du déplacement, avec une pause entre deux dash
+// * Le dash (voir DashSystem.js) : une courte accélération dans la direction du déplacement, qui ralentit jusqu'à
+// s'arrêter, avec une pause entre deux dash.
 export const DASH = {
-  SPEED_MULTIPLIER: 3, // la vitesse pendant le dash, en multiple de PLAYER.SPEED
-  DURATION_MS: 150, // durée du dash (distance ≈ SPEED x multiplicateur x durée = 135 pixels)
-  COOLDOWN_MS: 1000, // pause avant de pouvoir recommencer, comptée à partir de la fin du dash
+  DISTANCE: 135, // la distance parcourue, en pixels (toujours la même, quelle que soit la courbe de vitesse)
+  DURATION_MS: 220, // durée du dash
+  EASE_POWER: 1.5, // la forme du ralentissement : 0 = vitesse constante ; plus c'est grand, plus il part fort puis freine tôt
+  COOLDOWN_MS: 500, // pause avant de pouvoir recommencer, comptée à partir de la fin du dash
   GHOST: { INTERVAL_MS: 30, FADE_MS: 220, ALPHA: 0.5, TINT: 0xaaddff }, // les images fantômes laissées derrière le joueur
 };
 
