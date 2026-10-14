@@ -9,7 +9,7 @@
 //
 // * COMMENT L'UTILISER
 //   preloadEnemies(this);                                    // dans preload()
-//   this.enemies = createEnemies(this, map);                 // dans create()
+//   this.enemies = createEnemies(this, map, this.bullets);   // dans create(), une fois le groupe de balles créé (un GROUPE d'ennemis)
 //   updateEnemies(this, this.enemies, this.player, frozen);  // à chaque image dans update() (frozen : tout s'arrête)
 //
 // * LE COMPORTEMENT (une petite machine à états, voir ENEMY_AI dans constants.js)
@@ -18,9 +18,16 @@
 //   search  il l'a perdu (trop loin, ou caché derrière un mur) : il va où il l'a vu en dernier et y attend un instant.
 //   return  il rentre à son point de départ, puis redevient « idle ».
 //   S'il revoit le joueur à n'importe quel moment, il repart en chase.
+//
+// * LES TIRS
+//   Les balles les touchent comme les caisses (voir hitTarget dans fonctionTir.js) : chaque tir retire un point de vie
+//   (hitPoints : ENEMIES, ou la propriété « hitPoints » de l'objet Tiled). Un coup qui ne tue pas fait clignoter l'ennemi en
+//   blanc, le repousse et l'étourdit un instant ; le coup fatal le fait disparaître dans un nuage de fumée sombre.
 // =====================================================================================
 
 import { ENEMIES, ENEMY_FRAME_SIZE, ENEMY_AI, FONT_FAMILY, DEPTH } from '../utils/constants.js';
+import { getTiledProperty } from './CrateSystem.js';
+import { addTargetCollision } from './fonctionTir.js';
 
 /** Charge les images de tous les ennemis (à appeler dans preload). */
 export function preloadEnemies(scene) {
@@ -31,9 +38,13 @@ export function preloadEnemies(scene) {
 
 /**
  * Crée un ennemi à la position de chaque objet « enemy » de la carte.
- * @returns {Phaser.Physics.Arcade.Sprite[]} les ennemis créés, avec enemy.enemyType = le nom de l'objet Tiled
+ * @param {Phaser.Physics.Arcade.Group} bullets  Le groupe de balles : elles blessent les ennemis
+ * @returns {Phaser.Physics.Arcade.Group} le groupe des ennemis (un ennemi tué en sort tout seul), avec enemy.enemyType = le nom de l'objet Tiled
  */
-export function createEnemies(scene, map) {
+export function createEnemies(scene, map, bullets) {
+  ensureDeathTexture(scene);
+  const enemies = scene.physics.add.group();
+
   // * L'animation de la capuche est globale à tout le jeu : on ne la crée qu'une fois
   const { idle } = ENEMIES.capuche;
   if (!scene.anims.exists(idle.KEY)) {
@@ -45,18 +56,18 @@ export function createEnemies(scene, map) {
     });
   }
 
-  return map
+  map
     .getObjectLayer('objects')
     .objects.filter((object) => (object.class || object.type) === 'enemy')
-    .map((object) => {
+    .forEach((object) => {
       const config = ENEMIES[object.name];
       if (!config) {
         console.warn(`[EnemySystem] Ennemi inconnu : « ${object.name} » (voir ENEMIES dans constants.js).`);
-        return null;
+        return;
       }
 
       // * Les pieds sont au point de l'objet : le bas de l'image, centré
-      const enemy = scene.physics.add.sprite(object.x, object.y, config.key, 0).setOrigin(0.5, 1);
+      const enemy = enemies.create(object.x, object.y, config.key, 0).setOrigin(0.5, 1);
       enemy.enemyType = object.name;
       enemy.home = { x: object.x, y: object.y }; // l'endroit où il est posé, pour y revenir plus tard
 
@@ -66,9 +77,56 @@ export function createEnemies(scene, map) {
       enemy.body.setOffset((ENEMY_FRAME_SIZE - WIDTH) / 2, ENEMY_FRAME_SIZE - HEIGHT);
 
       if (config.idle) enemy.play(config.idle.KEY);
-      return enemy;
-    })
-    .filter(Boolean);
+
+      // * Les points de vie et l'effet d'un tir (voir hitTarget dans fonctionTir.js)
+      enemy.hitPoints = getTiledProperty(object, 'hitPoints', config.hitPoints);
+      enemy.onHit = () => playHitEffect(scene, enemy);
+    });
+
+  addTargetCollision(scene, bullets, enemies);
+  return enemies;
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// LES TIRS
+// ---------------------------------------------------------------------------------------------------------------
+
+/** Crée (une seule fois) la petite texture de la fumée de mort : un carré blanc, coloré par les teintes. */
+function ensureDeathTexture(scene) {
+  const { KEY, SIZE } = ENEMY_AI.DEATH;
+  if (scene.textures.exists(KEY)) return;
+  const graphics = scene.make.graphics({ x: 0, y: 0, add: false });
+  graphics.fillStyle(0xffffff).fillRect(0, 0, SIZE, SIZE);
+  graphics.generateTexture(KEY, SIZE, SIZE);
+  graphics.destroy();
+}
+
+/** Ce qui se passe quand un tir touche un ennemi (appelé AVANT sa destruction : il a encore sa position). */
+function playHitEffect(scene, enemy) {
+  const { HIT, DEATH } = ENEMY_AI;
+
+  if (enemy.hitPoints > 0) {
+    // * Il tient encore : un éclat blanc, il recule (loin du joueur) et reste étourdi un instant
+    enemy.setTintFill(0xffffff);
+    scene.time.delayedCall(HIT.FLASH_MS, () => enemy.active && enemy.clearTint());
+    const away = new Phaser.Math.Vector2(enemy.x - scene.player.x, enemy.y - (scene.player.y + scene.player.height / 2)).normalize();
+    enemy.setVelocity(away.x * HIT.KNOCKBACK, away.y * HIT.KNOCKBACK);
+    enemy.stunnedUntil = scene.time.now + HIT.STUN_MS;
+    return;
+  }
+
+  // * Il meurt : un nuage de fumée sombre à la place de son centre
+  const smoke = scene.add.particles(enemy.x, enemy.y - ENEMY_FRAME_SIZE / 2, DEATH.KEY, {
+    speed: { min: DEATH.SPEED.MIN, max: DEATH.SPEED.MAX },
+    angle: { min: 0, max: 360 },
+    lifespan: { min: DEATH.LIFETIME_MS.MIN, max: DEATH.LIFETIME_MS.MAX },
+    scale: { start: 1, end: 0 },
+    tint: DEATH.COLORS,
+    emitting: false,
+  });
+  smoke.setDepth(DEATH.DEPTH);
+  smoke.explode(DEATH.COUNT);
+  scene.time.delayedCall(DEATH.LIFETIME_MS.MAX + 100, () => smoke.destroy());
 }
 
 // ---------------------------------------------------------------------------------------------------------------
@@ -130,17 +188,22 @@ function setState(enemy, state, now) {
 /**
  * À appeler à chaque image : fait vivre tous les ennemis.
  * @param {Phaser.Scene} scene  La scène du monde (elle doit avoir un calque `walls`)
- * @param {Phaser.Physics.Arcade.Sprite[]} enemies
+ * @param {Phaser.Physics.Arcade.Group} enemies  Le groupe d'ennemis (voir createEnemies)
  * @param {Phaser.Physics.Arcade.Sprite} player
  * @param {boolean} frozen  Vrai pendant un dialogue ou une transition : les ennemis s'arrêtent
  */
 export function updateEnemies(scene, enemies, player, frozen) {
   const now = scene.time.now;
 
-  enemies.forEach((enemy) => {
+  enemies.getChildren().forEach((enemy) => {
     if (frozen) {
       enemy.setVelocity(0, 0);
       return;
+    }
+    if (enemy.stunnedUntil > now) return; // étourdi par un tir : il garde l'élan du recul, sans rien décider
+    if (enemy.stunnedUntil) {
+      enemy.stunnedUntil = 0;
+      enemy.setVelocity(0, 0);
     }
     if (!enemy.state) setState(enemy, 'idle', now);
 

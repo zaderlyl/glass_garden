@@ -338,6 +338,7 @@ export const ENEMIES = {
     frameCount: 3,
     frames: { left: 0, right: 1, up: 2, down: 0 }, // l'image à afficher selon la direction regardée
     hitbox: { WIDTH: 18, HEIGHT: 14 }, // la zone de collision aux pieds, en pixels
+    hitPoints: 3, // nombre de tirs pour le tuer (modifiable par une propriété « hitPoints » sur l'objet Tiled)
     speed: 220, // la vitesse de poursuite, en pixels par seconde (le joueur va à 300 : on peut toujours fuir)
     sight: 280, // à quelle distance il voit le joueur, en pixels
   },
@@ -348,6 +349,7 @@ export const ENEMIES = {
     frameCount: 4,
     idle: { KEY: 'capuche_idle', FRAME_RATE: 5 }, // l'animation en boucle
     hitbox: { WIDTH: 18, HEIGHT: 14 },
+    hitPoints: 2, // plus fragile que le faucheur
     speed: 160, // plus lente que le faucheur
     sight: 200, // et elle voit moins loin
   },
@@ -363,6 +365,10 @@ export const ENEMY_AI = {
   RETURN_SPEED_FACTOR: 0.7, // il rentre plus calmement qu'il ne poursuit
   WANDER: { RADIUS: 40, SPEED_FACTOR: 0.35, PAUSE_MS: { MIN: 1200, MAX: 2800 } }, // au repos : il flâne autour de son point
   LINE_OF_SIGHT_STEP: 12, // on regarde un point tous les 12 pixels entre l'ennemi et le joueur : un mur sur le chemin coupe la vue
+  // Quand un tir touche un ennemi : il clignote en blanc, est repoussé et reste étourdi un instant (il ne bouge plus de lui-même).
+  HIT: { FLASH_MS: 80, STUN_MS: 250, KNOCKBACK: 200 },
+  // Quand il meurt : un petit nuage de fumée sombre (de petits carrés générés par le code)
+  DEATH: { KEY: 'enemy_puff', SIZE: 6, COUNT: 14, COLORS: [0x2a2230, 0x4a3a58, 0x6b5a7a], SPEED: { MIN: 30, MAX: 110 }, LIFETIME_MS: { MIN: 350, MAX: 650 }, DEPTH: 15 },
   ALERT: { TEXT: '!', COLOR: '#ff4040', SIZE: '30px', RISE: 16, DURATION_MS: 600 }, // le « ! » qui monte quand il repère le joueur
 };
 
