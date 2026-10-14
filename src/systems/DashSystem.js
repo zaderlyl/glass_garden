@@ -6,6 +6,9 @@
 // regarde). Il part très vite puis ralentit jusqu'à s'arrêter, et parcourt toujours DASH.DISTANCE pixels en
 // DASH.DURATION_MS. Il laisse derrière lui des images fantômes qui s'estompent. Ensuite, une pause (DASH.COOLDOWN_MS)
 // avant de pouvoir recommencer.
+//
+// Pendant le dash, le personnage est ÉTIRÉ dans le sens du mouvement (puis reprend sa forme). Pour ne pas toucher à sa
+// boîte de collision (qui suit l'échelle du sprite), on cache le vrai sprite et on affiche à sa place une copie étirée.
 // Les murs, l'eau et les miroirs bloquent toujours le joueur : c'est la physique qui le déplace, on ne change que sa vitesse.
 //
 // * COMMENT L'UTILISER
@@ -28,6 +31,10 @@ export default class Dash {
     this.readyAt = 0; // l'instant à partir duquel on peut dasher de nouveau
     this.nextGhostAt = 0;
     this.direction = [0, 0];
+    this.visual = null; // la copie étirée affichée à la place du joueur pendant le dash
+
+    // * L'étirement suit l'horloge, pas update() : si le dash est interrompu (dialogue, transition), le joueur réapparaît
+    scene.events.on('update', () => this.updateVisual());
   }
 
   /**
@@ -65,6 +72,38 @@ export default class Dash {
       this.nextGhostAt = now + DASH.GHOST.INTERVAL_MS;
     }
     return true;
+  }
+
+  // Affiche la copie étirée du joueur pendant le dash, la retire à la fin
+  updateVisual() {
+    const now = this.scene.time.now;
+    const dashing = now < this.endsAt;
+
+    if (!dashing) {
+      if (this.visual) {
+        this.visual.destroy();
+        this.visual = null;
+        this.player.setAlpha(1);
+      }
+      return;
+    }
+
+    if (!this.visual) {
+      this.visual = this.scene.add.image(this.player.x, this.player.y, this.player.texture.key, this.player.frame.name);
+      this.player.setAlpha(0);
+    }
+
+    // * L'étirement est maximal au départ et s'efface jusqu'à la fin. Il suit l'axe dominant du mouvement (comme les
+    // images du joueur : en diagonale, l'horizontale passe en premier) : une échelle ne peut pas s'étirer en biais.
+    const remaining = 1 - (now - this.startedAt) / DASH.DURATION_MS;
+    const longer = 1 + (DASH.STRETCH.ALONG - 1) * remaining;
+    const thinner = 1 - (1 - DASH.STRETCH.ACROSS) * remaining;
+    const horizontal = Math.abs(this.direction[0]) >= Math.abs(this.direction[1]);
+    this.visual
+      .setPosition(this.player.x, this.player.y)
+      .setFrame(this.player.frame.name)
+      .setDepth(this.player.depth)
+      .setScale(horizontal ? longer : thinner, horizontal ? thinner : longer);
   }
 
   // Une copie du joueur, laissée sur place, qui s'estompe puis disparaît

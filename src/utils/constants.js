@@ -220,6 +220,7 @@ export const DASH = {
   DURATION_MS: 220, // durée du dash
   EASE_POWER: 1.5, // la forme du ralentissement : 0 = vitesse constante ; plus c'est grand, plus il part fort puis freine tôt
   COOLDOWN_MS: 500, // pause avant de pouvoir recommencer, comptée à partir de la fin du dash
+  STRETCH: { ALONG: 1.4, ACROSS: 0.75 }, // l'étirement du personnage au départ du dash : plus long dans le sens du mouvement, plus fin en travers (1 = normal)
   GHOST: { INTERVAL_MS: 30, FADE_MS: 220, ALPHA: 0.5, TINT: 0xaaddff }, // les images fantômes laissées derrière le joueur
 };
 
