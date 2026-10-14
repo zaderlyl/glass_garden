@@ -20,6 +20,12 @@ import { BUBBLES } from '../utils/constants.js';
 // Les cartes dont toutes les bulles ont été éclatées, retenues pour toute la partie (une scène est recréée à chaque visite)
 const completedMaps = new Set();
 
+// L'état des bulles du monde en cours ({ total, burst }), ou null s'il n'y en a pas : l'interface l'affiche (voir UIScene)
+let currentState = null;
+
+/** Les bulles du monde en cours : { total, burst }, ou null si ce monde n'a pas de bulles à éclater. */
+export const getBubbleState = () => currentState;
+
 /** Toutes les bulles de cette carte ont-elles déjà été éclatées ? */
 export const isBubblesComplete = (mapKey) => completedMaps.has(mapKey);
 
@@ -46,8 +52,12 @@ export function createBubbles(scene, map, player, onAllBurst) {
   }
 
   const objects = map.getObjectLayer('objects').objects.filter((object) => (object.class || object.type) === 'bubble');
-  if (objects.length > 0 && isBubblesComplete(scene.mapKey)) return { total: 0, burst: 0, done: true };
+  if (objects.length > 0 && isBubblesComplete(scene.mapKey)) {
+    currentState = null;
+    return { total: 0, burst: 0, done: true };
+  }
   const state = { total: objects.length, burst: 0, done: false };
+  currentState = objects.length > 0 ? state : null; // pas de compteur dans un monde sans bulles
 
   objects.forEach((object) => {
     const bubble = scene.physics.add.sprite(object.x, object.y, BUBBLES.KEY, 0).setDepth(BUBBLES.DEPTH);
