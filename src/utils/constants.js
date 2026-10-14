@@ -234,7 +234,9 @@ export const DASH = {
     SCALE: { START: 1, END: 2.4 },
     FEET_OFFSET: 13, // la poussière part des pieds : cette distance sous le centre du joueur
   },
-  GHOST: { INTERVAL_MS: 30, FADE_MS: 220, ALPHA: 0.5, TINT: 0xaaddff }, // les images fantômes laissées derrière le joueur
+  // Les images fantômes laissées derrière le joueur : une par image (INTERVAL_MS = 16 ≈ 60 par seconde), qui reprennent la forme
+  // étirée du joueur, passent du blanc-bleuté au bleu au fil du dash, rétrécissent un peu et s'estompent.
+  GHOST: { INTERVAL_MS: 16, FADE_MS: 280, ALPHA: 0.55, TINT_START: 0xe0f6ff, TINT_END: 0x4f95ff, SHRINK: 0.88 },
 };
 
 // Distance (en pixels) à laquelle le joueur peut interagir avec un miroir

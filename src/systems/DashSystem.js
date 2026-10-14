@@ -91,7 +91,7 @@ export default class Dash {
     const speed = startSpeed * Math.max(1 - progress, 0) ** DASH.EASE_POWER;
     this.player.setVelocity(this.direction[0] * speed, this.direction[1] * speed);
     if (now >= this.nextGhostAt) {
-      this.leaveGhost();
+      this.leaveGhost(progress);
       this.nextGhostAt = now + DASH.GHOST.INTERVAL_MS;
     }
     return true;
@@ -135,14 +135,33 @@ export default class Dash {
       .setScale(horizontal ? longer : thinner, horizontal ? thinner : longer);
   }
 
-  // Une copie du joueur, laissée sur place, qui s'estompe puis disparaît
-  leaveGhost() {
+  // Une copie du joueur, laissée sur place : de la forme étirée du joueur, d'une couleur qui dépend du moment du dash
+  // (progress, de 0 à 1), qui rétrécit un peu et s'estompe. Seul l'alpha et l'échelle sont animés : c'est léger.
+  leaveGhost(progress) {
     const { player } = this;
+    const { TINT_START, TINT_END, ALPHA, FADE_MS, SHRINK } = DASH.GHOST;
+    const color = Phaser.Display.Color.Interpolate.ColorWithColor(
+      Phaser.Display.Color.ValueToColor(TINT_START),
+      Phaser.Display.Color.ValueToColor(TINT_END),
+      100,
+      Math.min(Math.round(progress * 100), 100),
+    );
+    const scaleX = this.visual ? this.visual.scaleX : 1;
+    const scaleY = this.visual ? this.visual.scaleY : 1;
     const ghost = this.scene.add
       .image(player.x, player.y, player.texture.key, player.frame.name)
-      .setDepth(player.depth - 1)
-      .setAlpha(DASH.GHOST.ALPHA)
-      .setTint(DASH.GHOST.TINT);
-    this.scene.tweens.add({ targets: ghost, alpha: 0, duration: DASH.GHOST.FADE_MS, onComplete: () => ghost.destroy() });
+      .setDepth(player.depth)
+      .setAlpha(ALPHA)
+      .setScale(scaleX, scaleY)
+      .setTint(Phaser.Display.Color.GetColor(color.r, color.g, color.b));
+    this.scene.children.moveBelow(ghost, player); // derrière le joueur, mais au-dessus du sol (même profondeur : c'est l'ordre qui compte)
+    this.scene.tweens.add({
+      targets: ghost,
+      alpha: 0,
+      scaleX: scaleX * SHRINK,
+      scaleY: scaleY * SHRINK,
+      duration: FADE_MS,
+      onComplete: () => ghost.destroy(),
+    });
   }
 }
