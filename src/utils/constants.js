@@ -25,6 +25,7 @@ export const WORLDS = {
   world_1: SCENES.WORLD_1,
 };
 
+
 // * La couleur d'origine de l'eau principale dans les images (elle sert de référence aux palettes ci-dessous)
 const WATER_ORIGINAL_COLOR = '#6bc2bd';
 
@@ -264,3 +265,12 @@ export const CRATE = {
     SHAKE: { DURATION_MS: 90, INTENSITY: 0.004 }, // léger tremblement de l'écran quand la caisse casse
   },
 };
+export const P2_SPRITE = {
+  key: 'player2',
+  path: 'assets/images/sprites/player_2_spritesheet.png',
+  frameWidth: 32,
+  frameHeight: 32
+};
+
+export const P2_START = { x: 600, y: 300 };
+export const P2_SPEED = 200;

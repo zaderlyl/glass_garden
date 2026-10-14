@@ -7,6 +7,7 @@ import { preloadCrate, createCrates } from '../systems/CrateSystem.js';
 import { isMirrorUsed, markMirrorUsed, shouldMirrorDisappear } from '../systems/MirrorSystem.js';
 import { applyTint } from '../systems/TintSystem.js';
 import { pickVariant } from '../utils/helpers.js';
+import { loadSecondPlayer, createSecondPlayer, updateSecondPlayer } from '../systems/SecondPlayer.js';
 import {
   SCENES,
   ASSETS,
@@ -86,6 +87,7 @@ export default class WorldScene extends Phaser.Scene {
       frameWidth: TILE_SIZE,
       frameHeight: TILE_SIZE,
     });
+    loadSecondPlayer(this);
   }
 
   /**
@@ -330,6 +332,7 @@ export default class WorldScene extends Phaser.Scene {
 
     // * La teinte du monde, posée en dernier : tous les calques et les sprites d'eau existent. Le jardin n'en a pas.
     applyTint(map, this.waterSprites, WORLD_TINTS[this.getWorldName()]);
+    this.player2 = createSecondPlayer(this);
   }
 
   /**
@@ -496,5 +499,6 @@ export default class WorldScene extends Phaser.Scene {
         });
       }
     }
-  }
+  updateSecondPlayer(this.player2);
+}
 }
