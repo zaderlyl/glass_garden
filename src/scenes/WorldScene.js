@@ -15,6 +15,7 @@ import { preloadBubbles, createBubbles } from '../systems/BubbleSystem.js';
 import { preloadEnemies, createEnemies, updateEnemies, resetEnemies } from '../systems/EnemySystem.js';
 import { DIALOGUES } from '../data/dialogues.js';
 import { pickVariant } from '../utils/helpers.js';
+import { loadSecondPlayer, createSecondPlayer, updateSecondPlayer } from '../systems/SecondPlayer.js';
 import {
   GAME_WIDTH,
   SCENES,
@@ -117,6 +118,7 @@ export default class WorldScene extends Phaser.Scene {
       frameWidth: TILE_SIZE,
       frameHeight: TILE_SIZE,
     });
+    loadSecondPlayer(this);
   }
 
   /**
@@ -214,6 +216,7 @@ export default class WorldScene extends Phaser.Scene {
     // * Une même scène est réutilisée à chaque visite : on remet l'état à zéro
     // ! Sinon un message encore affiché au moment de partir bloquerait le texte d'aide au retour
     this.messageActive = false;
+    this.vanishingMirror = null;
     this.gameWon = false;
     this.transitioning = false; // vrai pendant la FERMETURE de l'iris, quand on prend un miroir : le joueur est figé (voir update)
     this.waterSprites = []; // les sprites de l'eau animée de CETTE visite (remplis par createAnimatedTiles)
@@ -327,7 +330,8 @@ export default class WorldScene extends Phaser.Scene {
         if (vanishing) {
           // * Il va jouer son animation de disparition. Il n'est PAS ajouté à this.mirrors : on ne peut plus l'utiliser.
           // Quand l'animation est finie, on détruit le miroir et sa collision pour de bon.
-          // L'animation démarre quand l'iris est entièrement ouvert (voir la fin de create), pour qu'on la voie.
+          mirror.play(MIRROR_VANISH.KEY);
+          this.vanishingMirror = mirror; // le joueur 2 doit aussi être bloqué par lui pendant l'animation
           mirror.once('animationcomplete', () => {
             collider.destroy();
             mirror.destroy();
@@ -408,6 +412,15 @@ export default class WorldScene extends Phaser.Scene {
 
     // * La teinte du monde, posée en dernier : tous les calques et les sprites d'eau existent. Le jardin n'en a pas.
     applyTint(map, this.waterSprites, WORLD_TINTS[this.getWorldName()]);
+    this.player2 = createSecondPlayer(this, this.player, walls);
+    // * Le joueur 2 est bloqué comme le joueur 1 : murs, eau, caisses, miroirs
+    [walls, waterBlockers, this.crates, ...this.mirrors].filter(Boolean).forEach((obstacle) => {
+      this.physics.add.collider(this.player2, obstacle);
+    });
+    if (this.vanishingMirror?.active) {
+      const collider = this.physics.add.collider(this.player2, this.vanishingMirror);
+      this.vanishingMirror.once('destroy', () => collider.destroy());
+    }
 
     // * Arrivée par un miroir : le cercle s'ouvre depuis le miroir d'arrivée (ou depuis celui qui disparaît).
     // Le joueur n'est pas figé pendant l'ouverture : il peut déjà bouger. Sans miroir d'origine (premier lancement),
@@ -716,5 +729,7 @@ export default class WorldScene extends Phaser.Scene {
         });
       }
     }
+
+    updateSecondPlayer(this.player2);
   }
 }

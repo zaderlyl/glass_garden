@@ -33,6 +33,7 @@ export const WORLDS = {
   world_5: SCENES.WORLD_5,
 };
 
+
 // * La couleur d'origine de l'eau principale dans les images (elle sert de référence aux palettes ci-dessous)
 const WATER_ORIGINAL_COLOR = '#6bc2bd';
 
@@ -466,3 +467,13 @@ export const CRATE = {
     SHAKE: { DURATION_MS: 90, INTENSITY: 0.004 }, // léger tremblement de l'écran quand la caisse casse
   },
 };
+export const P2_SPRITE = {
+  key: 'player2',
+  path: 'assets/images/sprites/player_2_spritesheet.png',
+  frameWidth: 32,
+  frameHeight: 32
+};
+
+// * Le joueur 2 apparaît à côté du joueur 1, à cette distance (en pixels) : à droite, sinon à gauche, en bas, en haut
+export const P2_SPAWN_DISTANCE = 40;
+export const P2_SPEED = PLAYER.SPEED; // la même vitesse que le joueur 1
