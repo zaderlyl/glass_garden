@@ -17,6 +17,15 @@
 // =====================================================================================
 
 export const DIALOGUES = {
+  // * La lettre du gardien, lue au début de la partie (voir WorldScene.playIntro)
+  lettre: {
+    name: 'Lettre',
+    lines: [
+      "Le gardien du jardin est parti sans prévenir. Sur sa porte, il a laissé une lettre.",
+      "« J'ai caché 5 étoiles dans les jardins de l'autre côté des miroirs. »",
+      "« Réunis-les, et tu sauras où je suis. »",
+    ],
+  },
   enigme: {
     name: '',
     lines: [

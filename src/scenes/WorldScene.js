@@ -475,7 +475,7 @@ export default class WorldScene extends Phaser.Scene {
   /**
    * * L'intro du jardin, au début d'une nouvelle partie. Le joueur est figé (même mécanisme que la transition : transitioning) :
    * 1. le jardin apparaît en fondu depuis le blanc, SANS ses miroirs, la caméra zoomée sur la maison ;
-   * 2. le joueur sort de la porte et s'arrête devant la maison ;
+   * 2. le joueur sort de la porte et s'arrête devant la maison, puis lit la lettre du gardien (DIALOGUES.lettre) ;
    * 3. la caméra reprend sa place, le joueur reprend la main et le chronomètre démarre (voir endIntro).
    * L'interface est cachée pendant l'intro, et le joueur 2 arrive à côté du joueur 1 à la fin.
    */
@@ -484,7 +484,9 @@ export default class WorldScene extends Phaser.Scene {
     const camera = this.cameras.main;
     this.transitioning = true;
     this.setMirrorsVisible(false);
+    // * L'interface est lancée dans le même instant que l'intro et démarre après : on la cache tout de suite, puis une fois qu'elle existe
     this.scene.setVisible(false, SCENES.UI);
+    this.time.delayedCall(0, () => this.introPlaying && this.scene.setVisible(false, SCENES.UI));
     if (this.player2.active) this.player2.setVisible(false); // en solo, le joueur 2 n'existe pas
 
     // * Le joueur attend sur le seuil de la porte, invisible, tourné vers le bas
@@ -498,7 +500,7 @@ export default class WorldScene extends Phaser.Scene {
 
   /** Le joueur sort de la maison : il apparaît sur le seuil et marche jusque devant, puis la caméra reprend sa place. */
   introWalkOut() {
-    const { FRONT, WALK_MS, PAUSE_MS, ZOOM_OUT_MS } = INTRO;
+    const { FRONT, WALK_MS, PAUSE_MS } = INTRO;
     this.tweens.add({
       targets: this.player,
       y: FRONT.Y,
@@ -506,14 +508,18 @@ export default class WorldScene extends Phaser.Scene {
       duration: WALK_MS,
       ease: 'Linear',
       onComplete: () => {
-        this.time.delayedCall(PAUSE_MS, () => {
-          const camera = this.cameras.main;
-          camera.zoomTo(1, ZOOM_OUT_MS, 'Sine.easeInOut');
-          camera.pan(this.scale.width / 2, this.scale.height / 2, ZOOM_OUT_MS, 'Sine.easeInOut', false, (cam, progress) => {
-            if (progress === 1) this.endIntro();
-          });
-        });
+        // * Il lit la lettre du gardien, puis la caméra reprend sa place
+        this.time.delayedCall(PAUSE_MS, () => this.dialogue.open('lettre', DIALOGUES.lettre, null, () => this.introZoomOut()));
       },
+    });
+  }
+
+  /** La caméra reprend sa place (zoom normal, centrée), puis l'intro se termine. */
+  introZoomOut() {
+    const camera = this.cameras.main;
+    camera.zoomTo(1, INTRO.ZOOM_OUT_MS, 'Sine.easeInOut');
+    camera.pan(this.scale.width / 2, this.scale.height / 2, INTRO.ZOOM_OUT_MS, 'Sine.easeInOut', false, (cam, progress) => {
+      if (progress === 1) this.endIntro();
     });
   }
 
@@ -801,6 +807,7 @@ export default class WorldScene extends Phaser.Scene {
     if (this.transitioning) {
       this.player.setVelocity(0, 0);
       this.player2.setVelocity(0, 0);
+      if (this.introPlaying && this.dialogue.isOpen) this.dialogue.update(this.input1); // la lettre de l'intro : le joueur la fait avancer
       return;
     }
 
