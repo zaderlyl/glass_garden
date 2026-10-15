@@ -6,6 +6,7 @@
 // l'objet est l'image à afficher (voir DECO.IMAGES dans constants.js : « fleur_1 », « lanterne_bleue »...). Le point marque les
 // PIEDS de l'image (le bas, centré). Changer, déplacer ou ajouter du décor se fait dans Tiled, sans toucher au code.
 //
+// Chaque monde peut avoir une teinte de décor (DECO.WORLD_TINTS), sauf pour les lanternes, bougies et cristaux (lumineux).
 // Le décor est trié en profondeur avec les personnages (voir WorldScene.sortByDepth) : le joueur passe devant ou derrière
 // selon sa position. Une image de 16 px est agrandie ×2 pour aller avec les tuiles de 32 px.
 //
@@ -40,6 +41,10 @@ export function createDeco(scene, map) {
       const image = scene.add.image(object.x, object.y, key).setOrigin(0.5, 1);
       image.texture.setFilter(Phaser.Textures.FilterMode.NEAREST); // pixel art net, même agrandi
       if (image.width <= DECO.SMALL_SIZE) image.setScale(2);
+
+      // * La teinte du monde (sauf pour les sources de lumière, qui gardent leurs couleurs)
+      const tint = DECO.WORLD_TINTS[scene.getWorldName()];
+      if (tint !== undefined && !DECO.UNTINTED.some((prefix) => object.name.startsWith(prefix))) image.setTint(tint);
       return image;
     })
     .filter(Boolean);

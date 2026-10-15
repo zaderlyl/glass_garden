@@ -591,6 +591,11 @@ export const DECO = {
   PATH: 'assets/images/deco/', // le dossier des images (un fichier par nom : « fleur_1.png »)
   KEY_PREFIX: 'deco_', // la clé Phaser d'une image est ce préfixe suivi de son nom
   SMALL_SIZE: 16, // une image de cette taille (ou moins) est agrandie ×2 pour aller avec les tuiles de 32 px
+  // * Une teinte par monde (le nom du monde est celui de WORLDS) : elle multiplie les couleurs du décor pour qu'il aille avec la lumière du monde
+  // (0xffffff = aucune teinte). Un monde absent garde les couleurs d'origine des images.
+  WORLD_TINTS: { world_1: 0x8f9cd4 }, // la nuit : des bleus, le vert des buissons s'assombrit
+  // * Les sources de lumière ne sont jamais teintées : une lanterne, une bougie ou un cristal reste lumineux, même la nuit
+  UNTINTED: ['lanterne_', 'bougie_', 'cristal_'], // les noms d'images qui commencent ainsi
   IMAGES: [
     'fleur_1', 'fleur_2', 'fleur_3', 'fleur_4', 'fleur_5', 'fleur_6',
     'buisson', 'buisson_automne', 'trefle', 'herbe', 'plante_verte', 'panneau',
