@@ -311,6 +311,12 @@ export const TRANSITION = {
   COLOR: 0x000000,
 };
 
+// * L'intro du jardin, jouée au début d'une nouvelle partie (voir WorldScene.playIntro)
+export const INTRO = {
+  FADE_MS: 2500, // le fondu depuis le blanc, pendant lequel le joueur est figé
+  FADE_COLOR: { RED: 255, GREEN: 255, BLUE: 255 }, // le blanc
+};
+
 // * Fumée de cheminée : des objets de classe « smoke » posés dans Tiled (point = le haut de la cheminée)
 export const SMOKE = {
   TEXTURE: 'smoke_puff', // texture générée par le code (carré de PUFF_SIZE pixels)

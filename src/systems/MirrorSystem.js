@@ -71,17 +71,20 @@ export function preloadMirrorLocks(scene) {
  * (voir ProgressSystem.takePendingMirrorAnimations) montre d'abord son cadenas, qui s'ouvre, monte et s'efface.
  * @param {Phaser.Scene} scene
  * @param {Phaser.GameObjects.Sprite[]} mirrors  Les miroirs de la scène (chacun a `world`)
+ * @returns {Phaser.GameObjects.Image[]} les cadenas posés (pour pouvoir les cacher, voir l'intro)
  */
 export function createMirrorLocks(scene, mirrors) {
   const opening = takePendingMirrorAnimations();
   const { CLOSED, OPEN, SCALE, DEPTH, TINT, OPEN_DELAY_MS, OPEN_ANIM } = MIRROR_LOCK;
   [CLOSED, OPEN].forEach(({ KEY }) => scene.textures.get(KEY).setFilter(Phaser.Textures.FilterMode.NEAREST));
 
+  const padlocks = [];
   mirrors.forEach((mirror) => {
     const locked = isMirrorLocked(mirror.world);
     if (!locked && !opening.includes(mirror.world)) return;
 
     const padlock = scene.add.image(mirror.x, mirror.y, CLOSED.KEY).setScale(SCALE).setDepth(DEPTH);
+    padlocks.push(padlock);
     if (locked) {
       mirror.setTint(TINT);
       return;
@@ -95,4 +98,5 @@ export function createMirrorLocks(scene, mirrors) {
       scene.tweens.add({ targets: padlock, y: padlock.y - OPEN_ANIM.RISE_PX, alpha: 0, duration: OPEN_ANIM.DURATION_MS, ease: 'Quad.easeOut', onComplete: () => padlock.destroy() });
     });
   });
+  return padlocks;
 }

@@ -9,6 +9,7 @@ import { preloadDeco, createDeco } from '../systems/DecoSystem.js';
 import { isMirrorUsed, markMirrorUsed, shouldMirrorDisappear, getMirrorFacing, preloadMirrorLocks, createMirrorLocks } from '../systems/MirrorSystem.js';
 import { applyTint } from '../systems/TintSystem.js';
 import { irisClose, irisOpen } from '../systems/TransitionSystem.js';
+import { consumeIntro } from '../systems/IntroSystem.js';
 import { preloadNpcs, createNpcs } from '../systems/NpcSystem.js';
 import DialogueBox, { isRiddleSolved } from '../systems/DialogueSystem.js';
 import { bounceStar } from '../systems/StarBounce.js';
@@ -49,6 +50,7 @@ import {
   STAR_BOUNCE,
   BUBBLES,
   ENEMY_AI,
+  INTRO,
 } from '../utils/constants.js';
 
 /**
@@ -228,6 +230,8 @@ export default class WorldScene extends Phaser.Scene {
     this.dialogueInput = null;
     this.gameWon = false;
     this.transitioning = false; // vrai pendant la FERMETURE de l'iris, quand on prend un miroir : le joueur est figé (voir update)
+    this.introPlaying = this.isNormalWorld() && consumeIntro(); // vrai au tout début d'une partie : le jardin joue son intro (voir playIntro)
+    this.mirrorLocks = []; // les cadenas des miroirs du jardin (créés plus bas)
     this.waterSprites = []; // les sprites de l'eau animée de CETTE visite (remplis par createAnimatedTiles)
 
     // * Le chronomètre et son affichage sont globaux : ils ne dépendent pas du monde.
@@ -237,7 +241,7 @@ export default class WorldScene extends Phaser.Scene {
       this.scene.launch(SCENES.UI);
     }
     this.scene.bringToTop(SCENES.UI);
-    timer.start(); // sans effet s'il tourne déjà
+    if (!this.introPlaying) timer.start(); // sans effet s'il tourne déjà (pendant l'intro, il démarre à la fin : voir endIntro)
 
     // * Les couleurs de ce monde sont une TEINTE (voir WORLD_TINTS), posée plus bas sur les tuiles (voir applyTint).
     // Les textures sont donc toujours les originales.
@@ -354,7 +358,7 @@ export default class WorldScene extends Phaser.Scene {
         this.mirrors.push(mirror);
       });
     // * Un cadenas sur chaque miroir encore verrouillé du jardin (et son animation d'ouverture pour ceux qui viennent de s'ouvrir)
-    if (this.isNormalWorld()) createMirrorLocks(this, this.mirrors);
+    if (this.isNormalWorld()) this.mirrorLocks = createMirrorLocks(this, this.mirrors);
 
 
     // * Texte d'aide, affiché en haut de l'écran quand on est près d'un miroir
@@ -464,6 +468,33 @@ export default class WorldScene extends Phaser.Scene {
       const arrival = this.mirrors.find((mirror) => mirror.world === this.fromWorld) || vanishingMirror || this.player;
       irisOpen(this, arrival.x, arrival.y, () => vanishingMirror?.play(MIRROR_VANISH.KEY));
     }
+
+    if (this.introPlaying) this.playIntro();
+  }
+
+  /**
+   * * L'intro du jardin, au début d'une nouvelle partie : le jardin apparaît en fondu depuis le blanc, SANS ses miroirs,
+   * pendant que le joueur est figé (même mécanisme que la transition : transitioning). Le chronomètre démarre à la fin.
+   */
+  playIntro() {
+    this.transitioning = true;
+    this.setMirrorsVisible(false);
+    const { RED, GREEN, BLUE } = INTRO.FADE_COLOR;
+    this.cameras.main.fadeIn(INTRO.FADE_MS, RED, GREEN, BLUE);
+    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_IN_COMPLETE, () => this.endIntro());
+  }
+
+  /** Fin de l'intro : les miroirs sont là, le joueur reprend la main et le chronomètre démarre. */
+  endIntro() {
+    this.introPlaying = false;
+    this.setMirrorsVisible(true);
+    this.transitioning = false;
+    timer.start();
+  }
+
+  /** Montre ou cache les miroirs du jardin et leurs cadenas. */
+  setMirrorsVisible(visible) {
+    [...this.mirrors, ...this.mirrorLocks].forEach((sprite) => sprite.setVisible(visible));
   }
 
   /**
