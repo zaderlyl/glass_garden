@@ -113,7 +113,10 @@ function playHitEffect(scene, enemy) {
     // * Il tient encore : un éclat blanc, il recule (loin du joueur) et reste étourdi un instant
     enemy.setTintFill(0xffffff);
     scene.time.delayedCall(HIT.FLASH_MS, () => enemy.active && enemy.clearTint());
-    const away = new Phaser.Math.Vector2(enemy.x - scene.player.x, enemy.y - (scene.player.y + scene.player.height / 2)).normalize();
+    const hitter = scene
+      .getEnemyTargets()
+      .reduce((a, b) => (Phaser.Math.Distance.Between(enemy.x, enemy.y, a.x, a.y) <= Phaser.Math.Distance.Between(enemy.x, enemy.y, b.x, b.y) ? a : b));
+    const away = new Phaser.Math.Vector2(enemy.x - hitter.x, enemy.y - (hitter.y + hitter.height / 2)).normalize();
     enemy.setVelocity(away.x * HIT.KNOCKBACK, away.y * HIT.KNOCKBACK);
     enemy.stunnedUntil = scene.time.now + HIT.STUN_MS;
     return;
@@ -152,6 +155,21 @@ function sees(scene, enemy, player, range) {
   const from = enemy.body.center;
   const to = player.body.center;
   return Phaser.Math.Distance.Between(from.x, from.y, to.x, to.y) < range && hasLineOfSight(scene, from.x, from.y, to.x, to.y);
+}
+
+/** Le joueur le plus proche que l'ennemi voit à moins de `range` pixels, ou null s'il n'en voit aucun. */
+function nearestSeen(scene, enemy, players, range) {
+  let best = null;
+  let bestDistance = Infinity;
+  players.forEach((player) => {
+    if (!sees(scene, enemy, player, range)) return;
+    const distance = Phaser.Math.Distance.Between(enemy.x, enemy.y, player.x, player.y);
+    if (distance < bestDistance) {
+      best = player;
+      bestDistance = distance;
+    }
+  });
+  return best;
 }
 
 /** Le petit « ! » qui monte au-dessus de l'ennemi quand il repère le joueur. */
@@ -301,10 +319,10 @@ function setState(enemy, state, now) {
  * À appeler à chaque image : fait vivre tous les ennemis.
  * @param {Phaser.Scene} scene  La scène du monde (elle doit avoir un calque `walls`)
  * @param {Phaser.Physics.Arcade.Group} enemies  Le groupe d'ennemis (voir createEnemies)
- * @param {Phaser.Physics.Arcade.Sprite} player
+ * @param {Phaser.Physics.Arcade.Sprite[]} players  Les joueurs que les ennemis peuvent voir (le plus proche visible est poursuivi)
  * @param {boolean} frozen  Vrai pendant un dialogue ou une transition : les ennemis s'arrêtent
  */
-export function updateEnemies(scene, enemies, player, frozen) {
+export function updateEnemies(scene, enemies, players, frozen) {
   const now = scene.time.now;
 
   enemies.getChildren().forEach((enemy) => {
@@ -320,7 +338,9 @@ export function updateEnemies(scene, enemies, player, frozen) {
     if (!enemy.state) setState(enemy, 'idle', now);
 
     const config = ENEMIES[enemy.enemyType];
-    const canSee = sees(scene, enemy, player, enemy.state === 'chase' ? config.sight * ENEMY_AI.LOSE_SIGHT_FACTOR : config.sight);
+    const range = enemy.state === 'chase' ? config.sight * ENEMY_AI.LOSE_SIGHT_FACTOR : config.sight;
+    const player = nearestSeen(scene, enemy, players, range); // le joueur visible le plus proche, sinon null
+    const canSee = player !== null;
 
     // * Il voit le joueur : il fonce dessus (et il se retient où il l'a vu, au cas où il le perde)
     if (canSee) {

@@ -274,7 +274,6 @@ export default class WorldScene extends Phaser.Scene {
     // * Où faire apparaître le joueur ? (voir getSpawnPosition)
     const spawn = this.getSpawnPosition(map);
     this.spawnPoint = spawn; // pour y renvoyer le joueur quand un ennemi le touche (voir respawnPlayer)
-    this.invulnerableUntil = 0;
 
     // * Le joueur est un sprite « physique » : c'est ce qui permet de le faire entrer en collision
     // Il commence de face (vers le bas), sur le point de départ
@@ -408,7 +407,7 @@ export default class WorldScene extends Phaser.Scene {
     });
     this.physics.add.collider(this.enemies, this.enemies);
     // * Un ennemi qui touche le joueur le renvoie au départ (il ne le bloque pas : ils se traversent)
-    this.physics.add.overlap(this.player, this.enemies, () => this.onEnemyTouch());
+    this.physics.add.overlap(this.player, this.enemies, () => this.onEnemyTouch(this.player));
 
     // * La boîte de dialogue des personnages (cachée tant qu'on ne parle à personne)
     this.dialogue = new DialogueBox(this);
@@ -416,6 +415,10 @@ export default class WorldScene extends Phaser.Scene {
     // * La teinte du monde, posée en dernier : tous les calques et les sprites d'eau existent. Le jardin n'en a pas.
     applyTint(map, this.waterSprites, WORLD_TINTS[this.getWorldName()]);
     this.player2 = createSecondPlayer(this, this.player, walls);
+    this.player2Spawn = { x: this.player2.x, y: this.player2.y }; // où il revient quand un ennemi le touche
+    this.player.invulnerableUntil = 0;
+    this.player2.invulnerableUntil = 0;
+    this.physics.add.overlap(this.player2, this.enemies, () => this.onEnemyTouch(this.player2));
     // * Le joueur 2 est bloqué comme le joueur 1 : murs, eau, caisses, miroirs
     [walls, waterBlockers, this.crates, ...this.mirrors].filter(Boolean).forEach((obstacle) => {
       this.physics.add.collider(this.player2, obstacle);
@@ -490,27 +493,35 @@ export default class WorldScene extends Phaser.Scene {
   }
 
   /** Un ennemi touche le joueur : sauf s'il vient déjà d'être renvoyé (invincible), ou en plein dialogue ou transition. */
-  onEnemyTouch() {
-    if (this.time.now < this.invulnerableUntil || this.time.now < this.dash.endsAt || this.dialogue.isOpen || this.transitioning) return;
-    this.respawnPlayer();
+  /** Les joueurs que les ennemis voient et peuvent toucher : le joueur 2 n'existe pas pour eux en mode pc (il ne bouge pas). */
+  getEnemyTargets() {
+    return getControlMode() === CONTROL_MODES.PC ? [this.player] : [this.player, this.player2];
   }
 
-  /** Renvoie le joueur au point de départ du monde, remet les ennemis vivants à leur place, et le rend invincible un instant. */
-  respawnPlayer() {
+  onEnemyTouch(player) {
+    if (!this.getEnemyTargets().includes(player)) return;
+    const dash = player === this.player ? this.dash : this.player2.dash;
+    if (this.time.now < player.invulnerableUntil || this.time.now < dash.endsAt || this.dialogue.isOpen || this.transitioning) return;
+    this.respawnPlayer(player);
+  }
+
+  /** Renvoie ce joueur au départ (le joueur 2 à côté du joueur 1), les ennemis reprennent leur place. */
+  respawnPlayer(player) {
     const { INVULNERABLE_MS, BLINK_MS, BLINK_ALPHA, FLASH } = ENEMY_AI.CONTACT;
 
-    this.player.setPosition(this.spawnPoint.x, this.spawnPoint.y);
-    this.player.setVelocity(0, 0);
+    const spawn = player === this.player ? this.spawnPoint : this.player2Spawn;
+    player.setPosition(spawn.x, spawn.y);
+    player.setVelocity(0, 0);
     resetEnemies(this.enemies);
     this.cameras.main.flash(FLASH.DURATION_MS, FLASH.RED, FLASH.GREEN, FLASH.BLUE);
 
     // * Invincible un court instant : le joueur clignote, puis redevient normal
-    this.invulnerableUntil = this.time.now + INVULNERABLE_MS;
-    this.tweens.killTweensOf(this.player);
-    this.tweens.add({ targets: this.player, alpha: BLINK_ALPHA, duration: BLINK_MS, yoyo: true, repeat: -1 });
+    player.invulnerableUntil = this.time.now + INVULNERABLE_MS;
+    this.tweens.killTweensOf(player);
+    this.tweens.add({ targets: player, alpha: BLINK_ALPHA, duration: BLINK_MS, yoyo: true, repeat: -1 });
     this.time.delayedCall(INVULNERABLE_MS, () => {
-      this.tweens.killTweensOf(this.player);
-      this.player.setAlpha(1);
+      this.tweens.killTweensOf(player);
+      player.setAlpha(1);
     });
   }
 
@@ -630,7 +641,7 @@ export default class WorldScene extends Phaser.Scene {
     }
 
     // * Les ennemis vivent à chaque image, sauf pendant un dialogue ou une transition (ils s'arrêtent)
-    updateEnemies(this, this.enemies, this.player, this.dialogue.isOpen || this.transitioning);
+    updateEnemies(this, this.enemies, this.getEnemyTargets(), this.dialogue.isOpen || this.transitioning);
 
     // * Pendant la fermeture de l'iris (on a pris un miroir) : le joueur est figé, on ne lit ni les déplacements, ni le tir, ni l'interaction
     if (this.transitioning) {
