@@ -1,6 +1,6 @@
 import InputManager from '../systems/InputManager.js';
 import timer from '../systems/TimerSystem.js';
-import { RecolteEtoiles } from '../systems/RecolteEtoiles.js';
+import { RecolteEtoiles, recolterEtoile } from '../systems/RecolteEtoiles.js';
 import { areAllStarsCollected } from '../systems/StarSystem.js';
 import { createBulletAnimations, explodeBullet, shoot } from '../systems/fonctionTir.js';
 import { preloadCrate, createCrates } from '../systems/CrateSystem.js';
@@ -419,6 +419,8 @@ export default class WorldScene extends Phaser.Scene {
     this.player.invulnerableUntil = 0;
     this.player2.invulnerableUntil = 0;
     this.physics.add.overlap(this.player2, this.enemies, () => this.onEnemyTouch(this.player2));
+    // * Le joueur 2 ramasse aussi les étoiles (le joueur 1 est branché dans RecolteEtoiles)
+    this.stars.forEach((star) => this.physics.add.overlap(this.player2, star, () => recolterEtoile(this, star)));
     // * Le joueur 2 est bloqué comme le joueur 1 : murs, eau, caisses, miroirs
     [walls, waterBlockers, this.crates, ...this.mirrors].filter(Boolean).forEach((obstacle) => {
       this.physics.add.collider(this.player2, obstacle);
