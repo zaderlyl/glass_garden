@@ -116,26 +116,7 @@
                  "width":0,
                  "x":780.3,
                  "y":415.488
-                }, 
-                {
-                 "height":0,
-                 "id":12,
-                 "name":"crate",
-                 "opacity":1,
-                 "point":true,
-                 "properties":[
-                        {
-                         "name":"hitPoints",
-                         "type":"int",
-                         "value":3
-                        }],
-                 "rotation":0,
-                 "type":"crate",
-                 "visible":true,
-                 "width":0,
-                 "x":386.44785600847,
-                 "y":310.56996647256
-                }, 
+                },
                 {
                  "height":0,
                  "id":465,
