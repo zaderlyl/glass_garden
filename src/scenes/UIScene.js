@@ -82,8 +82,7 @@ export default class UIScene extends Phaser.Scene {
     });
   }
 
-  // * Fin de partie : un message au milieu de l'écran (appelé par WorldScene.winGame)
-  // TODO(équipe): remplacer par un vrai écran de fin
+  // * Fin de partie : l'écran de victoire (appelé par WorldScene.winGame)
   showVictory() {
     // * L'écran de victoire : une image plein écran, devant tout le reste de l'interface
     this.add

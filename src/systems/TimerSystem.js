@@ -24,7 +24,6 @@
 //   timer.reset();            // remet à zéro (nouvelle partie)
 //
 // * À LA FIN DE LA PARTIE : appeler timer.stop() puis lire timer.elapsed()
-// TODO(équipe): sauvegarder le meilleur temps (SaveSystem)
 // TODO(équipe): démarrer le chrono au début de la session (après la saisie du pseudo),
 // et non plus depuis WorldScene
 // =====================================================================================

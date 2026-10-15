@@ -84,9 +84,7 @@ export const PALETTES = {
 
 // * Quelle palette pour quel monde (le nom du monde est celui de la table WORLDS).
 // Un monde absent de cette table garde ses couleurs d'origine : c'est le cas du jardin (le monde normal).
-// ! TEST : monde_1 est censé devenir la nuit (monde 1 du GDD). Il porte la palette « magic » le temps de
-// développer la recoloration, parce que c'est la seule carte qui existe en plus du jardin.
-// TODO(équipe): remplacer par la vraie palette de chaque monde quand les mondes seront créés
+// ! EN RÉSERVE : ces palettes ne sont plus appelées. Les mondes ont leurs propres images recolorées (voir WORLD_ART plus bas).
 export const WORLD_PALETTES = {
   world_1: 'magic',
 };
@@ -115,7 +113,7 @@ export const TINTS = {
 
 // * Quelle teinte pour quel monde (le nom du monde est celui de la table WORLDS).
 // Un monde absent de cette table garde ses couleurs d'origine : c'est le cas du jardin (le monde normal).
-// TODO(équipe): définir la teinte de chaque monde quand les mondes seront créés (monde 1 = la nuit)
+// Vide exprès : les mondes ont leurs images recolorées (WORLD_ART), une teinte en plus multiplierait deux fois les couleurs.
 export const WORLD_TINTS = {
 };
 
