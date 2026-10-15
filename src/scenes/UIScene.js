@@ -3,7 +3,7 @@ import { getCollectedStars, getTotalStars } from '../systems/StarSystem.js';
 import { getBubbleState } from '../systems/BubbleSystem.js';
 import { getControlMode, toggleControlMode } from '../systems/ControlMode.js';
 import { formatTime } from '../utils/helpers.js';
-import { SCENES, COLORS, FONT_FAMILY, FONT_SIZE, UI_MARGIN, VICTORY_MESSAGE, CONTROL_MODE_SHORTCUT } from '../utils/constants.js';
+import { SCENES, COLORS, FONT_FAMILY, FONT_SIZE, UI_MARGIN, UI_IMAGES, DEPTH, CONTROL_MODE_SHORTCUT } from '../utils/constants.js';
 
 /**
  * * Scène d'interface : affiche le chronomètre et le compteur d'étoiles par-dessus le monde en cours.
@@ -15,6 +15,10 @@ import { SCENES, COLORS, FONT_FAMILY, FONT_SIZE, UI_MARGIN, VICTORY_MESSAGE, CON
 export default class UIScene extends Phaser.Scene {
   constructor() {
     super(SCENES.UI);
+  }
+
+  preload() {
+    this.load.image(UI_IMAGES.WIN.KEY, UI_IMAGES.WIN.PATH);
   }
 
   create() {
@@ -79,15 +83,10 @@ export default class UIScene extends Phaser.Scene {
   // * Fin de partie : un message au milieu de l'écran (appelé par WorldScene.winGame)
   // TODO(équipe): remplacer par un vrai écran de fin
   showVictory() {
+    // * L'écran de victoire : une image plein écran, devant tout le reste de l'interface
     this.add
-      .text(this.scale.width / 2, this.scale.height / 2, VICTORY_MESSAGE, {
-        fontFamily: FONT_FAMILY,
-        fontSize: FONT_SIZE.VICTORY,
-        color: COLORS.TEXT,
-        backgroundColor: COLORS.VICTORY_BACKGROUND,
-        padding: { x: 32, y: 20 },
-      })
-      .setOrigin(0.5);
+      .image(this.scale.width / 2, this.scale.height / 2, UI_IMAGES.WIN.KEY)
+      .setDepth(DEPTH.VICTORY);
   }
 
   // Le texte du compteur : « Étoiles : 2 / 5 »

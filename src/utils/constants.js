@@ -24,6 +24,7 @@ export const UI_IMAGES = {
   HOME: { KEY: 'ui_accueil', PATH: 'assets/images/ui/accueil.png' },
   MODE_SOLO: { KEY: 'ui_mode_solo', PATH: 'assets/images/ui/mode_solo.png' }, // choix du mode, la carte Solo surlignée
   MODE_MULTI: { KEY: 'ui_mode_multi', PATH: 'assets/images/ui/mode_multi.png' }, // la carte Multi surlignée
+  WIN: { KEY: 'ui_victoire', PATH: 'assets/images/ui/victoire.png' }, // l'écran de victoire (« You win! »)
 };
 
 // * Le monde normal (le jardin), tel qu'il est nommé dans la table WORLDS ci-dessous.
@@ -286,6 +287,7 @@ export const DEPTH = {
   BULLET: 9, // les balles passent devant les personnages (derrière le décor du dessus)
   ABOVE_PLAYER: 10, // calque decor_above
   UI: 20,
+  VICTORY: 100, // l'écran de victoire : devant toute l'interface
   DIALOGUE: 30, // la boîte de dialogue des personnages (devant l'interface)
   TRANSITION: 100, // le calque noir de la transition entre deux mondes (devant tout)
 };
