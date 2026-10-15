@@ -508,6 +508,21 @@ export default class WorldScene extends Phaser.Scene {
     this.respawnPlayer(player);
   }
 
+  /** Un joueur est pris dans une explosion : le niveau recommence (sauf s'il est invincible, en plein dash, ou si le jeu est figé). */
+  onBombHit(player) {
+    const dash = player === this.player ? this.dash : this.player2.dash;
+    if (this.time.now < player.invulnerableUntil || this.time.now < dash.endsAt || this.dialogue.isOpen || this.transitioning) return;
+    this.restartLevel();
+  }
+
+  /** Recommence ce monde à zéro (caisses, ennemis, bombes), comme si on y arrivait par le même miroir. */
+  restartLevel() {
+    const { FLASH } = ENEMY_AI.CONTACT;
+    this.transitioning = true; // tout est figé pendant l'éclair
+    this.cameras.main.flash(FLASH.DURATION_MS, FLASH.RED, FLASH.GREEN, FLASH.BLUE);
+    this.time.delayedCall(FLASH.DURATION_MS + 250, () => this.scene.restart({ from: this.fromWorld }));
+  }
+
   /** Renvoie ce joueur au départ (le joueur 2 à côté du joueur 1), les ennemis reprennent leur place. */
   respawnPlayer(player) {
     const { INVULNERABLE_MS, BLINK_MS, BLINK_ALPHA, FLASH } = ENEMY_AI.CONTACT;

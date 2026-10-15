@@ -7,11 +7,11 @@
 // mèche clignote un instant (BOMB.FUSE_MS), puis elle explose.
 //
 // * L'EXPLOSION (rayon BOMB.RADIUS)
-//   - un joueur dans le rayon est renvoyé au départ, comme au contact d'un ennemi (invincibilité et dash comptent) ;
+//   - un joueur dans le rayon fait recommencer le niveau (scene.onBombHit ; l'invincibilité et le dash protègent) ;
 //   - un ennemi dans le rayon meurt ;
 //   - une caisse dans le rayon casse (et si elle cachait une bombe, la chaîne continue).
 //
-// * COMMENT L'UTILISER (la scène du monde doit avoir crates, enemies, getEnemyTargets, onEnemyTouch et isFreeGround)
+// * COMMENT L'UTILISER (la scène du monde doit avoir crates, enemies, getEnemyTargets, onBombHit et isFreeGround)
 //   import { dropBomb } from '../systems/BombSystem.js';
 //   onBombCrateBroken(crate) { dropBomb(this, crate); }   // appelée par CrateSystem à la casse d'une caisse à bombe
 // =====================================================================================
@@ -97,6 +97,6 @@ function explode(scene, x, y) {
     .filter((crate) => crate.active && inRadius(crate))
     .forEach(breakCrate);
 
-  // * Les joueurs dans le rayon : même sort qu'un contact avec un ennemi
-  scene.getEnemyTargets().filter((player) => Phaser.Math.Distance.Between(x, y, player.body.center.x, player.body.center.y) < RADIUS).forEach((player) => scene.onEnemyTouch(player));
+  // * Un joueur dans le rayon : le niveau recommence (la scène vérifie l'invincibilité et le dash)
+  scene.getEnemyTargets().filter((player) => Phaser.Math.Distance.Between(x, y, player.body.center.x, player.body.center.y) < RADIUS).forEach((player) => scene.onBombHit(player));
 }
