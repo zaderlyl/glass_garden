@@ -326,6 +326,9 @@ export const VICTORY_MESSAGE = 'Toutes les étoiles sont récupérées';
 
 // * Le chrono final sur l'écran de victoire : centré sous le titre « YOU WIN! » de l'image, en blanc cerclé de bleu nuit (comme le titre)
 export const VICTORY_TIME = { Y: 400, COLOR: '#ffffff', STROKE: '#2b2d5b', STROKE_THICKNESS: 8 };
+
+// * Sous le chrono final : le meilleur temps du mode, ou « Nouveau record ! » (en jaune, comme le titre) si on vient de le battre
+export const VICTORY_BEST = { Y: 475, RECORD_TEXT: 'Nouveau record !', RECORD_COLOR: '#fff23a', BEST_LABEL: 'Meilleur temps : ' };
 export const FONT_FAMILY = 'Georgia, serif';
 export const FONT_SIZE = {
   TITLE: '96px',
@@ -334,6 +337,7 @@ export const FONT_SIZE = {
   STARS: '28px',
   VICTORY: '48px',
   VICTORY_TIME: '64px', // le chrono final sur l'écran de victoire
+  VICTORY_BEST: '40px', // le meilleur temps et « Nouveau record ! » sur l'écran de victoire
   CONTROL_MODE: '20px',
 };
 

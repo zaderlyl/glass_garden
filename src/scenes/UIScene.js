@@ -1,9 +1,11 @@
 import timer from '../systems/TimerSystem.js';
+import { getBestTime, saveBestTime } from '../systems/SaveSystem.js';
+import { getGameMode } from '../systems/GameMode.js';
 import { getCollectedStars, getTotalStars } from '../systems/StarSystem.js';
 import { getBubbleState } from '../systems/BubbleSystem.js';
 import { getControlMode, toggleControlMode } from '../systems/ControlMode.js';
 import { formatTime } from '../utils/helpers.js';
-import { SCENES, COLORS, FONT_FAMILY, FONT_SIZE, UI_MARGIN, UI_IMAGES, DEPTH, VICTORY_TIME, CONTROL_MODE_SHORTCUT } from '../utils/constants.js';
+import { SCENES, COLORS, FONT_FAMILY, FONT_SIZE, UI_MARGIN, UI_IMAGES, DEPTH, VICTORY_TIME, VICTORY_BEST, CONTROL_MODE_SHORTCUT } from '../utils/constants.js';
 
 /**
  * * Scène d'interface : affiche le chronomètre et le compteur d'étoiles par-dessus le monde en cours.
@@ -89,14 +91,23 @@ export default class UIScene extends Phaser.Scene {
       .setDepth(DEPTH.VICTORY);
 
     // * Le chrono final, sous le titre (le chronomètre est déjà arrêté : winGame l'a fait avant)
+    const elapsed = timer.elapsed();
+    const style = { fontFamily: FONT_FAMILY, fontStyle: 'bold', stroke: VICTORY_TIME.STROKE, strokeThickness: VICTORY_TIME.STROKE_THICKNESS };
     this.add
-      .text(this.scale.width / 2, VICTORY_TIME.Y, formatTime(timer.elapsed()), {
-        fontFamily: FONT_FAMILY,
-        fontSize: FONT_SIZE.VICTORY_TIME,
-        fontStyle: 'bold',
-        color: VICTORY_TIME.COLOR,
-        stroke: VICTORY_TIME.STROKE,
-        strokeThickness: VICTORY_TIME.STROKE_THICKNESS,
+      .text(this.scale.width / 2, VICTORY_TIME.Y, formatTime(elapsed), { ...style, fontSize: FONT_SIZE.VICTORY_TIME, color: VICTORY_TIME.COLOR })
+      .setOrigin(0.5)
+      .setDepth(DEPTH.VICTORY + 1);
+
+    // * Le record de ce mode (solo ou multi) : on l'enregistre s'il est battu, et on le dit. Sinon on rappelle le meilleur temps.
+    const mode = getGameMode();
+    const isRecord = saveBestTime(elapsed, mode);
+    const best = getBestTime(mode);
+    const line = isRecord ? VICTORY_BEST.RECORD_TEXT : best !== null ? VICTORY_BEST.BEST_LABEL + formatTime(best) : '';
+    this.add
+      .text(this.scale.width / 2, VICTORY_BEST.Y, line, {
+        ...style,
+        fontSize: FONT_SIZE.VICTORY_BEST,
+        color: isRecord ? VICTORY_BEST.RECORD_COLOR : VICTORY_TIME.COLOR,
       })
       .setOrigin(0.5)
       .setDepth(DEPTH.VICTORY + 1);
