@@ -32,7 +32,7 @@
 //   addTargetCollision(this, this.bullets, this.targets);
 //
 // ! La texture « bullet » doit être chargée comme un SPRITESHEET (images de BULLET.FRAME_SIZE), pas comme une image seule.
-// TODO(équipe): une animation quand une cible est détruite (pour l'instant elle disparaît simplement)
+// * Les effets d'une cible touchée ou détruite (éclat, fumée, éclats de bois) sont joués par sa fonction facultative onHit.
 // =====================================================================================
 
 import { BULLET, DEPTH, DIRECTION_VECTORS } from '../utils/constants.js';

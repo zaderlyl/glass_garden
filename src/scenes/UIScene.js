@@ -6,7 +6,7 @@ import { getBubbleState } from '../systems/BubbleSystem.js';
 import { getEnemyState } from '../systems/EnemySystem.js';
 import { getControlMode, toggleControlMode } from '../systems/ControlMode.js';
 import { formatTime } from '../utils/helpers.js';
-import { SCENES, COLORS, FONT_FAMILY, FONT_SIZE, UI_MARGIN, UI_IMAGES, DEPTH, VICTORY_TIME, VICTORY_BEST, VICTORY_REPLAY, CONTROL_MODE_SHORTCUT } from '../utils/constants.js';
+import { SCENES, COLORS, FONT_FAMILY, FONT_SIZE, UI_MARGIN, UI_IMAGES, DEPTH, VICTORY_TIME, VICTORY_BEST, VICTORY_REPLAY, CONTROL_MODE_SHORTCUT, CONTROL_MODES } from '../utils/constants.js';
 
 /**
  * * Scène d'interface : affiche le chronomètre et le compteur d'étoiles par-dessus le monde en cours.
@@ -52,8 +52,8 @@ export default class UIScene extends Phaser.Scene {
       })
       .setOrigin(1, 0);
 
-    // * Le mode de contrôle actuel, en bas à gauche, discret : un repère pour les tests (arcade ou pc)
-    // TODO(équipe): le retirer (ou le cacher) pour la version finale sur la borne
+    // * Le mode de contrôle, en bas à gauche, discret : un repère pour les tests sur ordinateur. Il n'apparaît qu'en mode pc
+    // (voir getControlModeLabel) : sur la borne, qui est toujours en arcade, on ne voit rien.
     this.controlModeText = this.add
       .text(UI_MARGIN, this.scale.height - UI_MARGIN, this.getControlModeLabel(), {
         fontFamily: FONT_FAMILY,
@@ -68,7 +68,8 @@ export default class UIScene extends Phaser.Scene {
 
   // Le texte du mode : « Mode : arcade »
   getControlModeLabel() {
-    return `Mode : ${getControlMode()}`;
+    const mode = getControlMode();
+    return mode === CONTROL_MODES.PC ? `Mode : ${mode}` : '';
   }
 
   // * Le raccourci de test arcade <-> pc. Il est branché ICI parce que cette scène n'est jamais détruite :
@@ -83,8 +84,7 @@ export default class UIScene extends Phaser.Scene {
     });
   }
 
-  // * Fin de partie : un message au milieu de l'écran (appelé par WorldScene.winGame)
-  // TODO(équipe): remplacer par un vrai écran de fin
+  // * Fin de partie : l'écran de victoire (appelé par WorldScene.winGame)
   showVictory() {
     // * L'écran de victoire : une image plein écran, devant tout le reste de l'interface
     this.add

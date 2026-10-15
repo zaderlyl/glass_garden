@@ -28,8 +28,7 @@
 //     if (this.input1.justPressed('shoot')) { ... }    // tirer
 //   }
 //
-// TODO(équipe): ajouter les actions courir, lampe, pause
-// TODO(équipe): brancher les cinq autres boutons de la borne quand les actions existeront
+// Pas encore branchés : les actions courir, lampe et pause, et les cinq autres boutons de la borne (voir « Pistes d'amélioration » dans le GDD).
 // =====================================================================================
 
 import { getControlMode } from './ControlMode.js';
