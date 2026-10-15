@@ -323,6 +323,8 @@ export const INTRO = {
   WALK_MS: 800,
   PAUSE_MS: 500, // la pause quand il est sorti, avant que la caméra ne reprenne sa place
   ZOOM_OUT_MS: 1400, // le dézoom vers la vue normale
+  // * Les miroirs apparaissent un à un (dans l'ordre des mondes), chacun avec son cadenas : un petit « pop » (il grossit en se dévoilant)
+  MIRRORS: { START_DELAY_MS: 400, DELAY_MS: 650, POP_MS: 450, POP_FROM_SCALE: 0.4 },
 };
 
 // * Fumée de cheminée : des objets de classe « smoke » posés dans Tiled (point = le haut de la cheminée)

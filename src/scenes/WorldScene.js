@@ -476,7 +476,7 @@ export default class WorldScene extends Phaser.Scene {
    * * L'intro du jardin, au début d'une nouvelle partie. Le joueur est figé (même mécanisme que la transition : transitioning) :
    * 1. le jardin apparaît en fondu depuis le blanc, SANS ses miroirs, la caméra zoomée sur la maison ;
    * 2. le joueur sort de la porte et s'arrête devant la maison, puis lit la lettre du gardien (DIALOGUES.lettre) ;
-   * 3. la caméra reprend sa place, le joueur reprend la main et le chronomètre démarre (voir endIntro).
+   * 3. la caméra reprend sa place, les miroirs apparaissent un à un (cadenassés), le joueur reprend la main et le chronomètre démarre (voir endIntro).
    * L'interface est cachée pendant l'intro, et le joueur 2 arrive à côté du joueur 1 à la fin.
    */
   playIntro() {
@@ -519,14 +519,34 @@ export default class WorldScene extends Phaser.Scene {
     const camera = this.cameras.main;
     camera.zoomTo(1, INTRO.ZOOM_OUT_MS, 'Sine.easeInOut');
     camera.pan(this.scale.width / 2, this.scale.height / 2, INTRO.ZOOM_OUT_MS, 'Sine.easeInOut', false, (cam, progress) => {
-      if (progress === 1) this.endIntro();
+      if (progress === 1) this.introRevealMirrors(() => this.endIntro());
     });
+  }
+
+  /**
+   * Les miroirs du jardin apparaissent un à un, dans l'ordre des mondes, chacun avec son cadenas : ils grossissent en se dévoilant.
+   * @param {Function} onDone  Appelée quand le dernier est apparu
+   */
+  introRevealMirrors(onDone) {
+    const { START_DELAY_MS, DELAY_MS, POP_MS, POP_FROM_SCALE } = INTRO.MIRRORS;
+    const mirrors = [...this.mirrors].sort((a, b) => a.world.localeCompare(b.world));
+    mirrors.forEach((mirror, i) => {
+      const padlock = this.mirrorLocks.find((lock) => lock.x === mirror.x && lock.y === mirror.y);
+      this.time.delayedCall(START_DELAY_MS + i * DELAY_MS, () => {
+        [mirror, padlock].filter(Boolean).forEach((sprite) => {
+          const scale = sprite.scaleX;
+          sprite.setVisible(true).setAlpha(0).setScale(scale * POP_FROM_SCALE);
+          this.tweens.add({ targets: sprite, alpha: 1, scale, duration: POP_MS, ease: 'Back.easeOut' });
+        });
+      });
+    });
+    this.time.delayedCall(START_DELAY_MS + (mirrors.length - 1) * DELAY_MS + POP_MS + 300, onDone);
   }
 
   /** Fin de l'intro : les miroirs sont là, le joueur reprend la main, l'interface revient et le chronomètre démarre. */
   endIntro() {
     this.introPlaying = false;
-    this.setMirrorsVisible(true);
+    this.setMirrorsVisible(true); // (déjà visibles : filet de sécurité)
     this.scene.setVisible(true, SCENES.UI);
 
     // * Le joueur 2 arrive à côté du joueur 1 (qui n'est plus au point de départ)
