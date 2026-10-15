@@ -271,6 +271,11 @@ export const NPCS = {
 
 // * Ordre d'affichage : plus la valeur est grande, plus l'élément est devant
 export const DEPTH = {
+  // * Les personnages, caisses, miroirs et ennemis se trient selon leur position : plus un objet est BAS à l'écran (ses pieds),
+  // plus il passe devant. Leur profondeur va de SORTED_MIN (haut de la carte) à SORTED_MAX (bas), sous les balles et le décor du dessus.
+  SORTED_MIN: 1,
+  SORTED_MAX: 8,
+  BULLET: 9, // les balles passent devant les personnages (derrière le décor du dessus)
   ABOVE_PLAYER: 10, // calque decor_above
   UI: 20,
   DIALOGUE: 30, // la boîte de dialogue des personnages (devant l'interface)

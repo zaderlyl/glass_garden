@@ -537,6 +537,19 @@ export default class WorldScene extends Phaser.Scene {
     bounceStar(this, star, from, (x, y) => this.isFreeGround(x, y));
   }
 
+  /**
+   * Trie l'affichage selon la profondeur du terrain : plus les pieds d'un objet sont bas, plus il passe devant.
+   * Sans ça, l'ordre dépend de la création (les caisses, créées après le joueur, le recouvraient toujours).
+   */
+  sortByDepth() {
+    const { SORTED_MIN, SORTED_MAX } = DEPTH;
+    const height = this.map.heightInPixels;
+    [this.player, this.player2, ...this.enemies.getChildren(), ...this.crates.getChildren(), ...this.npcs, ...this.mirrors].forEach((sprite) => {
+      if (!sprite?.active || !sprite.body) return;
+      sprite.setDepth(SORTED_MIN + (SORTED_MAX - SORTED_MIN) * Phaser.Math.Clamp(sprite.body.bottom / height, 0, 1));
+    });
+  }
+
   /** Une caisse qui cachait une bombe vient de casser : la bombe saute, se pose et explose (voir BombSystem.js). */
   onBombCrateBroken(crate) {
     dropBomb(this, crate);
@@ -639,6 +652,8 @@ export default class WorldScene extends Phaser.Scene {
 
   // update() est appelée à chaque image (environ 60 fois par seconde)
   update() {
+    this.sortByDepth();
+
     // * Partie gagnée : tout est figé, on ne lit plus les touches
     if (this.gameWon) return;
 
