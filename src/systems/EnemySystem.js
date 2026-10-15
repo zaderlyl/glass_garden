@@ -175,6 +175,114 @@ function moveToward(enemy, x, y, speed) {
   return false;
 }
 
+// ---------------------------------------------------------------------------------------------------------------
+// LE CONTOURNEMENT DES OBSTACLES
+// ---------------------------------------------------------------------------------------------------------------
+// Une grille des cases bloquées (murs + eau, caisses, personnages, miroirs), mise à jour 4 fois par seconde.
+// Si le chemin droit est libre, l'ennemi y va tout droit. Sinon il cherche le plus court chemin dans la grille
+// (parcours en largeur) et vise le point le plus loin de ce chemin qu'il voit en ligne droite.
+
+const GRID_REFRESH_MS = 250;
+const STRAIGHT_SPREAD = 10; // la ligne droite est testée sur 3 lignes (centre et ±10 px), car l'ennemi a une largeur
+
+function getGrid(scene) {
+  const now = scene.time.now;
+  if (scene.enemyGrid && now - scene.enemyGrid.at < GRID_REFRESH_MS) return scene.enemyGrid;
+
+  const map = scene.walls.tilemap;
+  const { width, height } = scene.walls.layer;
+  const size = map.tileWidth;
+  const blocked = new Uint8Array(width * height);
+  for (let row = 0; row < height; row += 1) {
+    for (let col = 0; col < width; col += 1) if (scene.walls.hasTileAt(col, row)) blocked[row * width + col] = 1;
+  }
+  (scene.enemyObstacles || []).forEach((obstacle) => {
+    const members = obstacle.getChildren ? obstacle.getChildren() : [obstacle];
+    members.forEach((member) => {
+      if (!member.active || !member.body) return;
+      const { left, right, top, bottom } = member.body;
+      for (let row = Math.floor(top / size); row <= Math.floor((bottom - 1) / size); row += 1) {
+        for (let col = Math.floor(left / size); col <= Math.floor((right - 1) / size); col += 1) {
+          if (col >= 0 && row >= 0 && col < width && row < height) blocked[row * width + col] = 1;
+        }
+      }
+    });
+  });
+  scene.enemyGrid = { at: now, blocked, width, height, size };
+  return scene.enemyGrid;
+}
+
+const isBlockedAt = (grid, x, y) => {
+  const col = Math.floor(x / grid.size);
+  const row = Math.floor(y / grid.size);
+  return col < 0 || row < 0 || col >= grid.width || row >= grid.height || grid.blocked[row * grid.width + col] === 1;
+};
+
+/** Vrai si le trajet droit de (x1, y1) à (x2, y2) (en coordonnées de pieds) ne touche aucune case bloquée. */
+function isStraightClear(grid, x1, y1, x2, y2) {
+  const distance = Phaser.Math.Distance.Between(x1, y1, x2, y2);
+  const nx = distance ? -(y2 - y1) / distance : 0; // la perpendiculaire, pour tester les côtés
+  const ny = distance ? (x2 - x1) / distance : 0;
+  for (let d = 0; d <= distance; d += ENEMY_AI.LINE_OF_SIGHT_STEP / 2) {
+    const t = distance ? d / distance : 0;
+    const x = Phaser.Math.Linear(x1, x2, t);
+    const y = Phaser.Math.Linear(y1, y2, t) - 7; // le centre du corps, un peu au-dessus des pieds
+    for (const side of [-STRAIGHT_SPREAD, 0, STRAIGHT_SPREAD]) {
+      if (isBlockedAt(grid, x + nx * side, y + ny * side)) return false;
+    }
+  }
+  return true;
+}
+
+/** Le plus court chemin (liste de cases) de (x1, y1) à (x2, y2), ou null s'il n'y en a pas. */
+function findPath(grid, x1, y1, x2, y2) {
+  const { width, height, size, blocked } = grid;
+  const start = Math.floor((y1 - 7) / size) * width + Math.floor(x1 / size);
+  const goal = Math.floor((y2 - 7) / size) * width + Math.floor(x2 / size);
+  if (blocked[goal] || start === goal || start < 0 || start >= blocked.length) return null;
+
+  const from = new Int32Array(width * height).fill(-1);
+  from[start] = start;
+  const queue = [start];
+  for (let i = 0; i < queue.length && from[goal] === -1; i += 1) {
+    const cell = queue[i];
+    const col = cell % width;
+    const row = Math.floor(cell / width);
+    for (const [dc, dr] of [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]]) {
+      const c = col + dc;
+      const r = row + dr;
+      if (c < 0 || r < 0 || c >= width || r >= height) continue;
+      const next = r * width + c;
+      if (from[next] !== -1 || blocked[next]) continue;
+      if (dc && dr && (blocked[row * width + c] || blocked[r * width + col])) continue; // pas de coupe dans un coin
+      from[next] = cell;
+      queue.push(next);
+    }
+  }
+  if (from[goal] === -1) return null;
+
+  const path = [];
+  for (let cell = goal; cell !== start; cell = from[cell]) path.unshift(cell);
+  return path.map((cell) => ({ x: (cell % width) * size + size / 2, y: Math.floor(cell / width) * size + size / 2 + 7 }));
+}
+
+/** Avance vers (x, y) en contournant les obstacles. Renvoie vrai s'il est arrivé. */
+function walkToward(scene, enemy, x, y, speed) {
+  if (Phaser.Math.Distance.Between(enemy.x, enemy.y, x, y) <= ENEMY_AI.ARRIVE_DISTANCE) return moveToward(enemy, x, y, speed);
+
+  const grid = getGrid(scene);
+  let target = { x, y };
+  if (!isStraightClear(grid, enemy.x, enemy.y, x, y)) {
+    const path = findPath(grid, enemy.x, enemy.y, x, y);
+    if (path) {
+      // le point le plus loin du chemin qu'il voit tout droit (sinon la prochaine case)
+      target = path.slice().reverse().find((point) => isStraightClear(grid, enemy.x, enemy.y, point.x, point.y)) || path[0];
+    }
+  }
+  moveToward(enemy, target.x, target.y, speed);
+  return false;
+}
+
 /** L'image du faucheur selon la direction où il va (la capuche, elle, joue son animation). */
 function faceDirection(enemy) {
   const config = ENEMIES[enemy.enemyType];
@@ -220,21 +328,21 @@ export function updateEnemies(scene, enemies, player, frozen) {
       setState(enemy, 'chase', now);
       enemy.lastSeen = { x: player.x, y: player.y + player.height / 2 }; // les pieds du joueur
       enemy.setVelocity(0, 0);
-      moveToward(enemy, enemy.lastSeen.x, enemy.lastSeen.y, config.speed);
+      walkToward(scene, enemy, enemy.lastSeen.x, enemy.lastSeen.y, config.speed);
     } else if (enemy.state === 'chase') {
       setState(enemy, 'search', now); // il vient de le perdre
     } else if (enemy.state === 'search') {
       const waited = now - enemy.stateSince;
-      const arrived = moveToward(enemy, enemy.lastSeen.x, enemy.lastSeen.y, config.speed);
+      const arrived = walkToward(scene, enemy, enemy.lastSeen.x, enemy.lastSeen.y, config.speed);
       if (arrived && !enemy.arrivedAt) enemy.arrivedAt = now;
       if ((enemy.arrivedAt && now - enemy.arrivedAt >= ENEMY_AI.SEARCH.WAIT_MS) || waited >= ENEMY_AI.SEARCH.MAX_MS) {
         enemy.arrivedAt = null;
         setState(enemy, 'return', now);
       }
     } else if (enemy.state === 'return') {
-      if (moveToward(enemy, enemy.home.x, enemy.home.y, config.speed * ENEMY_AI.RETURN_SPEED_FACTOR)) setState(enemy, 'idle', now);
+      if (walkToward(scene, enemy, enemy.home.x, enemy.home.y, config.speed * ENEMY_AI.RETURN_SPEED_FACTOR)) setState(enemy, 'idle', now);
     } else {
-      wander(enemy, config, now); // au repos
+      wander(scene, enemy, config, now); // au repos
     }
 
     faceDirection(enemy);
@@ -242,7 +350,7 @@ export function updateEnemies(scene, enemies, player, frozen) {
 }
 
 /** Au repos : il flâne autour de son point, avec des pauses. */
-function wander(enemy, config, now) {
+function wander(scene, enemy, config, now) {
   const { RADIUS, SPEED_FACTOR, PAUSE_MS } = ENEMY_AI.WANDER;
   if (!enemy.wanderTarget) {
     enemy.setVelocity(0, 0);
@@ -255,7 +363,7 @@ function wander(enemy, config, now) {
     }
     return;
   }
-  if (moveToward(enemy, enemy.wanderTarget.x, enemy.wanderTarget.y, config.speed * SPEED_FACTOR)) enemy.wanderTarget = null;
+  if (walkToward(scene, enemy, enemy.wanderTarget.x, enemy.wanderTarget.y, config.speed * SPEED_FACTOR)) enemy.wanderTarget = null;
 }
 
 /** Remet les ennemis vivants à leur point de départ, calmes : après un contact avec le joueur, tout recommence. */

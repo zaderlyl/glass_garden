@@ -395,7 +395,8 @@ export default class WorldScene extends Phaser.Scene {
     // * Les ennemis, posés dans Tiled
     this.enemies = createEnemies(this, map, this.bullets);
     // * Les ennemis sont bloqués par les murs, l'eau, les caisses, les personnages, les miroirs et entre eux
-    [this.walls, this.waterBlockers, this.crates, ...this.npcs, ...this.mirrors].filter(Boolean).forEach((obstacle) => {
+    this.enemyObstacles = [this.waterBlockers, this.crates, ...this.npcs, ...this.mirrors].filter(Boolean); // aussi lus par EnemySystem pour contourner
+    [this.walls, ...this.enemyObstacles].forEach((obstacle) => {
       this.physics.add.collider(this.enemies, obstacle);
     });
     this.physics.add.collider(this.enemies, this.enemies);
