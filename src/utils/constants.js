@@ -591,7 +591,10 @@ export const DECO = {
   SMALL_SIZE: 16, // une image de cette taille (ou moins) est agrandie ×2 pour aller avec les tuiles de 32 px
   // * Une teinte par monde (le nom du monde est celui de WORLDS) : elle multiplie les couleurs du décor pour qu'il aille avec la lumière du monde
   // (0xffffff = aucune teinte). Un monde absent garde les couleurs d'origine des images.
-  WORLD_TINTS: { world_1: 0x8f9cd4 }, // la nuit : des bleus, le vert des buissons s'assombrit
+  WORLD_TINTS: {
+    world_1: 0x8f9cd4, // la nuit : des bleus, le vert des buissons s'assombrit
+    world_3: 0xf2d0a0, // l'automne : une lumière chaude
+  },
   // * Les sources de lumière ne sont jamais teintées : une lanterne, une bougie ou un cristal reste lumineux, même la nuit
   UNTINTED: ['lanterne_', 'bougie_', 'cristal_'], // les noms d'images qui commencent ainsi
   // * Le décor SOLIDE : le joueur, les ennemis et les balles ne le traversent pas. Les autres (fleurs, herbe, trèfle, plantes,

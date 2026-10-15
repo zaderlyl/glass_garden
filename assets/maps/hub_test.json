@@ -103,20 +103,7 @@
                  "width":32,
                  "x":320,
                  "y":224
-                }, 
-                {
-                 "height":0,
-                 "id":6,
-                 "name":"star",
-                 "opacity":1,
-                 "point":true,
-                 "rotation":0,
-                 "type":"star",
-                 "visible":true,
-                 "width":0,
-                 "x":780.3,
-                 "y":415.488
-                }, 
+                },
                 {
                  "height":0,
                  "id":7,
