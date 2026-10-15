@@ -3,7 +3,7 @@ import { getCollectedStars, getTotalStars } from '../systems/StarSystem.js';
 import { getBubbleState } from '../systems/BubbleSystem.js';
 import { getControlMode, toggleControlMode } from '../systems/ControlMode.js';
 import { formatTime } from '../utils/helpers.js';
-import { SCENES, COLORS, FONT_FAMILY, FONT_SIZE, UI_MARGIN, UI_IMAGES, DEPTH, CONTROL_MODE_SHORTCUT } from '../utils/constants.js';
+import { SCENES, COLORS, FONT_FAMILY, FONT_SIZE, UI_MARGIN, UI_IMAGES, DEPTH, VICTORY_TIME, CONTROL_MODE_SHORTCUT } from '../utils/constants.js';
 
 /**
  * * Scène d'interface : affiche le chronomètre et le compteur d'étoiles par-dessus le monde en cours.
@@ -87,6 +87,19 @@ export default class UIScene extends Phaser.Scene {
     this.add
       .image(this.scale.width / 2, this.scale.height / 2, UI_IMAGES.WIN.KEY)
       .setDepth(DEPTH.VICTORY);
+
+    // * Le chrono final, sous le titre (le chronomètre est déjà arrêté : winGame l'a fait avant)
+    this.add
+      .text(this.scale.width / 2, VICTORY_TIME.Y, formatTime(timer.elapsed()), {
+        fontFamily: FONT_FAMILY,
+        fontSize: FONT_SIZE.VICTORY_TIME,
+        fontStyle: 'bold',
+        color: VICTORY_TIME.COLOR,
+        stroke: VICTORY_TIME.STROKE,
+        strokeThickness: VICTORY_TIME.STROKE_THICKNESS,
+      })
+      .setOrigin(0.5)
+      .setDepth(DEPTH.VICTORY + 1);
   }
 
   // Le texte du compteur : « Étoiles : 2 / 5 »
