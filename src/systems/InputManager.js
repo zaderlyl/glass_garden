@@ -45,7 +45,7 @@ import { CONTROL_MODES } from '../utils/constants.js';
 // dans le même ordre que ceux du joueur 1. R : interagir, T : tirer, Y : dash. F G H ne servent pas encore.
 // ? Mode pc : le joueur 2 ne bouge pas (un seul joueur au clavier), ses touches pc ne servent donc pas encore.
 // ? La touche E (interagir, mode pc) n'est PAS définitive. La touche A (tirer, mode pc) et Shift (dash, mode pc) non plus.
-const BINDINGS = {
+export const BINDINGS = {
   [CONTROL_MODES.ARCADE]: {
     1: { up: 'UP', down: 'DOWN', left: 'LEFT', right: 'RIGHT', interact: 'I', shoot: 'O', dash: 'P' },
     2: { up: 'Z', down: 'S', left: 'Q', right: 'D', interact: 'R', shoot: 'T', dash: 'Y' },

@@ -9,6 +9,9 @@ export const GAME_HEIGHT = 720;
 export const SCENES = {
   PRELOAD: 'PreloadScene',
   MENU: 'MenuScene',
+  MODE: 'ModeScene',
+  CONTROLS: 'ControlsScene',
+  CREDITS: 'CreditsScene',
   HUB: 'HubScene',
   WORLD_1: 'World1Scene',
   WORLD_2: 'World2Scene',
@@ -16,6 +19,24 @@ export const SCENES = {
   WORLD_4: 'World4Scene',
   WORLD_5: 'World5Scene',
   UI: 'UIScene',
+};
+
+// * Les images des écrans d'interface (accueil, choix du mode, victoire) : une image plein écran chacune
+export const UI_IMAGES = {
+  HOME: { KEY: 'ui_accueil', PATH: 'assets/images/ui/accueil.png' },
+  MODE_SOLO: { KEY: 'ui_mode_solo', PATH: 'assets/images/ui/mode_solo.png' }, // choix du mode, la carte Solo surlignée
+  MODE_MULTI: { KEY: 'ui_mode_multi', PATH: 'assets/images/ui/mode_multi.png' }, // la carte Multi surlignée
+  BUTTON: { KEY: 'ui_bouton', PATH: 'assets/images/ui/bouton.png' }, // le bouton vert du menu (42 x 12 px, rogné au contenu)
+  // Le joystick de la page Commandes, en deux morceaux de 24 x 24 px pour que le manche puisse s'incliner sur son socle :
+  // le socle (fixe) et le manche avec sa boule (violet pour le joueur 1, bleu pour le joueur 2)
+  JOYSTICK_BASE: { KEY: 'ui_joystick_socle', PATH: 'assets/images/ui/joystick_base.png' },
+  JOYSTICK_STICK_1: { KEY: 'ui_joystick_manche_1', PATH: 'assets/images/ui/joystick_baton_1.png' },
+  JOYSTICK_STICK_2: { KEY: 'ui_joystick_manche_2', PATH: 'assets/images/ui/joystick_baton_2.png' },
+  // Les boutons d'arcade de la page Commandes (20 x 20 px, une couleur par action)
+  ARCADE_GREEN: { KEY: 'ui_arcade_vert', PATH: 'assets/images/ui/bouton_arcade_vert.png' },
+  ARCADE_RED: { KEY: 'ui_arcade_rouge', PATH: 'assets/images/ui/bouton_arcade_rouge.png' },
+  ARCADE_YELLOW: { KEY: 'ui_arcade_jaune', PATH: 'assets/images/ui/bouton_arcade_jaune.png' },
+  WIN: { KEY: 'ui_victoire', PATH: 'assets/images/ui/victoire.png' }, // l'écran de victoire (« You win! »)
 };
 
 // * Le monde normal (le jardin), tel qu'il est nommé dans la table WORLDS ci-dessous.
@@ -278,6 +299,7 @@ export const DEPTH = {
   BULLET: 9, // les balles passent devant les personnages (derrière le décor du dessus)
   ABOVE_PLAYER: 10, // calque decor_above
   UI: 20,
+  VICTORY: 100, // l'écran de victoire : devant toute l'interface
   DIALOGUE: 30, // la boîte de dialogue des personnages (devant l'interface)
   TRANSITION: 100, // le calque noir de la transition entre deux mondes (devant tout)
 };
@@ -313,6 +335,81 @@ export const COLORS = {
 
 // Textes
 export const VICTORY_MESSAGE = 'Toutes les étoiles sont récupérées';
+
+// * Les boutons du menu d'accueil, empilés au centre sous le titre (dans le miroir de l'image). Le bouton est du pixel art :
+// on l'agrandit d'un nombre entier de fois pour garder des pixels nets.
+export const MENU_BUTTONS = {
+  LABELS: ['Jouer', 'Réglages', 'Commandes', 'Crédits'],
+  SCALE: 4,
+  SELECTED_SCALE: 5, // le bouton choisi : un cran plus grand (entier, pour garder des pixels nets)
+  TINT: 0xaaaaaa, // les boutons non choisis sont un peu assombris (le choisi garde sa couleur d'origine, donc plus clair)
+  FIRST_Y: 395, // le centre du premier bouton
+  SPACING: 58, // la distance entre les centres de deux boutons
+  TEXT: { SIZE: '22px', COLOR: '#ffffff', STROKE: '#1f4d1a', STROKE_THICKNESS: 4 },
+};
+
+// * La place de chaque bouton dans MENU_BUTTONS.LABELS (pour revenir sur le bon bouton en quittant sa page)
+export const MENU_INDEX = { PLAY: 0, SETTINGS: 1, CONTROLS: 2, CREDITS: 3 };
+
+// * Les pages sur un cadre en parchemin (Commandes, Crédits) : l'image d'accueil assombrie, un cadre aux couleurs de la boîte de
+// dialogue (DIALOGUE.COLORS), et un titre en haut. Voir ParchmentPage.js.
+export const PARCHMENT_PAGE = {
+  DIM_ALPHA: 0.55, // l'image d'accueil est assombrie derrière le cadre
+  FRAME: { X: 130, Y: 70, WIDTH: 1020, HEIGHT: 580, RADIUS: 26, BORDER: 5 },
+  TITLE: { Y: 125, SIZE: '56px' },
+  BACK: { Y: 625, SIZE: '26px', TEXT: 'O : retour' }, // l'indication en bas du cadre (O est le bouton de retour de la borne)
+};
+
+// * La page « Commandes » : les touches du mode arcade des deux joueurs, sur un cadre en parchemin (voir PARCHMENT_PAGE)
+export const CONTROLS_PAGE = {
+  COLUMNS_X: [380, 900], // le centre de la colonne du joueur 1 et de celle du joueur 2
+  PLAYER_Y: 215, // le nom du joueur
+  PLAYER_SIZE: '38px',
+  HEADER_SHIFT: 30, // le nom du joueur est décalé vers la droite pour se centrer sur ses lignes (libellé + icône)
+  SPRITE: { SCALE: 3, OFFSET_X: -110 }, // le personnage du joueur, à gauche de son nom (32 px x 3 = 96 px)
+  FIRST_ROW_Y: 300,
+  ROW_SPACING: 90,
+  LABEL_GAP: 24, // l'espace entre le libellé (aligné à droite) et le centre de la colonne
+  ICON_OFFSET: 64, // le centre de l'icône (joystick ou bouton), à droite du centre de la colonne
+  JOYSTICK_SCALE: 3, // 24 px x 3 = 72 px (entier, pour des pixels nets)
+  // * Le manche s'incline autour de son pied (un point de l'image de 24 x 24 px), de -ANGLE à +ANGLE degrés, en va-et-vient
+  JOYSTICK_TILT: { PIVOT: { X: 11.5, Y: 17.5 }, ANGLE_DEG: 14, DURATION_MS: 650, EASE: 'Sine.easeInOut', PLAYER_2_DELAY_MS: 325 },
+  ARCADE_SCALE: 3, // 20 px x 3 = 60 px
+  ARCADE_LETTER_SIZE: '30px', // la lettre posée sur le bouton
+  // Quel bouton d'arcade pour quelle action (les deux joueurs ont les mêmes couleurs)
+  ARCADE_BUTTONS: { interact: 'ARCADE_GREEN', shoot: 'ARCADE_RED', dash: 'ARCADE_YELLOW' },
+  ACTION_SIZE: '32px', // « Déplacer »
+  KEY_SIZE: '36px', // la touche
+  // Les lignes : [libellé, action de BINDINGS]. « move » est le joystick (haut, bas, gauche, droite).
+  ROWS: [
+    ['Déplacer', 'move'],
+    ['Interagir', 'interact'],
+    ['Tirer', 'shoot'],
+    ['Dash', 'dash'],
+  ],
+};
+
+// * La page « Crédits » : le cadre du développement et l'équipe. Chaque ligne : le texte, sa hauteur (Y), sa taille, en gras ou non.
+export const CREDITS_PAGE = {
+  LINES: [
+    { TEXT: 'Glass Garden', Y: 215, SIZE: '64px', BOLD: true },
+    { TEXT: 'Projet de SAE · BUT MMI · 2026', Y: 295, SIZE: '34px' },
+    { TEXT: 'IUT de Béziers', Y: 340, SIZE: '34px' },
+    { TEXT: 'Thème « Monde onirique »', Y: 400, SIZE: '30px' },
+    { TEXT: "Jeu pour borne d'arcade, réalisé avec Phaser", Y: 444, SIZE: '30px' },
+    { TEXT: 'Équipe', Y: 510, SIZE: '36px', BOLD: true },
+    { TEXT: 'Lilian · Léa · Hina', Y: 560, SIZE: '42px', BOLD: true },
+  ],
+};
+
+// * Le chrono final sur l'écran de victoire : centré sous le titre « YOU WIN! » de l'image, en blanc cerclé de bleu nuit (comme le titre)
+export const VICTORY_TIME = { Y: 400, COLOR: '#ffffff', STROKE: '#2b2d5b', STROKE_THICKNESS: 8 };
+
+// * Sous le chrono final : le meilleur temps du mode, ou « Nouveau record ! » (en jaune, comme le titre) si on vient de le battre
+export const VICTORY_BEST = { Y: 475, RECORD_TEXT: 'Nouveau record !', RECORD_COLOR: '#fff23a', BEST_LABEL: 'Meilleur temps : ' };
+
+// * Le texte qui invite à rejouer, en bas de l'écran de victoire
+export const VICTORY_REPLAY = { Y: 600, TEXT: 'Appuie sur Entrée pour rejouer', SIZE: '32px' };
 export const FONT_FAMILY = 'Georgia, serif';
 export const FONT_SIZE = {
   TITLE: '96px',
@@ -320,6 +417,8 @@ export const FONT_SIZE = {
   TIMER: '36px',
   STARS: '28px',
   VICTORY: '48px',
+  VICTORY_TIME: '64px', // le chrono final sur l'écran de victoire
+  VICTORY_BEST: '40px', // le meilleur temps et « Nouveau record ! » sur l'écran de victoire
   CONTROL_MODE: '20px',
 };
 
