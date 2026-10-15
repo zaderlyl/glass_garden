@@ -400,6 +400,11 @@ export const BUBBLES = {
     small: { SCALE: 1 },
   },
   DEFAULT_SIZE: 'small',
+  // * Quand une bulle éclate, elle se divise : COUNT bulles de la taille INTO apparaissent à sa place et s'écartent (une taille absente ne se divise pas)
+  SPLIT: {
+    large: { INTO: 'medium', COUNT: 4 },
+  },
+  SPREAD: { DISTANCE: 64, DURATION_MS: 450, EASE: 'Back.easeOut' }, // l'écartement des bulles filles : distance en pixels, durée
   DEPTH: 9, // devant le joueur, derrière le décor du dessus (10)
   STAR_POP: { DURATION_MS: 700, EASE: 'Back.easeOut' }, // l'étoile apparaît au centre de la carte en grossissant, avec un petit rebond
 };

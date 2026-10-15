@@ -70,17 +70,55 @@ export function createBubbles(scene, map, player, onAllBurst) {
     currentState = null;
     return { total: 0, burst: 0, done: true };
   }
-  const state = { total: objects.length, burst: 0, done: false };
+  // * Une bulle et toutes celles qui naîtront d'elle comptent chacune : le total est fixé dès le départ
+  const countTree = (size) => 1 + (BUBBLES.SPLIT[size] ? BUBBLES.SPLIT[size].COUNT * countTree(BUBBLES.SPLIT[size].INTO) : 0);
+  const sizeOf = (object) => {
+    const size = getTiledProperty(object, 'size', BUBBLES.DEFAULT_SIZE);
+    return BUBBLES.SIZES[size] ? size : BUBBLES.DEFAULT_SIZE;
+  };
+  const state = { total: objects.reduce((sum, object) => sum + countTree(sizeOf(object)), 0), burst: 0, done: false };
   currentState = objects.length > 0 ? state : null; // pas de compteur dans un monde sans bulles
 
-  // * Crée une bulle de cette taille (large, medium ou small) centrée sur (x, y)
-  const spawnBubble = (x, y, size) => {
+  // * Où vont s'écarter les bulles filles : autour de la bulle mère, à SPREAD.DISTANCE, en évitant les murs, l'eau, les caisses.
+  // Si une direction est bloquée on raccourcit (60 %, puis 30 %), sinon la fille reste sur place.
+  const childTargets = (x, y, count) => {
+    const offset = Math.random() * Math.PI * 2;
+    return Array.from({ length: count }, (_, i) => {
+      const angle = offset + (i * Math.PI * 2) / count;
+      for (const scale of [1, 0.6, 0.3]) {
+        const target = { x: x + Math.cos(angle) * BUBBLES.SPREAD.DISTANCE * scale, y: y + Math.sin(angle) * BUBBLES.SPREAD.DISTANCE * scale };
+        if (!scene.isFreeGround || scene.isFreeGround(target.x, target.y)) return target;
+      }
+      return { x, y };
+    });
+  };
+
+  // * Crée une bulle de cette taille (large, medium ou small) centrée sur (x, y).
+  // from : si on la donne, c'est une bulle fille : elle naît à ce point (la bulle mère) en grossissant, et s'écarte jusqu'en (x, y).
+  const spawnBubble = (x, y, size, from) => {
     const { SCALE } = BUBBLES.SIZES[size];
-    const bubble = scene.physics.add.sprite(x, y, BUBBLES.KEY, 0).setDepth(BUBBLES.DEPTH).setScale(SCALE);
+    const bubble = scene.physics.add.sprite(from ? from.x : x, from ? from.y : y, BUBBLES.KEY, 0).setDepth(BUBBLES.DEPTH).setScale(from ? 0 : SCALE);
     bubble.body.setCircle(BUBBLES.HITBOX_RADIUS, BUBBLES.FRAME_SIZE / 2 - BUBBLES.HITBOX_RADIUS, BUBBLES.FRAME_SIZE / 2 - BUBBLES.HITBOX_RADIUS);
 
     // * Elle flotte autour de son point (voir updateFloating) ; la phase au hasard évite qu'elles bougent toutes ensemble
-    floaters.push({ bubble, originX: x, originY: y, phase: Math.random() * Math.PI * 2 });
+    const floater = { bubble, originX: from ? from.x : x, originY: from ? from.y : y, phase: Math.random() * Math.PI * 2 };
+    floaters.push(floater);
+
+    // * Une bulle fille ne peut pas être touchée pendant qu'elle s'écarte (sinon le joueur, resté au même endroit, la ferait éclater aussitôt)
+    if (from) {
+      bubble.body.enable = false;
+      scene.tweens.add({
+        targets: floater,
+        originX: x,
+        originY: y,
+        duration: BUBBLES.SPREAD.DURATION_MS,
+        ease: BUBBLES.SPREAD.EASE,
+        onComplete: () => {
+          if (bubble.active && !bubble.burst) bubble.body.enable = true;
+        },
+      });
+      scene.tweens.add({ targets: bubble, scale: SCALE, duration: BUBBLES.SPREAD.DURATION_MS, ease: BUBBLES.SPREAD.EASE });
+    }
 
     scene.physics.add.overlap(player, bubble, () => {
       if (bubble.burst) return;
@@ -88,6 +126,12 @@ export function createBubbles(scene, map, player, onAllBurst) {
       bubble.body.enable = false; // elle ne peut plus être touchée
       bubble.play(BUBBLES.BURST.KEY);
       bubble.once('animationcomplete', () => bubble.destroy());
+
+      // * Elle se divise : ses filles naissent à sa place (avant de la compter, pour que la partie ne finisse pas trop tôt)
+      const split = BUBBLES.SPLIT[size];
+      if (split) {
+        childTargets(bubble.x, bubble.y, split.COUNT).forEach((target) => spawnBubble(target.x, target.y, split.INTO, { x: bubble.x, y: bubble.y }));
+      }
 
       state.burst += 1;
       if (state.burst === state.total) {
@@ -98,10 +142,7 @@ export function createBubbles(scene, map, player, onAllBurst) {
     return bubble;
   };
 
-  objects.forEach((object) => {
-    const size = getTiledProperty(object, 'size', BUBBLES.DEFAULT_SIZE);
-    spawnBubble(object.x, object.y, BUBBLES.SIZES[size] ? size : BUBBLES.DEFAULT_SIZE);
-  });
+  objects.forEach((object) => spawnBubble(object.x, object.y, sizeOf(object)));
 
   return state;
 }
