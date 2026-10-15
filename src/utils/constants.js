@@ -24,6 +24,7 @@ export const UI_IMAGES = {
   HOME: { KEY: 'ui_accueil', PATH: 'assets/images/ui/accueil.png' },
   MODE_SOLO: { KEY: 'ui_mode_solo', PATH: 'assets/images/ui/mode_solo.png' }, // choix du mode, la carte Solo surlignée
   MODE_MULTI: { KEY: 'ui_mode_multi', PATH: 'assets/images/ui/mode_multi.png' }, // la carte Multi surlignée
+  BUTTON: { KEY: 'ui_bouton', PATH: 'assets/images/ui/bouton.png' }, // le bouton vert du menu (42 x 12 px, rogné au contenu)
   WIN: { KEY: 'ui_victoire', PATH: 'assets/images/ui/victoire.png' }, // l'écran de victoire (« You win! »)
 };
 
@@ -323,6 +324,16 @@ export const COLORS = {
 
 // Textes
 export const VICTORY_MESSAGE = 'Toutes les étoiles sont récupérées';
+
+// * Les boutons du menu d'accueil, empilés au centre sous le titre (dans le miroir de l'image). Le bouton est du pixel art :
+// on l'agrandit d'un nombre entier de fois pour garder des pixels nets.
+export const MENU_BUTTONS = {
+  LABELS: ['Jouer', 'Réglages', 'Commandes', 'Crédits'],
+  SCALE: 4,
+  FIRST_Y: 395, // le centre du premier bouton
+  SPACING: 58, // la distance entre les centres de deux boutons
+  TEXT: { SIZE: '22px', COLOR: '#ffffff', STROKE: '#1f4d1a', STROKE_THICKNESS: 4 },
+};
 
 // * Le chrono final sur l'écran de victoire : centré sous le titre « YOU WIN! » de l'image, en blanc cerclé de bleu nuit (comme le titre)
 export const VICTORY_TIME = { Y: 400, COLOR: '#ffffff', STROKE: '#2b2d5b', STROKE_THICKNESS: 8 };
