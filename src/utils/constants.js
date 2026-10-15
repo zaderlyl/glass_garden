@@ -274,4 +274,4 @@ export const P2_SPRITE = {
 
 // * Le joueur 2 apparaît à côté du joueur 1, à cette distance (en pixels) : à droite, sinon à gauche, en bas, en haut
 export const P2_SPAWN_DISTANCE = 40;
-export const P2_SPEED = 200;
+export const P2_SPEED = PLAYER.SPEED; // la même vitesse que le joueur 1
