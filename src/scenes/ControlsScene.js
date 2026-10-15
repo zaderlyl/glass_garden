@@ -1,4 +1,4 @@
-import { SCENES, UI_IMAGES, FONT_FAMILY, DIALOGUE, CONTROL_MODES, CONTROLS_PAGE } from '../utils/constants.js';
+import { SCENES, UI_IMAGES, FONT_FAMILY, DIALOGUE, CONTROL_MODES, CONTROLS_PAGE, MENU_COMMANDS_INDEX } from '../utils/constants.js';
 import { BINDINGS } from '../systems/InputManager.js';
 
 /** Le nom d'une touche tel qu'on l'affiche : « ENTER » devient « Entrée » (les lettres restent telles quelles). */
@@ -7,6 +7,7 @@ const keyLabel = (key) => ({ ENTER: 'Entrée', SPACE: 'Espace', SHIFT: 'Maj' }[k
 /**
  * * La page « Commandes » : les touches du mode arcade des deux joueurs, sur un cadre en parchemin posé sur l'image d'accueil
  * assombrie. Les touches sont lues dans BINDINGS (InputManager.js) : la page reste juste si on les change pour la borne.
+ * O (ou Échap) revient à l'accueil.
  */
 export default class ControlsScene extends Phaser.Scene {
   constructor() {
@@ -19,7 +20,7 @@ export default class ControlsScene extends Phaser.Scene {
 
   create() {
     const { width, height } = this.scale;
-    const { FRAME, TITLE, COLUMNS_X, PLAYER_Y, FIRST_ROW_Y, ROW_SPACING, ROWS } = CONTROLS_PAGE;
+    const { FRAME, TITLE, COLUMNS_X, PLAYER_Y, FIRST_ROW_Y, ROW_SPACING, ROWS, BACK } = CONTROLS_PAGE;
 
     // * Le fond : l'image d'accueil, assombrie
     this.add.image(width / 2, height / 2, UI_IMAGES.HOME.KEY);
@@ -47,5 +48,16 @@ export default class ControlsScene extends Phaser.Scene {
         text(x, y + 16, action === 'move' ? 'Joystick' : keyLabel(keys[action]), CONTROLS_PAGE.KEY_SIZE, true);
       });
     });
+
+    // * O (le bouton de retour de la borne) ou Échap : retour à l'accueil, sur le bouton « Commandes »
+    text(width / 2, BACK.Y, BACK.TEXT, BACK.SIZE);
+    const back = () => {
+      if (this.leaving) return;
+      this.leaving = true; // une touche maintenue répète l'événement : on ne lance la scène qu'une fois
+      this.scene.start(SCENES.MENU, { selected: MENU_COMMANDS_INDEX });
+    };
+    this.leaving = false;
+    this.input.keyboard.on('keydown-O', back);
+    this.input.keyboard.on('keydown-ESC', back);
   }
 }

@@ -338,6 +338,8 @@ export const MENU_BUTTONS = {
   TEXT: { SIZE: '22px', COLOR: '#ffffff', STROKE: '#1f4d1a', STROKE_THICKNESS: 4 },
 };
 
+export const MENU_COMMANDS_INDEX = 2; // la place du bouton « Commandes » dans MENU_BUTTONS.LABELS (pour y revenir depuis la page)
+
 // * La page « Commandes » : les touches du mode arcade des deux joueurs, sur un cadre en parchemin (couleurs de DIALOGUE.COLORS)
 export const CONTROLS_PAGE = {
   DIM_ALPHA: 0.55, // l'image d'accueil est assombrie derrière le cadre
@@ -348,6 +350,7 @@ export const CONTROLS_PAGE = {
   PLAYER_SIZE: '38px',
   FIRST_ROW_Y: 300,
   ROW_SPACING: 80,
+  BACK: { Y: 620, SIZE: '26px', TEXT: 'O : retour' }, // l'indication en bas du cadre (O est le bouton de retour de la borne)
   ACTION_SIZE: '26px', // « Déplacer »
   KEY_SIZE: '36px', // la touche
   // Les lignes : [libellé, action de BINDINGS]. « move » est le joystick (haut, bas, gauche, droite).

@@ -16,7 +16,8 @@ export default class MenuScene extends Phaser.Scene {
   }
 
   // create() est appelée une fois, quand la scène démarre
-  create() {
+  // data.selected : le bouton à choisir au départ (au retour d'une page, celui qu'on vient de quitter)
+  create(data) {
     const { width, height } = this.scale;
 
     // * L'image fait déjà 1280 x 720 : elle est simplement centrée
@@ -41,9 +42,9 @@ export default class MenuScene extends Phaser.Scene {
     });
 
     // * Haut et bas changent le bouton choisi (on boucle : après le dernier, on revient au premier). Au départ : « Jouer ».
-    this.selected = 0;
     this.leaving = false;
-    this.select(0);
+    this.selected = 0;
+    this.select(data?.selected ?? 0);
     this.input.keyboard.on('keydown-UP', () => this.select(this.selected - 1));
     this.input.keyboard.on('keydown-DOWN', () => this.select(this.selected + 1));
 
