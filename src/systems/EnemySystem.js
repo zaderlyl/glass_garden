@@ -33,6 +33,27 @@ import { ENEMIES, ENEMY_FRAME_SIZE, ENEMY_AI, FONT_FAMILY, DEPTH } from '../util
 import { getTiledProperty } from './CrateSystem.js';
 import { addTargetCollision } from './fonctionTir.js';
 
+// Les mondes dont tous les ennemis ont été tués, retenus pour toute la partie (une scène est recréée à chaque visite) :
+// à la visite suivante, les ennemis ne reviennent pas et l'étoile est là.
+const clearedMaps = new Set();
+
+// Le compteur d'ennemis du monde en cours ({ total, killed }), ou null s'il n'y en a pas : l'interface l'affiche (voir UIScene)
+let enemyState = null;
+
+/** Les ennemis du monde en cours : { total, killed }, ou null si ce monde n'a pas d'ennemis à tuer. */
+export const getEnemyState = () => enemyState;
+
+/** Démarre le compteur d'un monde (appelé à sa création) : 0 ennemi tué sur `total`. Sans ennemi, il n'y a pas de compteur. */
+export const startEnemyCounter = (total) => {
+  enemyState = total > 0 ? { total, killed: 0 } : null;
+};
+
+/** Tous les ennemis de cette carte ont-ils déjà été tués lors d'une visite précédente ? */
+export const isEnemiesCleared = (mapKey) => clearedMaps.has(mapKey);
+
+/** Retient que tous les ennemis de cette carte sont morts. */
+export const markEnemiesCleared = (mapKey) => clearedMaps.add(mapKey);
+
 /** Charge les images de tous les ennemis (à appeler dans preload). */
 export function preloadEnemies(scene) {
   Object.values(ENEMIES).forEach((enemy) =>
@@ -122,7 +143,10 @@ function playHitEffect(scene, enemy) {
     return;
   }
 
-  // * Il meurt : un nuage de fumée sombre à la place de son centre
+  // * Il meurt : on retient où (c'est de là que sautera l'étoile si c'était le dernier ennemi du monde), puis un nuage de fumée sombre
+  scene.lastEnemyDeath = { x: enemy.x, y: enemy.y };
+  if (enemyState) enemyState.killed += 1;
+  // * Un nuage de fumée sombre à la place de son centre
   const smoke = scene.add.particles(enemy.x, enemy.y - ENEMY_FRAME_SIZE / 2, DEATH.KEY, {
     speed: { min: DEATH.SPEED.MIN, max: DEATH.SPEED.MAX },
     angle: { min: 0, max: 360 },
