@@ -594,6 +594,7 @@ export const DECO = {
   WORLD_TINTS: {
     world_1: 0x8f9cd4, // la nuit : des bleus, le vert des buissons s'assombrit
     world_3: 0xf2d0a0, // l'automne : une lumière chaude
+    world_5: 0xc4b0ff, // la magie : des buissons et des fleurs qui virent au violet
   },
   // * Les sources de lumière ne sont jamais teintées : une lanterne, une bougie ou un cristal reste lumineux, même la nuit
   UNTINTED: ['lanterne_', 'bougie_', 'cristal_'], // les noms d'images qui commencent ainsi
