@@ -315,6 +315,14 @@ export const TRANSITION = {
 export const INTRO = {
   FADE_MS: 2500, // le fondu depuis le blanc, pendant lequel le joueur est figé
   FADE_COLOR: { RED: 255, GREEN: 255, BLUE: 255 }, // le blanc
+  // * Le zoom sur la maison (le centre est choisi pour que la vue reste dans la carte), qui grossit lentement pendant le fondu et la sortie
+  CAMERA: { CENTER_X: 270, CENTER_Y: 260, ZOOM_START: 2.4, ZOOM_END: 2.8, ZOOM_IN_MS: 3600 },
+  // * Le joueur sort de la porte de la maison (DOOR), apparaît en marchant, et s'arrête devant (FRONT)
+  DOOR: { X: 167, Y: 286 },
+  FRONT: { X: 167, Y: 302 },
+  WALK_MS: 800,
+  PAUSE_MS: 500, // la pause quand il est sorti, avant que la caméra ne reprenne sa place
+  ZOOM_OUT_MS: 1400, // le dézoom vers la vue normale
 };
 
 // * Fumée de cheminée : des objets de classe « smoke » posés dans Tiled (point = le haut de la cheminée)

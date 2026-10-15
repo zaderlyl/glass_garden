@@ -18,7 +18,7 @@ import { preloadBubbles, createBubbles } from '../systems/BubbleSystem.js';
 import { preloadEnemies, createEnemies, updateEnemies, resetEnemies, isEnemiesCleared, markEnemiesCleared, startEnemyCounter } from '../systems/EnemySystem.js';
 import { DIALOGUES } from '../data/dialogues.js';
 import { pickVariant } from '../utils/helpers.js';
-import { loadSecondPlayer, createSecondPlayer, updateSecondPlayer } from '../systems/SecondPlayer.js';
+import { loadSecondPlayer, createSecondPlayer, updateSecondPlayer, findStartNear } from '../systems/SecondPlayer.js';
 import { getControlMode } from '../systems/ControlMode.js';
 import { ABILITIES, isUnlocked, notifyLocked, isMirrorLocked, getMirrorUnlocker } from '../systems/ProgressSystem.js';
 import {
@@ -473,21 +473,62 @@ export default class WorldScene extends Phaser.Scene {
   }
 
   /**
-   * * L'intro du jardin, au début d'une nouvelle partie : le jardin apparaît en fondu depuis le blanc, SANS ses miroirs,
-   * pendant que le joueur est figé (même mécanisme que la transition : transitioning). Le chronomètre démarre à la fin.
+   * * L'intro du jardin, au début d'une nouvelle partie. Le joueur est figé (même mécanisme que la transition : transitioning) :
+   * 1. le jardin apparaît en fondu depuis le blanc, SANS ses miroirs, la caméra zoomée sur la maison ;
+   * 2. le joueur sort de la porte et s'arrête devant la maison ;
+   * 3. la caméra reprend sa place, le joueur reprend la main et le chronomètre démarre (voir endIntro).
+   * L'interface est cachée pendant l'intro, et le joueur 2 arrive à côté du joueur 1 à la fin.
    */
   playIntro() {
+    const { FADE_MS, FADE_COLOR, CAMERA, DOOR } = INTRO;
+    const camera = this.cameras.main;
     this.transitioning = true;
     this.setMirrorsVisible(false);
-    const { RED, GREEN, BLUE } = INTRO.FADE_COLOR;
-    this.cameras.main.fadeIn(INTRO.FADE_MS, RED, GREEN, BLUE);
-    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_IN_COMPLETE, () => this.endIntro());
+    this.scene.setVisible(false, SCENES.UI);
+    if (this.player2.active) this.player2.setVisible(false); // en solo, le joueur 2 n'existe pas
+
+    // * Le joueur attend sur le seuil de la porte, invisible, tourné vers le bas
+    this.player.setPosition(DOOR.X, DOOR.Y).setAlpha(0).setFrame(PLAYER.FRAMES.DOWN);
+
+    camera.setZoom(CAMERA.ZOOM_START).centerOn(CAMERA.CENTER_X, CAMERA.CENTER_Y);
+    camera.zoomTo(CAMERA.ZOOM_END, CAMERA.ZOOM_IN_MS, 'Sine.easeInOut'); // le zoom grossit lentement pendant tout le début
+    camera.fadeIn(FADE_MS, FADE_COLOR.RED, FADE_COLOR.GREEN, FADE_COLOR.BLUE);
+    camera.once(Phaser.Cameras.Scene2D.Events.FADE_IN_COMPLETE, () => this.introWalkOut());
   }
 
-  /** Fin de l'intro : les miroirs sont là, le joueur reprend la main et le chronomètre démarre. */
+  /** Le joueur sort de la maison : il apparaît sur le seuil et marche jusque devant, puis la caméra reprend sa place. */
+  introWalkOut() {
+    const { FRONT, WALK_MS, PAUSE_MS, ZOOM_OUT_MS } = INTRO;
+    this.tweens.add({
+      targets: this.player,
+      y: FRONT.Y,
+      alpha: 1,
+      duration: WALK_MS,
+      ease: 'Linear',
+      onComplete: () => {
+        this.time.delayedCall(PAUSE_MS, () => {
+          const camera = this.cameras.main;
+          camera.zoomTo(1, ZOOM_OUT_MS, 'Sine.easeInOut');
+          camera.pan(this.scale.width / 2, this.scale.height / 2, ZOOM_OUT_MS, 'Sine.easeInOut', false, (cam, progress) => {
+            if (progress === 1) this.endIntro();
+          });
+        });
+      },
+    });
+  }
+
+  /** Fin de l'intro : les miroirs sont là, le joueur reprend la main, l'interface revient et le chronomètre démarre. */
   endIntro() {
     this.introPlaying = false;
     this.setMirrorsVisible(true);
+    this.scene.setVisible(true, SCENES.UI);
+
+    // * Le joueur 2 arrive à côté du joueur 1 (qui n'est plus au point de départ)
+    if (this.player2.active) {
+      const start = findStartNear(this, this.player, this.walls);
+      this.player2.setPosition(start.x, start.y).setVisible(true);
+    }
+
     this.transitioning = false;
     timer.start();
   }
