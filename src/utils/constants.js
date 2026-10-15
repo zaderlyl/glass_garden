@@ -467,6 +467,31 @@ export const CRATE = {
     SHAKE: { DURATION_MS: 90, INTENSITY: 0.004 }, // léger tremblement de l'écran quand la caisse casse
   },
 };
+// * Les bombes cachées dans certaines caisses (voir BombSystem.js). Dans Tiled : propriété « hasBomb » (booléen) sur la caisse.
+export const BOMB = {
+  KEY: 'bomb',
+  PATH: 'assets/images/sprites/bombe.png',
+  TILED_PROPERTY: 'hasBomb',
+  DISTANCE_SCALE: 0.5, // elle saute comme l'étoile, mais va deux fois moins loin
+  FUSE_MS: 300, // la pause entre l'arrivée au sol et l'explosion : elle clignote (0 = explose dès qu'elle se pose)
+  PULSE: { SCALE: 1.25, MS: 100 }, // le gonflement pendant la mèche
+  RADIUS: 80, // le rayon de l'explosion, en pixels
+  DEPTH: 9, // comme l'étoile : devant le joueur, derrière le décor du dessus
+  // * L'explosion : un disque orange qui grandit, des éclats, un tremblement de l'écran
+  BLAST: {
+    COLOR: 0xffa040,
+    START_ALPHA: 0.85,
+    DURATION_MS: 300,
+    DEPTH: 16,
+    PUFF_KEY: 'bomb_puff', // texture générée par le code (un petit carré blanc)
+    PUFF_SIZE: 6,
+    PUFF_COLORS: [0xffd060, 0xff8030, 0xd04020, 0x302830],
+    PUFF_COUNT: 28,
+    PUFF_SPEED: { MIN: 60, MAX: 220 },
+    PUFF_LIFETIME_MS: { MIN: 300, MAX: 700 },
+    SHAKE: { DURATION_MS: 200, INTENSITY: 0.01 },
+  },
+};
 export const P2_SPRITE = {
   key: 'player2',
   path: 'assets/images/sprites/player_2_spritesheet.png',

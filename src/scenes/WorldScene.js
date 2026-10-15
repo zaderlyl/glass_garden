@@ -1,5 +1,6 @@
 import InputManager from '../systems/InputManager.js';
 import timer from '../systems/TimerSystem.js';
+import { dropBomb } from '../systems/BombSystem.js';
 import { RecolteEtoiles, recolterEtoile } from '../systems/RecolteEtoiles.js';
 import { areAllStarsCollected } from '../systems/StarSystem.js';
 import { createBulletAnimations, explodeBullet, shoot } from '../systems/fonctionTir.js';
@@ -534,6 +535,11 @@ export default class WorldScene extends Phaser.Scene {
     // Elle part du centre de la caisse (la caisse fait 32 pixels : le sol est 16 sous son centre, l'étoile à 20 au-dessus)
     const from = { x: crate.x, y: crate.y + 16, headHeight: 20 + 16 };
     bounceStar(this, star, from, (x, y) => this.isFreeGround(x, y));
+  }
+
+  /** Une caisse qui cachait une bombe vient de casser : la bombe saute, se pose et explose (voir BombSystem.js). */
+  onBombCrateBroken(crate) {
+    dropBomb(this, crate);
   }
 
   /** L'étoile du monde apparaît au centre de la carte (récompense des bulles), avec un petit effet de rebond si animated. */
