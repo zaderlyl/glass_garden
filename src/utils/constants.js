@@ -584,6 +584,42 @@ export const CRATE = {
     SHAKE: { DURATION_MS: 90, INTENSITY: 0.004 }, // léger tremblement de l'écran quand la caisse casse
   },
 };
+// * Le décor posé dans les cartes (voir DecoSystem.js) : de petites images (fleurs, lanternes, cristaux, champignons...).
+// Dans Tiled : un objet « point » de classe « deco », dont le NOM est une des images ci-dessous. Le point marque les pieds de l'image.
+export const DECO = {
+  TILED_CLASS: 'deco',
+  PATH: 'assets/images/deco/', // le dossier des images (un fichier par nom : « fleur_1.png »)
+  KEY_PREFIX: 'deco_', // la clé Phaser d'une image est ce préfixe suivi de son nom
+  SMALL_SIZE: 16, // une image de cette taille (ou moins) est agrandie ×2 pour aller avec les tuiles de 32 px
+  // * Une teinte par monde (le nom du monde est celui de WORLDS) : elle multiplie les couleurs du décor pour qu'il aille avec la lumière du monde
+  // (0xffffff = aucune teinte). Un monde absent garde les couleurs d'origine des images.
+  WORLD_TINTS: { world_1: 0x8f9cd4 }, // la nuit : des bleus, le vert des buissons s'assombrit
+  // * Les sources de lumière ne sont jamais teintées : une lanterne, une bougie ou un cristal reste lumineux, même la nuit
+  UNTINTED: ['lanterne_', 'bougie_', 'cristal_'], // les noms d'images qui commencent ainsi
+  // * Le décor SOLIDE : le joueur, les ennemis et les balles ne le traversent pas. Les autres (fleurs, herbe, trèfle, plantes,
+  // champignons, bougies, crâne) se traversent. Chaque ligne : [début du nom de l'image, largeur, hauteur] de la zone qui bloque, en
+  // pixels, posée AUX PIEDS de l'image (pas sur toute l'image : on passe derrière un arbuste, devant sa base on est bloqué).
+  SOLID: [
+    ['buisson', 30, 14], // les arbustes et les haies (deux arbustes côte à côte ne laissent pas de passage)
+    ['lanterne_', 14, 10], // le pied d'une lanterne
+    ['panneau', 14, 10],
+    ['citrouilles', 28, 14],
+    ['sac_', 20, 12],
+    ['puits', 28, 16],
+    ['cristal_', 22, 12],
+    ['livres', 26, 14],
+  ],
+  IMAGES: [
+    'fleur_1', 'fleur_2', 'fleur_3', 'fleur_4', 'fleur_5', 'fleur_6',
+    'buisson', 'buisson_automne', 'trefle', 'herbe', 'plante_verte', 'panneau',
+    'champignon_1', 'champignon_2', 'champignon_3', 'champignon_4',
+    'lanterne_bleue', 'lanterne_orange', 'lanterne_noire', 'lanterne_rose', 'lanterne_verte', 'lanterne_violette',
+    'bougie_1', 'bougie_2', 'bougie_3',
+    'cristal_bleu', 'cristal_jaune', 'cristal_orange', 'cristal_rose', 'cristal_vert', 'cristal_violet',
+    'citrouilles', 'citrouilles_halloween', 'crane', 'livres', 'sac_1', 'sac_2', 'sac_3', 'puits',
+  ],
+};
+
 // * Les bombes cachées dans certaines caisses (voir BombSystem.js). Dans Tiled : propriété « hasBomb » (booléen) sur la caisse.
 export const BOMB = {
   KEY: 'bomb',

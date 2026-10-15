@@ -17,17 +17,24 @@ export function loadSecondPlayer(scene) {
   });
 }
 
-// * Le premier endroit libre (sans mur sous sa boîte de collision) autour du joueur 1
-function findStartNear(player, walls) {
+// * Le premier endroit libre autour du joueur 1 : ni dans un mur, ni dans un miroir, ni dans un décor solide
+// (la boîte de collision du joueur 2 est un petit rectangle aux pieds : on le compare aux obstacles ; un miroir en train de disparaître compte aussi)
+function findStartNear(scene, player, walls) {
   const d = P2_SPAWN_DISTANCE;
-  const isFree = ({ x, y }) =>
-    [-PLAYER.HITBOX.WIDTH / 2, PLAYER.HITBOX.WIDTH / 2].every((dx) => !walls.hasTileAtWorldXY(x + dx, y + PLAYER.HITBOX.HEIGHT / 2));
+  const { WIDTH, HEIGHT } = PLAYER.HITBOX;
+  const overlaps = (x, y, body) => x + WIDTH / 2 > body.left && x - WIDTH / 2 < body.right && y + HEIGHT > body.top && y < body.bottom;
+  const isFree = ({ x, y }) => {
+    if ([-WIDTH / 2, WIDTH / 2].some((dx) => walls.hasTileAtWorldXY(x + dx, y + HEIGHT / 2))) return false;
+    // * Le sprite est centré : sa boîte (hauteur HEIGHT) commence à y et finit à y + HEIGHT
+    const blockers = [...(scene.mirrors ?? []), scene.vanishingMirror, ...(scene.decoBlockers?.getChildren() ?? [])].filter((b) => b?.active);
+    return !blockers.some((blocker) => blocker.body && overlaps(x, y, blocker.body));
+  };
   const candidates = [[d, 0], [-d, 0], [0, d], [0, -d]].map(([dx, dy]) => ({ x: player.x + dx, y: player.y + dy }));
   return candidates.find(isFree) || { x: player.x, y: player.y };
 }
 
 export function createSecondPlayer(scene, player, walls) {
-  const start = findStartNear(player, walls);
+  const start = findStartNear(scene, player, walls);
   const p2 = scene.physics.add.sprite(start.x, start.y, P2_SPRITE.key, FRAME_BAS);
   p2.setCollideWorldBounds(true);
   // * Petite boîte de collision aux pieds, comme le joueur 1 (sinon il se coince dans les décors)

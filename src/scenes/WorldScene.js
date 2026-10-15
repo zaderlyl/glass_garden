@@ -5,7 +5,8 @@ import { RecolteEtoiles, recolterEtoile } from '../systems/RecolteEtoiles.js';
 import { areAllStarsCollected } from '../systems/StarSystem.js';
 import { createBulletAnimations, explodeBullet, shoot } from '../systems/fonctionTir.js';
 import { preloadCrate, createCrates } from '../systems/CrateSystem.js';
-import { isMirrorUsed, markMirrorUsed, shouldMirrorDisappear } from '../systems/MirrorSystem.js';
+import { preloadDeco, createDeco } from '../systems/DecoSystem.js';
+import { isMirrorUsed, markMirrorUsed, shouldMirrorDisappear, getMirrorFacing } from '../systems/MirrorSystem.js';
 import { applyTint } from '../systems/TintSystem.js';
 import { irisClose, irisOpen } from '../systems/TransitionSystem.js';
 import { preloadNpcs, createNpcs } from '../systems/NpcSystem.js';
@@ -92,6 +93,7 @@ export default class WorldScene extends Phaser.Scene {
     }
     this.load.image('etoile', 'assets/images/sprites/Etoile.png');
     preloadCrate(this);
+    preloadDeco(this);
     this.load.image(ASSETS.TILESET_DECO, 'assets/images/tilesets/tileset_deco.png');
 
     // * Les balles : balle.png est une bande de 33 images de 16 x 16 pixels, chargée comme un spritesheet
@@ -326,6 +328,9 @@ export default class WorldScene extends Phaser.Scene {
           ASSETS.MIRROR,
         );
         mirror.world = object.name; // le monde de destination
+        // * De quel côté il regarde : à gauche, l'image est inversée (le joueur arrive alors à sa gauche, voir getSpawnPosition)
+        mirror.facing = getMirrorFacing(object, map.widthInPixels);
+        if (mirror.facing === 'left') mirror.setFlipX(true);
 
         // * Le miroir bloque le joueur comme un mur
         const collider = this.physics.add.collider(this.player, mirror);
@@ -376,6 +381,12 @@ export default class WorldScene extends Phaser.Scene {
 
     // * Les caisses de ce monde, posées dans Tiled (le joueur et le groupe de balles existent déjà)
     this.crates = createCrates(this, map, this.player, this.bullets);
+    // * Le décor : les images sont triées en profondeur avec les personnages (voir sortByDepth) ; une partie est solide (voir DECO.SOLID)
+    const { images, blockers } = createDeco(this, map);
+    this.deco = images;
+    this.decoBlockers = blockers;
+    this.physics.add.collider(this.player, blockers);
+    this.physics.add.collider(this.bullets, blockers, (bullet) => explodeBullet(bullet));
 
     // * La fumée des cheminées, posée dans Tiled
     this.createSmokes(map);
@@ -402,7 +413,7 @@ export default class WorldScene extends Phaser.Scene {
     // * Les ennemis, posés dans Tiled
     this.enemies = createEnemies(this, map, this.bullets);
     // * Les ennemis sont bloqués par les murs, l'eau, les caisses, les personnages, les miroirs et entre eux
-    this.enemyObstacles = [this.waterBlockers, this.crates, ...this.npcs, ...this.mirrors].filter(Boolean); // aussi lus par EnemySystem pour contourner
+    this.enemyObstacles = [this.waterBlockers, this.crates, this.decoBlockers, ...this.npcs, ...this.mirrors].filter(Boolean); // aussi lus par EnemySystem pour contourner
     [this.walls, ...this.enemyObstacles].forEach((obstacle) => {
       this.physics.add.collider(this.enemies, obstacle);
     });
@@ -425,7 +436,7 @@ export default class WorldScene extends Phaser.Scene {
     // * Le joueur 2 ramasse aussi les étoiles (le joueur 1 est branché dans RecolteEtoiles)
     this.stars.forEach((star) => this.physics.add.overlap(this.player2, star, () => recolterEtoile(this, star)));
     // * Le joueur 2 est bloqué comme le joueur 1 : murs, eau, caisses, miroirs
-    [walls, waterBlockers, this.crates, ...this.mirrors].filter(Boolean).forEach((obstacle) => {
+    [walls, waterBlockers, this.crates, this.decoBlockers, ...this.mirrors].filter(Boolean).forEach((obstacle) => {
       this.physics.add.collider(this.player2, obstacle);
     });
     if (this.vanishingMirror?.active) {
@@ -561,9 +572,11 @@ export default class WorldScene extends Phaser.Scene {
   sortByDepth() {
     const { SORTED_MIN, SORTED_MAX } = DEPTH;
     const height = this.map.heightInPixels;
-    [this.player, this.player2, ...this.enemies.getChildren(), ...this.crates.getChildren(), ...this.npcs, ...this.mirrors].forEach((sprite) => {
-      if (!sprite?.active || !sprite.body) return;
-      sprite.setDepth(SORTED_MIN + (SORTED_MAX - SORTED_MIN) * Phaser.Math.Clamp(sprite.body.bottom / height, 0, 1));
+    [this.player, this.player2, ...this.enemies.getChildren(), ...this.crates.getChildren(), ...this.npcs, ...this.mirrors, ...this.deco].forEach((sprite) => {
+      if (!sprite?.active) return;
+      // * Les pieds : le bas du corps physique, ou le point où l'image est posée (le décor n'a pas de corps)
+      const feet = sprite.body ? sprite.body.bottom : sprite.y;
+      sprite.setDepth(SORTED_MIN + (SORTED_MAX - SORTED_MIN) * Phaser.Math.Clamp(feet / height, 0, 1));
     });
   }
 
@@ -590,6 +603,7 @@ export default class WorldScene extends Phaser.Scene {
     if (this.waterBlockers?.getChildren().some((zone) => Math.abs(zone.x - x) <= 20 && Math.abs(zone.y - y) <= 20)) return false;
     if (this.mirrors.some((mirror) => Phaser.Math.Distance.Between(x, y, mirror.x, mirror.y) < 40)) return false;
     if (this.crates.getChildren().some((crate) => crate.active && crate.hitPoints > 0 && Math.abs(crate.x - x) < 22 && Math.abs(crate.y - y) < 22)) return false;
+    if (this.decoBlockers.getChildren().some((zone) => Math.abs(zone.x - x) < zone.width / 2 + 12 && Math.abs(zone.y - y) < zone.height / 2 + 12)) return false;
     return !this.npcs.some((other) => Math.abs(other.x - x) < 34 && y > other.y - 24 && y < other.y + 12);
   }
 
@@ -644,8 +658,10 @@ export default class WorldScene extends Phaser.Scene {
       );
 
       if (mirror) {
+        // * Le joueur arrive du côté où le miroir regarde : à sa droite, ou à sa gauche s'il est tourné vers la gauche
+        const toLeft = getMirrorFacing(mirror, map.widthInPixels) === 'left';
         return {
-          x: mirror.x + mirror.width + MIRROR_SPAWN_OFFSET.X,
+          x: toLeft ? mirror.x - MIRROR_SPAWN_OFFSET.X : mirror.x + mirror.width + MIRROR_SPAWN_OFFSET.X,
           y: mirror.y + mirror.height / 2 + MIRROR_SPAWN_OFFSET.Y,
         };
       }
