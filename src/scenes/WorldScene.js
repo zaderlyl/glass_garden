@@ -332,7 +332,7 @@ export default class WorldScene extends Phaser.Scene {
 
     // * La teinte du monde, posée en dernier : tous les calques et les sprites d'eau existent. Le jardin n'en a pas.
     applyTint(map, this.waterSprites, WORLD_TINTS[this.getWorldName()]);
-    this.player2 = createSecondPlayer(this);
+    this.player2 = createSecondPlayer(this, this.player, walls);
     // * Le joueur 2 est bloqué comme le joueur 1 : murs, eau, caisses, miroirs
     [walls, waterBlockers, this.crates, ...this.mirrors].filter(Boolean).forEach((obstacle) => {
       this.physics.add.collider(this.player2, obstacle);

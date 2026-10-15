@@ -1,4 +1,4 @@
-import { P2_SPRITE, P2_START, P2_SPEED, PLAYER } from '../utils/constants.js';
+import { P2_SPRITE, P2_SPAWN_DISTANCE, P2_SPEED, PLAYER } from '../utils/constants.js';
 import { createP2Keys } from './InputManager.js';
 
 const FRAME_HAUT   = 0; // dos
@@ -13,8 +13,18 @@ export function loadSecondPlayer(scene) {
   });
 }
 
-export function createSecondPlayer(scene) {
-  const p2 = scene.physics.add.sprite(P2_START.x, P2_START.y, P2_SPRITE.key, FRAME_BAS);
+// * Le premier endroit libre (sans mur sous sa boîte de collision) autour du joueur 1
+function findStartNear(player, walls) {
+  const d = P2_SPAWN_DISTANCE;
+  const isFree = ({ x, y }) =>
+    [-PLAYER.HITBOX.WIDTH / 2, PLAYER.HITBOX.WIDTH / 2].every((dx) => !walls.hasTileAtWorldXY(x + dx, y + PLAYER.HITBOX.HEIGHT / 2));
+  const candidates = [[d, 0], [-d, 0], [0, d], [0, -d]].map(([dx, dy]) => ({ x: player.x + dx, y: player.y + dy }));
+  return candidates.find(isFree) || { x: player.x, y: player.y };
+}
+
+export function createSecondPlayer(scene, player, walls) {
+  const start = findStartNear(player, walls);
+  const p2 = scene.physics.add.sprite(start.x, start.y, P2_SPRITE.key, FRAME_BAS);
   p2.setCollideWorldBounds(true);
   // * Petite boîte de collision aux pieds, comme le joueur 1 (sinon il se coince dans les décors)
   p2.body.setSize(PLAYER.HITBOX.WIDTH, PLAYER.HITBOX.HEIGHT);
