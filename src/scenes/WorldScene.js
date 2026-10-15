@@ -6,7 +6,7 @@ import { areAllStarsCollected } from '../systems/StarSystem.js';
 import { createBulletAnimations, explodeBullet, shoot } from '../systems/fonctionTir.js';
 import { preloadCrate, createCrates } from '../systems/CrateSystem.js';
 import { preloadDeco, createDeco } from '../systems/DecoSystem.js';
-import { isMirrorUsed, markMirrorUsed, shouldMirrorDisappear, getMirrorFacing, preloadMirrorLocks, createMirrorLocks } from '../systems/MirrorSystem.js';
+import { isMirrorUsed, markMirrorUsed, shouldMirrorDisappear, getMirrorFacing, preloadMirrorLocks, createMirrorLocks, addMirrorLock, playMirrorUnlock } from '../systems/MirrorSystem.js';
 import { applyTint } from '../systems/TintSystem.js';
 import { irisClose, irisOpen } from '../systems/TransitionSystem.js';
 import { consumeIntro } from '../systems/IntroSystem.js';
@@ -476,7 +476,7 @@ export default class WorldScene extends Phaser.Scene {
    * * L'intro du jardin, au début d'une nouvelle partie. Le joueur est figé (même mécanisme que la transition : transitioning) :
    * 1. le jardin apparaît en fondu depuis le blanc, SANS ses miroirs, la caméra zoomée sur la maison ;
    * 2. le joueur sort de la porte et s'arrête devant la maison, puis lit la lettre du gardien (DIALOGUES.lettre) ;
-   * 3. la caméra reprend sa place, les miroirs apparaissent un à un (cadenassés), le joueur reprend la main et le chronomètre démarre (voir endIntro).
+   * 3. la caméra reprend sa place, les miroirs apparaissent un à un (cadenassés), la note au dos de la lettre explique les cadenas, celui du premier miroir s'ouvre, puis le joueur reprend la main et le chronomètre démarre (voir endIntro).
    * L'interface est cachée pendant l'intro, et le joueur 2 arrive à côté du joueur 1 à la fin.
    */
   playIntro() {
@@ -484,6 +484,13 @@ export default class WorldScene extends Phaser.Scene {
     const camera = this.cameras.main;
     this.transitioning = true;
     this.setMirrorsVisible(false);
+
+    // * Pour l'histoire, TOUS les miroirs commencent verrouillés : ceux qui sont déjà ouverts reçoivent un cadenas, qui s'ouvrira après la note (voir introUnlockFirstMirror)
+    this.introOpenMirrors = this.mirrors
+      .filter((mirror) => !isMirrorLocked(mirror.world))
+      .map((mirror) => ({ mirror, padlock: addMirrorLock(this, mirror).setVisible(false) }));
+    this.mirrorLocks.push(...this.introOpenMirrors.map(({ padlock }) => padlock));
+
     // * L'interface est lancée dans le même instant que l'intro et démarre après : on la cache tout de suite, puis une fois qu'elle existe
     this.scene.setVisible(false, SCENES.UI);
     this.time.delayedCall(0, () => this.introPlaying && this.scene.setVisible(false, SCENES.UI));
@@ -519,7 +526,21 @@ export default class WorldScene extends Phaser.Scene {
     const camera = this.cameras.main;
     camera.zoomTo(1, INTRO.ZOOM_OUT_MS, 'Sine.easeInOut');
     camera.pan(this.scale.width / 2, this.scale.height / 2, INTRO.ZOOM_OUT_MS, 'Sine.easeInOut', false, (cam, progress) => {
-      if (progress === 1) this.introRevealMirrors(() => this.endIntro());
+      if (progress === 1) this.introRevealMirrors(() => this.introNote());
+    });
+  }
+
+  /** Les miroirs sont là, cadenassés : la note au dos de la lettre l'explique, puis le premier miroir s'ouvre. */
+  introNote() {
+    this.dialogue.open('note', DIALOGUES.note, null, () => this.introUnlockFirstMirror());
+  }
+
+  /** Le cadenas du premier miroir (celui de la nuit) s'ouvre, puis l'intro se termine : la partie commence. */
+  introUnlockFirstMirror() {
+    const { UNLOCK_DELAY_MS, END_PAUSE_MS } = INTRO;
+    this.introOpenMirrors.forEach(({ mirror, padlock }, i) => {
+      const last = i === this.introOpenMirrors.length - 1;
+      playMirrorUnlock(this, mirror, padlock, UNLOCK_DELAY_MS, last ? () => this.time.delayedCall(END_PAUSE_MS, () => this.endIntro()) : undefined);
     });
   }
 
@@ -561,7 +582,7 @@ export default class WorldScene extends Phaser.Scene {
 
   /** Montre ou cache les miroirs du jardin et leurs cadenas. */
   setMirrorsVisible(visible) {
-    [...this.mirrors, ...this.mirrorLocks].forEach((sprite) => sprite.setVisible(visible));
+    [...this.mirrors, ...this.mirrorLocks].filter((sprite) => sprite.active).forEach((sprite) => sprite.setVisible(visible)); // (un cadenas ouvert est détruit)
   }
 
   /**

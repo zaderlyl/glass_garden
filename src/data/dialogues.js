@@ -26,6 +26,14 @@ export const DIALOGUES = {
       "« Réunis-les, et tu sauras où je suis. »",
     ],
   },
+  // * La note au dos de la lettre, lue quand les miroirs sont apparus (voir WorldScene.playIntro) : elle explique les cadenas
+  note: {
+    name: 'Lettre',
+    lines: [
+      "Au dos de la lettre, une note : « Les miroirs sont verrouillés. Chaque étoile rapportée en ouvre de nouveaux. »",
+      "« Commence par celui de la nuit. »",
+    ],
+  },
   enigme: {
     name: '',
     lines: [
