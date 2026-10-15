@@ -420,6 +420,8 @@ export default class WorldScene extends Phaser.Scene {
     this.player.invulnerableUntil = 0;
     this.player2.invulnerableUntil = 0;
     this.physics.add.overlap(this.player2, this.enemies, () => this.onEnemyTouch(this.player2));
+    // * Le joueur 2 éclate aussi les bulles
+    this.bubbles.addPlayer?.(this.player2);
     // * Le joueur 2 ramasse aussi les étoiles (le joueur 1 est branché dans RecolteEtoiles)
     this.stars.forEach((star) => this.physics.add.overlap(this.player2, star, () => recolterEtoile(this, star)));
     // * Le joueur 2 est bloqué comme le joueur 1 : murs, eau, caisses, miroirs

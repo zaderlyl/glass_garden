@@ -14,6 +14,7 @@
 // * COMMENT L'UTILISER
 //   preloadBubbles(this);                                          // dans preload()
 //   this.bubbles = createBubbles(this, map, this.player, () => ...); // dans create(), une fois le joueur créé
+//   this.bubbles.addPlayer?.(this.player2);                           // un 2e joueur qui éclate aussi les bulles
 //   // le dernier argument est appelé quand TOUTES les bulles sont éclatées
 // =====================================================================================
 
@@ -71,6 +72,8 @@ export function createBubbles(scene, map, player, onAllBurst) {
     currentState = null;
     return { total: 0, burst: 0, done: true };
   }
+  const players = [player]; // les joueurs qui éclatent les bulles (voir state.addPlayer)
+
   // * Une bulle et toutes celles qui naîtront d'elle comptent chacune : le total est fixé dès le départ
   // (splitCount : une bulle posée dans Tiled peut se diviser en un autre nombre de filles que BUBBLES.SPLIT, via la propriété « splitCount »)
   const countTree = (size, splitCount) => 1 + (BUBBLES.SPLIT[size] ? (splitCount ?? BUBBLES.SPLIT[size].COUNT) * countTree(BUBBLES.SPLIT[size].INTO) : 0);
@@ -122,7 +125,8 @@ export function createBubbles(scene, map, player, onAllBurst) {
       scene.tweens.add({ targets: bubble, scale: SCALE, duration: BUBBLES.SPREAD.DURATION_MS, ease: BUBBLES.SPREAD.EASE });
     }
 
-    scene.physics.add.overlap(player, bubble, () => {
+    // * Éclater : appelée au contact d'un joueur (le joueur 1 ici, le joueur 2 via state.addPlayer)
+    bubble.pop = () => {
       if (bubble.burst) return;
       bubble.burst = true;
       bubble.body.enable = false; // elle ne peut plus être touchée
@@ -140,8 +144,15 @@ export function createBubbles(scene, map, player, onAllBurst) {
         completedMaps.add(scene.mapKey);
         onAllBurst?.();
       }
-    });
+    };
+    players.forEach((p) => scene.physics.add.overlap(p, bubble, bubble.pop));
     return bubble;
+  };
+
+  // * Brancher un joueur de plus (le joueur 2, créé après les bulles) : il éclate aussi les bulles déjà là et les futures filles
+  state.addPlayer = (extraPlayer) => {
+    players.push(extraPlayer);
+    floaters.forEach(({ bubble }) => bubble.active && !bubble.burst && scene.physics.add.overlap(extraPlayer, bubble, bubble.pop));
   };
 
   objects.forEach((object) => spawnBubble(object.x, object.y, sizeOf(object), undefined, getTiledProperty(object, 'splitCount', undefined)));
