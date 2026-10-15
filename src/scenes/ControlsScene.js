@@ -1,6 +1,6 @@
-import { SCENES, UI_IMAGES, FONT_FAMILY, CONTROL_MODES, CONTROLS_PAGE, MENU_COMMANDS_INDEX, ASSETS, PLAYER, P2_SPRITE } from '../utils/constants.js';
+import { SCENES, UI_IMAGES, FONT_FAMILY, CONTROL_MODES, CONTROLS_PAGE, MENU_INDEX, ASSETS, PLAYER, P2_SPRITE } from '../utils/constants.js';
 import { BINDINGS } from '../systems/InputManager.js';
-import { createParchmentPage } from '../systems/ParchmentPage.js';
+import { createParchmentPage, addBackKey } from '../systems/ParchmentPage.js';
 
 /** Le nom d'une touche tel qu'on l'affiche : « ENTER » devient « Entrée » (les lettres restent telles quelles). */
 const keyLabel = (key) => ({ ENTER: 'Entrée', SPACE: 'Espace', SHIFT: 'Maj' }[key] ?? key);
@@ -26,7 +26,7 @@ export default class ControlsScene extends Phaser.Scene {
 
   create() {
     const { width } = this.scale;
-    const { COLUMNS_X, PLAYER_Y, FIRST_ROW_Y, ROW_SPACING, ROWS, BACK } = CONTROLS_PAGE;
+    const { COLUMNS_X, PLAYER_Y, FIRST_ROW_Y, ROW_SPACING, ROWS } = CONTROLS_PAGE;
 
     // * Le fond, le cadre en parchemin et le titre (voir ParchmentPage.js)
     const text = createParchmentPage(this, 'Commandes');
@@ -90,14 +90,6 @@ export default class ControlsScene extends Phaser.Scene {
     });
 
     // * O (le bouton de retour de la borne) ou Échap : retour à l'accueil, sur le bouton « Commandes »
-    text(width / 2, BACK.Y, BACK.TEXT, BACK.SIZE);
-    const back = () => {
-      if (this.leaving) return;
-      this.leaving = true; // une touche maintenue répète l'événement : on ne lance la scène qu'une fois
-      this.scene.start(SCENES.MENU, { selected: MENU_COMMANDS_INDEX });
-    };
-    this.leaving = false;
-    this.input.keyboard.on('keydown-O', back);
-    this.input.keyboard.on('keydown-ESC', back);
+    addBackKey(this, text, MENU_INDEX.CONTROLS);
   }
 }

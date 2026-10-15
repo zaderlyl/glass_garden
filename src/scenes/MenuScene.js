@@ -1,4 +1,4 @@
-import { SCENES, UI_IMAGES, MENU_BUTTONS, FONT_FAMILY } from '../utils/constants.js';
+import { SCENES, UI_IMAGES, MENU_BUTTONS, MENU_INDEX, FONT_FAMILY } from '../utils/constants.js';
 
 /**
  * * L'écran d'accueil : une image plein écran (le titre est dessiné dedans).
@@ -51,7 +51,7 @@ export default class MenuScene extends Phaser.Scene {
     // * Entrée (clavier) ou I (bouton d'interaction de la borne) valide le bouton choisi : « Jouer » mène au choix du mode,
     // « Commandes » à la page des touches, « Crédits » à la page de l'équipe. (Réglages : pas encore de page.)
     const validate = () => {
-      const scenes = { 0: SCENES.MODE, 2: SCENES.CONTROLS, 3: SCENES.CREDITS };
+      const scenes = { [MENU_INDEX.PLAY]: SCENES.MODE, [MENU_INDEX.CONTROLS]: SCENES.CONTROLS, [MENU_INDEX.CREDITS]: SCENES.CREDITS };
       const target = scenes[this.selected];
       if (target && !this.leaving) {
         this.leaving = true; // une touche maintenue répète l'événement : on ne lance la scène qu'une fois

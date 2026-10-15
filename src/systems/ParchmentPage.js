@@ -7,10 +7,10 @@
 //
 // * COMMENT L'UTILISER
 //   preload() { this.load.image(UI_IMAGES.HOME.KEY, UI_IMAGES.HOME.PATH); }   // l'image de fond
-//   create()  { const text = createParchmentPage(this, 'Crédits'); text(640, 300, 'Bonjour', '30px'); }
+//   create()  { const text = createParchmentPage(this, 'Crédits'); text(640, 300, 'Bonjour', '30px'); addBackKey(this, text, MENU_INDEX.CREDITS); }
 // =====================================================================================
 
-import { UI_IMAGES, FONT_FAMILY, DIALOGUE, PARCHMENT_PAGE } from '../utils/constants.js';
+import { SCENES, UI_IMAGES, FONT_FAMILY, DIALOGUE, PARCHMENT_PAGE } from '../utils/constants.js';
 
 /**
  * Dessine le fond, le cadre et le titre, et renvoie une petite fonction pour poser du texte centré dans la couleur du parchemin.
@@ -36,4 +36,24 @@ export function createParchmentPage(scene, title) {
 
   text(width / 2, TITLE.Y, title, TITLE.SIZE, true);
   return text;
+}
+
+/**
+ * Affiche « O : retour » en bas du cadre, et fait revenir à l'accueil quand on appuie sur O (le bouton de retour de la borne) ou sur Échap.
+ * @param {Phaser.Scene} scene
+ * @param {Function} text  La fonction renvoyée par createParchmentPage
+ * @param {number} menuIndex  Le bouton de l'accueil à choisir au retour (celui de cette page, voir MENU_INDEX)
+ */
+export function addBackKey(scene, text, menuIndex) {
+  const { BACK } = PARCHMENT_PAGE;
+  text(scene.scale.width / 2, BACK.Y, BACK.TEXT, BACK.SIZE);
+
+  let leaving = false;
+  const back = () => {
+    if (leaving) return;
+    leaving = true; // une touche maintenue répète l'événement : on ne lance la scène qu'une fois
+    scene.scene.start(SCENES.MENU, { selected: menuIndex });
+  };
+  scene.input.keyboard.on('keydown-O', back);
+  scene.input.keyboard.on('keydown-ESC', back);
 }

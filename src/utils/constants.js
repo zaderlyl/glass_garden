@@ -348,7 +348,8 @@ export const MENU_BUTTONS = {
   TEXT: { SIZE: '22px', COLOR: '#ffffff', STROKE: '#1f4d1a', STROKE_THICKNESS: 4 },
 };
 
-export const MENU_COMMANDS_INDEX = 2; // la place du bouton « Commandes » dans MENU_BUTTONS.LABELS (pour y revenir depuis la page)
+// * La place de chaque bouton dans MENU_BUTTONS.LABELS (pour revenir sur le bon bouton en quittant sa page)
+export const MENU_INDEX = { PLAY: 0, SETTINGS: 1, CONTROLS: 2, CREDITS: 3 };
 
 // * Les pages sur un cadre en parchemin (Commandes, Crédits) : l'image d'accueil assombrie, un cadre aux couleurs de la boîte de
 // dialogue (DIALOGUE.COLORS), et un titre en haut. Voir ParchmentPage.js.
@@ -356,6 +357,7 @@ export const PARCHMENT_PAGE = {
   DIM_ALPHA: 0.55, // l'image d'accueil est assombrie derrière le cadre
   FRAME: { X: 130, Y: 70, WIDTH: 1020, HEIGHT: 580, RADIUS: 26, BORDER: 5 },
   TITLE: { Y: 125, SIZE: '56px' },
+  BACK: { Y: 625, SIZE: '26px', TEXT: 'O : retour' }, // l'indication en bas du cadre (O est le bouton de retour de la borne)
 };
 
 // * La page « Commandes » : les touches du mode arcade des deux joueurs, sur un cadre en parchemin (voir PARCHMENT_PAGE)
@@ -376,7 +378,6 @@ export const CONTROLS_PAGE = {
   ARCADE_LETTER_SIZE: '30px', // la lettre posée sur le bouton
   // Quel bouton d'arcade pour quelle action (les deux joueurs ont les mêmes couleurs)
   ARCADE_BUTTONS: { interact: 'ARCADE_GREEN', shoot: 'ARCADE_RED', dash: 'ARCADE_YELLOW' },
-  BACK: { Y: 625, SIZE: '26px', TEXT: 'O : retour' }, // l'indication en bas du cadre (O est le bouton de retour de la borne)
   ACTION_SIZE: '32px', // « Déplacer »
   KEY_SIZE: '36px', // la touche
   // Les lignes : [libellé, action de BINDINGS]. « move » est le joystick (haut, bas, gauche, droite).
