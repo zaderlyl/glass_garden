@@ -343,11 +343,11 @@ export const ENEMIES = {
     speed: 220, // la vitesse de poursuite, en pixels par seconde (le joueur va à 300 : on peut toujours fuir)
     sight: 280, // à quelle distance il voit le joueur, en pixels
   },
-  // La capuche bleue : 4 images de face, jouées en boucle (elle bouge un peu même à l'arrêt)
+  // La capuche (un fantôme à tentacules) : une seule image. L'animation en boucle n'a qu'une image, il suffit d'en ajouter pour l'animer
   capuche: {
     key: ASSETS.ENEMY_CAPUCHE,
     image: 'assets/images/sprites/ennemi_capuche.png',
-    frameCount: 4,
+    frameCount: 1,
     idle: { KEY: 'capuche_idle', FRAME_RATE: 5 }, // l'animation en boucle
     hitbox: { WIDTH: 18, HEIGHT: 14 },
     hitPoints: 2, // plus fragile que le faucheur
