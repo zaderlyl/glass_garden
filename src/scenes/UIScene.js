@@ -5,7 +5,7 @@ import { getCollectedStars, getTotalStars } from '../systems/StarSystem.js';
 import { getBubbleState } from '../systems/BubbleSystem.js';
 import { getControlMode, toggleControlMode } from '../systems/ControlMode.js';
 import { formatTime } from '../utils/helpers.js';
-import { SCENES, COLORS, FONT_FAMILY, FONT_SIZE, UI_MARGIN, UI_IMAGES, DEPTH, VICTORY_TIME, VICTORY_BEST, CONTROL_MODE_SHORTCUT } from '../utils/constants.js';
+import { SCENES, COLORS, FONT_FAMILY, FONT_SIZE, UI_MARGIN, UI_IMAGES, DEPTH, VICTORY_TIME, VICTORY_BEST, VICTORY_REPLAY, CONTROL_MODE_SHORTCUT } from '../utils/constants.js';
 
 /**
  * * Scène d'interface : affiche le chronomètre et le compteur d'étoiles par-dessus le monde en cours.
@@ -111,6 +111,14 @@ export default class UIScene extends Phaser.Scene {
       })
       .setOrigin(0.5)
       .setDepth(DEPTH.VICTORY + 1);
+
+    // * Entrée : on rejoue. Recharger la page remet TOUT à zéro d'un coup (étoiles, miroirs, énigmes, bulles, caisses, chrono)
+    // et ramène à l'écran d'accueil : aucun état ne peut rester d'une partie à l'autre.
+    this.add
+      .text(this.scale.width / 2, VICTORY_REPLAY.Y, VICTORY_REPLAY.TEXT, { ...style, fontSize: VICTORY_REPLAY.SIZE, color: VICTORY_TIME.COLOR })
+      .setOrigin(0.5)
+      .setDepth(DEPTH.VICTORY + 1);
+    this.input.keyboard.once('keydown-ENTER', () => window.location.reload());
   }
 
   // Le texte du compteur : « Étoiles : 2 / 5 »

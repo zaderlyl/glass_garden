@@ -329,6 +329,9 @@ export const VICTORY_TIME = { Y: 400, COLOR: '#ffffff', STROKE: '#2b2d5b', STROK
 
 // * Sous le chrono final : le meilleur temps du mode, ou « Nouveau record ! » (en jaune, comme le titre) si on vient de le battre
 export const VICTORY_BEST = { Y: 475, RECORD_TEXT: 'Nouveau record !', RECORD_COLOR: '#fff23a', BEST_LABEL: 'Meilleur temps : ' };
+
+// * Le texte qui invite à rejouer, en bas de l'écran de victoire
+export const VICTORY_REPLAY = { Y: 600, TEXT: 'Appuie sur Entrée pour rejouer', SIZE: '32px' };
 export const FONT_FAMILY = 'Georgia, serif';
 export const FONT_SIZE = {
   TITLE: '96px',
