@@ -143,6 +143,8 @@ export const ASSETS = {
   MIRROR: 'mirror',
   NPC_ENIGME: 'pnj_enigme', // le personnage de l'énigme (voir NPCS)
   BUBBLE: 'bulle', // les bulles du monde magique (voir BUBBLES)
+  ENEMY_FAUCHEUR: 'ennemi_faucheur', // les ennemis du monde du rêve (voir ENEMIES)
+  ENEMY_CAPUCHE: 'ennemi_capuche',
 };
 
 // * Les cartes de chaque monde : la clé Phaser et le fichier JSON exporté de Tiled. Le nom du monde est celui de WORLDS.
@@ -324,6 +326,53 @@ export const DIALOGUE = {
   FONT_SIZE: '34px',
   TYPE_DELAY_MS: 28, // délai entre deux lettres (effet machine à écrire)
   COLORS: { PAPER: 0xf7e8c2, BORDER: 0xb98a3f, TEXT: '#7a4a12', TAG: 0x7a4a12, TAG_TEXT: '#f7e8c2' },
+};
+
+// * Les ennemis (voir EnemySystem.js) : posés dans Tiled par un objet « point » de classe « enemy », dont le NOM est la clé de
+// cette table. Le point marque l'endroit où l'ennemi a les pieds (le bas de l'image, centré). Chaque image fait 32 x 32 pixels.
+export const ENEMIES = {
+  // Le faucheur : 3 images de la feuille (faux à gauche, faux à droite, de dos)
+  faucheur: {
+    key: ASSETS.ENEMY_FAUCHEUR,
+    image: 'assets/images/sprites/ennemi_faucheur.png',
+    frameCount: 3,
+    frames: { left: 0, right: 1, up: 2, down: 0 }, // l'image à afficher selon la direction regardée
+    hitbox: { WIDTH: 18, HEIGHT: 14 }, // la zone de collision aux pieds, en pixels
+    hitPoints: 3, // nombre de tirs pour le tuer (modifiable par une propriété « hitPoints » sur l'objet Tiled)
+    speed: 220, // la vitesse de poursuite, en pixels par seconde (le joueur va à 300 : on peut toujours fuir)
+    sight: 280, // à quelle distance il voit le joueur, en pixels
+  },
+  // La capuche bleue : 4 images de face, jouées en boucle (elle bouge un peu même à l'arrêt)
+  capuche: {
+    key: ASSETS.ENEMY_CAPUCHE,
+    image: 'assets/images/sprites/ennemi_capuche.png',
+    frameCount: 4,
+    idle: { KEY: 'capuche_idle', FRAME_RATE: 5 }, // l'animation en boucle
+    hitbox: { WIDTH: 18, HEIGHT: 14 },
+    hitPoints: 2, // plus fragile que le faucheur
+    speed: 160, // plus lente que le faucheur
+    sight: 200, // et elle voit moins loin
+  },
+};
+export const ENEMY_FRAME_SIZE = 32;
+
+// * Le comportement des ennemis (voir EnemySystem.js) : au repos près de leur point, ils fondent sur le joueur dès qu'ils le voient
+// (distance < sight ET aucun mur entre eux), le perdent s'il s'éloigne ou se cache, vont voir où ils l'ont vu en dernier, puis rentrent.
+export const ENEMY_AI = {
+  LOSE_SIGHT_FACTOR: 1.3, // un ennemi lancé à la poursuite ne lâche le joueur que s'il dépasse sight x ce facteur
+  SEARCH: { WAIT_MS: 1200, MAX_MS: 3500 }, // il attend sur place au dernier endroit vu, et abandonne au bout de MAX_MS (s'il est coincé)
+  ARRIVE_DISTANCE: 8, // à moins de ce nombre de pixels d'un point, il est « arrivé »
+  RETURN_SPEED_FACTOR: 0.7, // il rentre plus calmement qu'il ne poursuit
+  WANDER: { RADIUS: 40, SPEED_FACTOR: 0.35, PAUSE_MS: { MIN: 1200, MAX: 2800 } }, // au repos : il flâne autour de son point
+  LINE_OF_SIGHT_STEP: 12, // on regarde un point tous les 12 pixels entre l'ennemi et le joueur : un mur sur le chemin coupe la vue
+  // Quand un tir touche un ennemi : il clignote en blanc, est repoussé et reste étourdi un instant (il ne bouge plus de lui-même).
+  HIT: { FLASH_MS: 80, STUN_MS: 250, KNOCKBACK: 200 },
+  // Quand il meurt : un petit nuage de fumée sombre (de petits carrés générés par le code)
+  DEATH: { KEY: 'enemy_puff', SIZE: 6, COUNT: 14, COLORS: [0x2a2230, 0x4a3a58, 0x6b5a7a], SPEED: { MIN: 30, MAX: 110 }, LIFETIME_MS: { MIN: 350, MAX: 650 }, DEPTH: 15 },
+  // Quand un ennemi touche le joueur : il est renvoyé au point de départ du monde, les ennemis vivants reprennent leur place, et il est
+  // invincible un court instant (il clignote) pour ne pas être touché aussitôt. Un éclair rouge marque le contact.
+  CONTACT: { INVULNERABLE_MS: 1500, BLINK_MS: 100, BLINK_ALPHA: 0.3, FLASH: { DURATION_MS: 180, RED: 255, GREEN: 60, BLUE: 60 } },
+  ALERT: { TEXT: '!', COLOR: '#ff4040', SIZE: '30px', RISE: 16, DURATION_MS: 600 }, // le « ! » qui monte quand il repère le joueur
 };
 
 // * Les bulles du monde magique (voir BubbleSystem.js) : posées dans Tiled par des objets « point » de classe « bubble »
