@@ -2,8 +2,8 @@ import { SCENES, UI_IMAGES } from '../utils/constants.js';
 
 /**
  * * L'écran de choix du mode (Solo ou Multi) : une image plein écran où la carte choisie est surlignée.
- * Pour l'instant il n'affiche que Solo surligné. Prochaines étapes : les images à la bonne taille, gauche/droite pour
- * changer de carte, Entrée pour lancer le jeu.
+ * Pour l'instant il n'affiche que Solo surligné. Prochaines étapes : gauche/droite pour changer de carte, Entrée pour lancer
+ * le jeu.
  */
 export default class ModeScene extends Phaser.Scene {
   constructor() {
@@ -18,7 +18,7 @@ export default class ModeScene extends Phaser.Scene {
   create() {
     const { width, height } = this.scale;
 
-    // * L'image est centrée et étirée aux dimensions de l'écran (elle est au même format 16:9)
-    this.add.image(width / 2, height / 2, UI_IMAGES.MODE_SOLO.KEY).setDisplaySize(width, height);
+    // * Les images font déjà 1280 x 720 : elles sont simplement centrées
+    this.add.image(width / 2, height / 2, UI_IMAGES.MODE_SOLO.KEY);
   }
 }

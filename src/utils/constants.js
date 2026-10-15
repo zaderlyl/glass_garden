@@ -22,8 +22,8 @@ export const SCENES = {
 // * Les images des écrans d'interface (accueil, choix du mode, victoire) : une image plein écran chacune
 export const UI_IMAGES = {
   HOME: { KEY: 'ui_accueil', PATH: 'assets/images/ui/accueil.png' },
-  MODE_SOLO: { KEY: 'ui_mode_solo', PATH: 'assets/images/ui/mode_solo.webp' }, // choix du mode, la carte Solo surlignée
-  MODE_MULTI: { KEY: 'ui_mode_multi', PATH: 'assets/images/ui/mode_multi.webp' }, // la carte Multi surlignée
+  MODE_SOLO: { KEY: 'ui_mode_solo', PATH: 'assets/images/ui/mode_solo.png' }, // choix du mode, la carte Solo surlignée
+  MODE_MULTI: { KEY: 'ui_mode_multi', PATH: 'assets/images/ui/mode_multi.png' }, // la carte Multi surlignée
 };
 
 // * Le monde normal (le jardin), tel qu'il est nommé dans la table WORLDS ci-dessous.
