@@ -1,4 +1,4 @@
-import { P2_SPRITE, P2_START, P2_SPEED } from '../utils/constants.js';
+import { P2_SPRITE, P2_START, P2_SPEED, PLAYER } from '../utils/constants.js';
 import { createP2Keys } from './InputManager.js';
 
 const FRAME_HAUT   = 0; // dos
@@ -16,6 +16,9 @@ export function loadSecondPlayer(scene) {
 export function createSecondPlayer(scene) {
   const p2 = scene.physics.add.sprite(P2_START.x, P2_START.y, P2_SPRITE.key, FRAME_BAS);
   p2.setCollideWorldBounds(true);
+  // * Petite boîte de collision aux pieds, comme le joueur 1 (sinon il se coince dans les décors)
+  p2.body.setSize(PLAYER.HITBOX.WIDTH, PLAYER.HITBOX.HEIGHT);
+  p2.body.setOffset(PLAYER.HITBOX.OFFSET_X, PLAYER.HITBOX.OFFSET_Y);
   p2.keys = createP2Keys(scene);
   return p2;
 }
