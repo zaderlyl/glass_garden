@@ -111,12 +111,3 @@ export default class InputManager {
     return { x, y };
   }
 }
-export function createP2Keys(scene) {
-  return scene.input.keyboard.addKeys({
-    up: 'Z',
-    down: 'S',
-    left: 'Q',
-    right: 'D',
-    shoot: 'A'
-  });
-}

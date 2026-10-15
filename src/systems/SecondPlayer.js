@@ -1,5 +1,6 @@
-import { P2_SPRITE, P2_SPAWN_DISTANCE, P2_SPEED, PLAYER } from '../utils/constants.js';
-import { createP2Keys } from './InputManager.js';
+import { P2_SPRITE, P2_SPAWN_DISTANCE, P2_SPEED, PLAYER, CONTROL_MODES } from '../utils/constants.js';
+import InputManager from './InputManager.js';
+import { getControlMode } from './ControlMode.js';
 
 const FRAME_HAUT   = 0; // dos
 const FRAME_DROITE = 1;
@@ -29,31 +30,23 @@ export function createSecondPlayer(scene, player, walls) {
   // * Petite boîte de collision aux pieds, comme le joueur 1 (sinon il se coince dans les décors)
   p2.body.setSize(PLAYER.HITBOX.WIDTH, PLAYER.HITBOX.HEIGHT);
   p2.body.setOffset(PLAYER.HITBOX.OFFSET_X, PLAYER.HITBOX.OFFSET_Y);
-  p2.keys = createP2Keys(scene);
+  p2.input2 = new InputManager(scene, 2); // les touches du joueur 2 (table BINDINGS)
   return p2;
 }
 
 export function updateSecondPlayer(p2) {
-  const k = p2.keys;
-
-  p2.setVelocity(0);
-
-  if (k.left.isDown) {
-    p2.setVelocityX(-P2_SPEED);
-    p2.setFrame(FRAME_GAUCHE);
-  } else if (k.right.isDown) {
-    p2.setVelocityX(P2_SPEED);
-    p2.setFrame(FRAME_DROITE);
+  // * En mode PC, le joueur 2 ne bouge pas (un seul joueur au clavier)
+  if (getControlMode() === CONTROL_MODES.PC) {
+    p2.setVelocity(0, 0);
+    return;
   }
 
-  if (k.up.isDown) {
-    p2.setVelocityY(-P2_SPEED);
-    p2.setFrame(FRAME_HAUT);
-  } else if (k.down.isDown) {
-    p2.setVelocityY(P2_SPEED);
-    p2.setFrame(FRAME_BAS);
-  }
+  // * La direction est déjà normalisée en diagonale par l'InputManager
+  const { x, y } = p2.input2.getMove();
+  p2.setVelocity(x * P2_SPEED, y * P2_SPEED);
 
-  // * En diagonale, on garde la même vitesse qu'en ligne droite (sinon il irait environ 41 % plus vite)
-  p2.body.velocity.normalize().scale(P2_SPEED);
+  if (x < 0) p2.setFrame(FRAME_GAUCHE);
+  else if (x > 0) p2.setFrame(FRAME_DROITE);
+  if (y < 0) p2.setFrame(FRAME_HAUT);
+  else if (y > 0) p2.setFrame(FRAME_BAS);
 }
