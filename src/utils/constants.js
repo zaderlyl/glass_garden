@@ -354,6 +354,8 @@ export const CONTROLS_PAGE = {
   COLUMNS_X: [380, 900], // le centre de la colonne du joueur 1 et de celle du joueur 2
   PLAYER_Y: 215, // le nom du joueur
   PLAYER_SIZE: '38px',
+  HEADER_SHIFT: 30, // le nom du joueur est décalé vers la droite pour se centrer sur ses lignes (libellé + icône)
+  SPRITE: { SCALE: 3, OFFSET_X: -110 }, // le personnage du joueur, à gauche de son nom (32 px x 3 = 96 px)
   FIRST_ROW_Y: 300,
   ROW_SPACING: 90,
   LABEL_GAP: 24, // l'espace entre le libellé (aligné à droite) et le centre de la colonne

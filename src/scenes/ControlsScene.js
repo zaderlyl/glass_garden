@@ -1,4 +1,4 @@
-import { SCENES, UI_IMAGES, FONT_FAMILY, DIALOGUE, CONTROL_MODES, CONTROLS_PAGE, MENU_COMMANDS_INDEX } from '../utils/constants.js';
+import { SCENES, UI_IMAGES, FONT_FAMILY, DIALOGUE, CONTROL_MODES, CONTROLS_PAGE, MENU_COMMANDS_INDEX, ASSETS, PLAYER, P2_SPRITE } from '../utils/constants.js';
 import { BINDINGS } from '../systems/InputManager.js';
 
 /** Le nom d'une touche tel qu'on l'affiche : « ENTER » devient « Entrée » (les lettres restent telles quelles). */
@@ -16,6 +16,9 @@ export default class ControlsScene extends Phaser.Scene {
 
   preload() {
     this.load.image(UI_IMAGES.HOME.KEY, UI_IMAGES.HOME.PATH);
+    // * Les personnages des deux joueurs (les mêmes feuilles que dans le jeu : Phaser ne les recharge pas deux fois)
+    this.load.spritesheet(ASSETS.PLAYER_1, 'assets/images/sprites/player_1_spritesheet.png', { frameWidth: PLAYER.FRAME_SIZE, frameHeight: PLAYER.FRAME_SIZE });
+    this.load.spritesheet(P2_SPRITE.key, P2_SPRITE.path, { frameWidth: P2_SPRITE.frameWidth, frameHeight: P2_SPRITE.frameHeight });
     this.load.image(UI_IMAGES.JOYSTICK_1.KEY, UI_IMAGES.JOYSTICK_1.PATH);
     this.load.image(UI_IMAGES.JOYSTICK_2.KEY, UI_IMAGES.JOYSTICK_2.PATH);
     ['ARCADE_GREEN', 'ARCADE_RED', 'ARCADE_YELLOW'].forEach((name) => this.load.image(UI_IMAGES[name].KEY, UI_IMAGES[name].PATH));
@@ -43,7 +46,12 @@ export default class ControlsScene extends Phaser.Scene {
     [1, 2].forEach((player, column) => {
       const keys = BINDINGS[CONTROL_MODES.ARCADE][player];
       const x = COLUMNS_X[column];
-      text(x, PLAYER_Y, `Joueur ${player}`, CONTROLS_PAGE.PLAYER_SIZE, true);
+      text(x + CONTROLS_PAGE.HEADER_SHIFT, PLAYER_Y, `Joueur ${player}`, CONTROLS_PAGE.PLAYER_SIZE, true);
+
+      // * Le personnage du joueur, de face, à gauche de son nom (pixel art net)
+      const spriteKey = player === 1 ? ASSETS.PLAYER_1 : P2_SPRITE.key;
+      this.textures.get(spriteKey).setFilter(Phaser.Textures.FilterMode.NEAREST);
+      this.add.image(x + CONTROLS_PAGE.SPRITE.OFFSET_X, PLAYER_Y, spriteKey, PLAYER.FRAMES.DOWN).setScale(CONTROLS_PAGE.SPRITE.SCALE);
       // * Une ligne par action : le libellé à gauche (aligné à droite), l'icône à droite
       ROWS.forEach(([label, action], row) => {
         const y = FIRST_ROW_Y + row * ROW_SPACING;
