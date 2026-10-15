@@ -47,7 +47,7 @@ export function shouldMirrorDisappear(world) {
 /**
  * De quel côté regarde ce miroir ? 'right' : le joueur apparaît à sa droite. 'left' : l'image est inversée et le joueur apparaît à sa gauche.
  * * Une propriété « facing » (right ou left) sur l'objet miroir dans Tiled décide. Sans elle : un miroir de la moitié gauche de la carte
- * regarde vers la droite, un miroir de la moitié droite regarde vers la gauche (ils regardent vers le milieu de la carte).
+ * regarde vers la gauche, un miroir de la moitié droite regarde vers la droite (ils regardent vers le bord de la carte, loin du milieu).
  * @param {object} object  L'objet « mirror » de Tiled (avec x, width et properties)
  * @param {number} mapWidth  La largeur de la carte, en pixels
  * @returns {'left'|'right'}
@@ -55,5 +55,5 @@ export function shouldMirrorDisappear(world) {
 export function getMirrorFacing(object, mapWidth) {
   const property = (object.properties ?? []).find((p) => p.name === 'facing');
   if (property && (property.value === 'left' || property.value === 'right')) return property.value;
-  return object.x + (object.width ?? 0) / 2 < mapWidth / 2 ? 'right' : 'left';
+  return object.x + (object.width ?? 0) / 2 < mapWidth / 2 ? 'left' : 'right';
 }
