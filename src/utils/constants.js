@@ -324,6 +324,7 @@ export const INTRO = {
   PAUSE_MS: 500, // la pause quand il est sorti, avant que la caméra ne reprenne sa place
   ZOOM_OUT_MS: 1400, // le dézoom vers la vue normale
   // * Les miroirs apparaissent un à un (dans l'ordre des mondes), chacun avec son cadenas : un petit « pop » (il grossit en se dévoilant)
+  SKIP_AFTER_MS: 1000, // pendant la première seconde, on ne peut pas passer l'intro (une touche encore enfoncée depuis le menu)
   UNLOCK_DELAY_MS: 500, // après la note : le temps avant que le cadenas du premier miroir ne s'ouvre
   END_PAUSE_MS: 600, // la pause entre l'ouverture du cadenas et la reprise du jeu
   MIRRORS: { START_DELAY_MS: 400, DELAY_MS: 650, POP_MS: 450, POP_FROM_SCALE: 0.4 },

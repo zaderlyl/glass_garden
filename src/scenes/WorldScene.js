@@ -51,6 +51,7 @@ import {
   BUBBLES,
   ENEMY_AI,
   INTRO,
+  MIRROR_LOCK,
 } from '../utils/constants.js';
 
 /**
@@ -483,7 +484,12 @@ export default class WorldScene extends Phaser.Scene {
     const { FADE_MS, FADE_COLOR, CAMERA, DOOR } = INTRO;
     const camera = this.cameras.main;
     this.transitioning = true;
+    this.introStartedAt = this.time.now;
     this.setMirrorsVisible(false);
+
+    // * O ou Échap passent l'intro à tout moment (I aussi, tant qu'aucune phrase n'est affichée : voir update)
+    this.skipIntroKeys = ['keydown-O', 'keydown-ESC'];
+    this.skipIntroKeys.forEach((event) => this.input.keyboard.on(event, this.skipIntro, this));
 
     // * Pour l'histoire, TOUS les miroirs commencent verrouillés : ceux qui sont déjà ouverts reçoivent un cadenas, qui s'ouvrira après la note (voir introUnlockFirstMirror)
     this.introOpenMirrors = this.mirrors
@@ -516,7 +522,7 @@ export default class WorldScene extends Phaser.Scene {
       ease: 'Linear',
       onComplete: () => {
         // * Il lit la lettre du gardien, puis la caméra reprend sa place
-        this.time.delayedCall(PAUSE_MS, () => this.dialogue.open('lettre', DIALOGUES.lettre, null, () => this.introZoomOut()));
+        this.time.delayedCall(PAUSE_MS, () => this.introPlaying && this.dialogue.open('lettre', DIALOGUES.lettre, null, () => this.introZoomOut()));
       },
     });
   }
@@ -526,21 +532,58 @@ export default class WorldScene extends Phaser.Scene {
     const camera = this.cameras.main;
     camera.zoomTo(1, INTRO.ZOOM_OUT_MS, 'Sine.easeInOut');
     camera.pan(this.scale.width / 2, this.scale.height / 2, INTRO.ZOOM_OUT_MS, 'Sine.easeInOut', false, (cam, progress) => {
-      if (progress === 1) this.introRevealMirrors(() => this.introNote());
+      if (progress === 1 && this.introPlaying) this.introRevealMirrors(() => this.introNote());
     });
+  }
+
+  /**
+   * * Passe l'intro : tout se termine d'un coup, comme si elle était allée au bout (le joueur devant la maison, les miroirs là, le premier ouvert).
+   * Les rappels différés et les animations de l'intro s'arrêtent d'eux-mêmes : ils ne font rien dès que introPlaying est faux.
+   * Sans effet dans la première seconde (une touche encore enfoncée depuis le menu ne doit pas la passer).
+   */
+  skipIntro() {
+    if (!this.introPlaying || this.time.now - this.introStartedAt < INTRO.SKIP_AFTER_MS) return;
+    const { FRONT, CAMERA } = INTRO;
+
+    // * La boîte de dialogue se ferme sans lancer la suite de l'intro
+    this.dialogue.onClosed = null;
+    this.dialogue.typing?.remove();
+    this.dialogue.typing = null;
+    this.dialogue.close();
+
+    // * Les animations de la caméra (fondu, zoom, déplacement) s'arrêtent, la vue est celle du jeu
+    const camera = this.cameras.main;
+    camera.fadeEffect.reset();
+    camera.zoomEffect.reset();
+    camera.panEffect.reset();
+    camera.setZoom(1).centerOn(this.scale.width / 2, this.scale.height / 2);
+
+    // * Le joueur est devant la maison ; les miroirs sont là, en taille normale, et le premier est ouvert (son cadenas disparaît)
+    this.tweens.killTweensOf([this.player, ...this.mirrors, ...this.mirrorLocks]);
+    this.player.setPosition(FRONT.X, FRONT.Y).setAlpha(1).setFrame(PLAYER.FRAMES.DOWN);
+    this.mirrors.forEach((mirror) => mirror.setAlpha(1).setScale(1));
+    this.mirrorLocks.forEach((padlock) => padlock.setAlpha(1).setScale(MIRROR_LOCK.SCALE));
+    this.introOpenMirrors.forEach(({ mirror, padlock }) => {
+      mirror.clearTint();
+      padlock.destroy();
+    });
+
+    this.endIntro();
   }
 
   /** Les miroirs sont là, cadenassés : la note au dos de la lettre l'explique, puis le premier miroir s'ouvre. */
   introNote() {
+    if (!this.introPlaying) return;
     this.dialogue.open('note', DIALOGUES.note, null, () => this.introUnlockFirstMirror());
   }
 
   /** Le cadenas du premier miroir (celui de la nuit) s'ouvre, puis l'intro se termine : la partie commence. */
   introUnlockFirstMirror() {
+    if (!this.introPlaying) return;
     const { UNLOCK_DELAY_MS, END_PAUSE_MS } = INTRO;
     this.introOpenMirrors.forEach(({ mirror, padlock }, i) => {
       const last = i === this.introOpenMirrors.length - 1;
-      playMirrorUnlock(this, mirror, padlock, UNLOCK_DELAY_MS, last ? () => this.time.delayedCall(END_PAUSE_MS, () => this.endIntro()) : undefined);
+      playMirrorUnlock(this, mirror, padlock, UNLOCK_DELAY_MS, last ? () => this.time.delayedCall(END_PAUSE_MS, () => this.introPlaying && this.endIntro()) : undefined);
     });
   }
 
@@ -554,6 +597,7 @@ export default class WorldScene extends Phaser.Scene {
     mirrors.forEach((mirror, i) => {
       const padlock = this.mirrorLocks.find((lock) => lock.x === mirror.x && lock.y === mirror.y);
       this.time.delayedCall(START_DELAY_MS + i * DELAY_MS, () => {
+        if (!this.introPlaying) return;
         [mirror, padlock].filter(Boolean).forEach((sprite) => {
           const scale = sprite.scaleX;
           sprite.setVisible(true).setAlpha(0).setScale(scale * POP_FROM_SCALE);
@@ -561,12 +605,13 @@ export default class WorldScene extends Phaser.Scene {
         });
       });
     });
-    this.time.delayedCall(START_DELAY_MS + (mirrors.length - 1) * DELAY_MS + POP_MS + 300, onDone);
+    this.time.delayedCall(START_DELAY_MS + (mirrors.length - 1) * DELAY_MS + POP_MS + 300, () => this.introPlaying && onDone());
   }
 
   /** Fin de l'intro : les miroirs sont là, le joueur reprend la main, l'interface revient et le chronomètre démarre. */
   endIntro() {
     this.introPlaying = false;
+    this.skipIntroKeys?.forEach((event) => this.input.keyboard.off(event, this.skipIntro, this));
     this.setMirrorsVisible(true); // (déjà visibles : filet de sécurité)
     this.scene.setVisible(true, SCENES.UI);
 
@@ -848,7 +893,10 @@ export default class WorldScene extends Phaser.Scene {
     if (this.transitioning) {
       this.player.setVelocity(0, 0);
       this.player2.setVelocity(0, 0);
-      if (this.introPlaying && this.dialogue.isOpen) this.dialogue.update(this.input1); // la lettre de l'intro : le joueur la fait avancer
+      if (this.introPlaying) {
+        if (this.dialogue.isOpen) this.dialogue.update(this.input1); // la lettre de l'intro : le joueur la fait avancer
+        else if (this.input1.justPressed('interact')) this.skipIntro(); // I sans phrase affichée : on passe l'intro
+      }
       return;
     }
 
