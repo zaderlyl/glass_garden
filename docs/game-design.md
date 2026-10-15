@@ -242,7 +242,7 @@ La borne n'a pas de clavier : on ne peut pas y utiliser de raccourci. Le jeu **d
 |---|---|
 | `Ctrl + C` (ou `Cmd + C` sur Mac) | Passe de arcade à pc, ou de pc à arcade |
 
-Cliquer d'abord sur le jeu pour qu'il reçoive le clavier. Le mode actuel s'affiche en bas à gauche de l'écran (« Mode : arcade » ou « Mode : pc »).
+Cliquer d'abord sur le jeu pour qu'il reçoive le clavier. En mode pc, « Mode : pc » s'affiche en bas à gauche de l'écran (on ne voit rien en mode arcade : la borne est toujours en arcade).
 
 **Comment ça marche dans le code :**
 - `InputManager` contient les touches de **chaque mode** et branche les deux jeux dès le début ; il lit celui du mode actuel à chaque image. Changer de mode est donc immédiat, sans recréer la scène.
