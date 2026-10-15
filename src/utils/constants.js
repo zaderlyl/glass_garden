@@ -20,7 +20,7 @@ export const SCENES = {
 
 // * Les images des écrans d'interface (accueil, choix du mode, victoire) : une image plein écran chacune
 export const UI_IMAGES = {
-  HOME: { KEY: 'ui_accueil', PATH: 'assets/images/ui/accueil.webp' },
+  HOME: { KEY: 'ui_accueil', PATH: 'assets/images/ui/accueil.png' },
 };
 
 // * Le monde normal (le jardin), tel qu'il est nommé dans la table WORLDS ci-dessous.
