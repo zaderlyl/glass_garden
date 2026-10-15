@@ -12,7 +12,7 @@
 // « le miroir du monde world_1 est utilisé ».
 //
 // * COMMENT L'UTILISER
-//   import { isMirrorUsed, markMirrorUsed, shouldMirrorDisappear } from '../systems/MirrorSystem.js';
+//   import { isMirrorUsed, markMirrorUsed, shouldMirrorDisappear, getMirrorFacing } from '../systems/MirrorSystem.js';
 // =====================================================================================
 
 import { isWorldStarCollected } from './StarSystem.js';
@@ -42,4 +42,18 @@ export function resetMirrors() {
  */
 export function shouldMirrorDisappear(world) {
   return isWorldStarCollected(world);
+}
+
+/**
+ * De quel côté regarde ce miroir ? 'right' : le joueur apparaît à sa droite. 'left' : l'image est inversée et le joueur apparaît à sa gauche.
+ * * Une propriété « facing » (right ou left) sur l'objet miroir dans Tiled décide. Sans elle : un miroir de la moitié gauche de la carte
+ * regarde vers la droite, un miroir de la moitié droite regarde vers la gauche (ils regardent vers le milieu de la carte).
+ * @param {object} object  L'objet « mirror » de Tiled (avec x, width et properties)
+ * @param {number} mapWidth  La largeur de la carte, en pixels
+ * @returns {'left'|'right'}
+ */
+export function getMirrorFacing(object, mapWidth) {
+  const property = (object.properties ?? []).find((p) => p.name === 'facing');
+  if (property && (property.value === 'left' || property.value === 'right')) return property.value;
+  return object.x + (object.width ?? 0) / 2 < mapWidth / 2 ? 'right' : 'left';
 }

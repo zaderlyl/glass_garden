@@ -596,6 +596,19 @@ export const DECO = {
   WORLD_TINTS: { world_1: 0x8f9cd4 }, // la nuit : des bleus, le vert des buissons s'assombrit
   // * Les sources de lumière ne sont jamais teintées : une lanterne, une bougie ou un cristal reste lumineux, même la nuit
   UNTINTED: ['lanterne_', 'bougie_', 'cristal_'], // les noms d'images qui commencent ainsi
+  // * Le décor SOLIDE : le joueur, les ennemis et les balles ne le traversent pas. Les autres (fleurs, herbe, trèfle, plantes,
+  // champignons, bougies, crâne) se traversent. Chaque ligne : [début du nom de l'image, largeur, hauteur] de la zone qui bloque, en
+  // pixels, posée AUX PIEDS de l'image (pas sur toute l'image : on passe derrière un arbuste, devant sa base on est bloqué).
+  SOLID: [
+    ['buisson', 30, 14], // les arbustes et les haies (deux arbustes côte à côte ne laissent pas de passage)
+    ['lanterne_', 14, 10], // le pied d'une lanterne
+    ['panneau', 14, 10],
+    ['citrouilles', 28, 14],
+    ['sac_', 20, 12],
+    ['puits', 28, 16],
+    ['cristal_', 22, 12],
+    ['livres', 26, 14],
+  ],
   IMAGES: [
     'fleur_1', 'fleur_2', 'fleur_3', 'fleur_4', 'fleur_5', 'fleur_6',
     'buisson', 'buisson_automne', 'trefle', 'herbe', 'plante_verte', 'panneau',
