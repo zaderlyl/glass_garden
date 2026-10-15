@@ -2,7 +2,8 @@ import { SCENES, UI_IMAGES, MENU_BUTTONS, FONT_FAMILY } from '../utils/constants
 
 /**
  * * L'écran d'accueil : une image plein écran (le titre est dessiné dedans).
- * Elle a 4 boutons (Jouer, Réglages, Commandes, Crédits). Entrée mène au choix du mode (ModeScene).
+ * Elle a 4 boutons (Jouer, Réglages, Commandes, Crédits). Haut et bas changent le bouton choisi (plus grand et plus clair).
+ * Entrée mène au choix du mode (ModeScene).
  */
 export default class MenuScene extends Phaser.Scene {
   constructor() {
@@ -39,7 +40,23 @@ export default class MenuScene extends Phaser.Scene {
       return { label, image, text };
     });
 
+    // * Haut et bas changent le bouton choisi (on boucle : après le dernier, on revient au premier). Au départ : « Jouer ».
+    this.selected = 0;
+    this.select(0);
+    this.input.keyboard.on('keydown-UP', () => this.select(this.selected - 1));
+    this.input.keyboard.on('keydown-DOWN', () => this.select(this.selected + 1));
+
     // * Entrée : on passe au choix du mode (une seule fois, même si la touche est maintenue)
     this.input.keyboard.once('keydown-ENTER', () => this.scene.start(SCENES.MODE));
+  }
+
+  /** Choisit le bouton n° index (en bouclant) : il devient plus grand et plus clair, les autres reprennent leur taille. */
+  select(index) {
+    this.selected = (index + this.buttons.length) % this.buttons.length;
+    this.buttons.forEach(({ image }, i) => {
+      const chosen = i === this.selected;
+      image.setScale(chosen ? MENU_BUTTONS.SELECTED_SCALE : MENU_BUTTONS.SCALE);
+      image.setTint(chosen ? 0xffffff : MENU_BUTTONS.TINT);
+    });
   }
 }

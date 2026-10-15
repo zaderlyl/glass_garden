@@ -330,6 +330,8 @@ export const VICTORY_MESSAGE = 'Toutes les étoiles sont récupérées';
 export const MENU_BUTTONS = {
   LABELS: ['Jouer', 'Réglages', 'Commandes', 'Crédits'],
   SCALE: 4,
+  SELECTED_SCALE: 5, // le bouton choisi : un cran plus grand (entier, pour garder des pixels nets)
+  TINT: 0xaaaaaa, // les boutons non choisis sont un peu assombris (le choisi garde sa couleur d'origine, donc plus clair)
   FIRST_Y: 395, // le centre du premier bouton
   SPACING: 58, // la distance entre les centres de deux boutons
   TEXT: { SIZE: '22px', COLOR: '#ffffff', STROKE: '#1f4d1a', STROKE_THICKNESS: 4 },
