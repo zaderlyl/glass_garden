@@ -503,6 +503,7 @@ export default class WorldScene extends Phaser.Scene {
         });
       }
     }
-  updateSecondPlayer(this.player2);
-}
+
+    updateSecondPlayer(this.player2);
+  }
 }
