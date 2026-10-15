@@ -7,6 +7,7 @@
 // Une carte sans objet « bubble » n'en a pas.
 // Selon la version de Tiled, la classe s'appelle « class » ou « type » : on lit les deux.
 //
+// Une bulle a une taille (propriété Tiled « size » : large, medium ou small ; sans elle, small).
 // Une bulle flotte et dérive doucement autour de son point. Quand le joueur la touche, elle éclate (animation) puis disparaît.
 //
 // * COMMENT L'UTILISER
@@ -16,6 +17,7 @@
 // =====================================================================================
 
 import { BUBBLES } from '../utils/constants.js';
+import { getTiledProperty } from './CrateSystem.js';
 
 // Les cartes dont toutes les bulles ont été éclatées, retenues pour toute la partie (une scène est recréée à chaque visite)
 const completedMaps = new Set();
@@ -71,12 +73,14 @@ export function createBubbles(scene, map, player, onAllBurst) {
   const state = { total: objects.length, burst: 0, done: false };
   currentState = objects.length > 0 ? state : null; // pas de compteur dans un monde sans bulles
 
-  objects.forEach((object) => {
-    const bubble = scene.physics.add.sprite(object.x, object.y, BUBBLES.KEY, 0).setDepth(BUBBLES.DEPTH);
+  // * Crée une bulle de cette taille (large, medium ou small) centrée sur (x, y)
+  const spawnBubble = (x, y, size) => {
+    const { SCALE } = BUBBLES.SIZES[size];
+    const bubble = scene.physics.add.sprite(x, y, BUBBLES.KEY, 0).setDepth(BUBBLES.DEPTH).setScale(SCALE);
     bubble.body.setCircle(BUBBLES.HITBOX_RADIUS, BUBBLES.FRAME_SIZE / 2 - BUBBLES.HITBOX_RADIUS, BUBBLES.FRAME_SIZE / 2 - BUBBLES.HITBOX_RADIUS);
 
     // * Elle flotte autour de son point (voir updateFloating) ; la phase au hasard évite qu'elles bougent toutes ensemble
-    floaters.push({ bubble, originX: object.x, originY: object.y, phase: Math.random() * Math.PI * 2 });
+    floaters.push({ bubble, originX: x, originY: y, phase: Math.random() * Math.PI * 2 });
 
     scene.physics.add.overlap(player, bubble, () => {
       if (bubble.burst) return;
@@ -91,6 +95,12 @@ export function createBubbles(scene, map, player, onAllBurst) {
         onAllBurst?.();
       }
     });
+    return bubble;
+  };
+
+  objects.forEach((object) => {
+    const size = getTiledProperty(object, 'size', BUBBLES.DEFAULT_SIZE);
+    spawnBubble(object.x, object.y, BUBBLES.SIZES[size] ? size : BUBBLES.DEFAULT_SIZE);
   });
 
   return state;

@@ -393,6 +393,13 @@ export const BUBBLES = {
   // (ça trace une petite boucle irrégulière). Amplitudes en pixels, vitesses en radians par seconde (6,28 = un tour par seconde).
   FLOAT: { AMPLITUDE_X: 10, AMPLITUDE_Y: 6, SPEED_X: 1.3, SPEED_Y: 2.1 },
   HITBOX_RADIUS: 12, // la zone qui éclate la bulle au contact du joueur
+  // * Les tailles de bulle (propriété Tiled « size » : large, medium ou small, par défaut small). L'échelle agrandit l'image ET la zone de contact.
+  SIZES: {
+    large: { SCALE: 2.5 },
+    medium: { SCALE: 1.5 },
+    small: { SCALE: 1 },
+  },
+  DEFAULT_SIZE: 'small',
   DEPTH: 9, // devant le joueur, derrière le décor du dessus (10)
   STAR_POP: { DURATION_MS: 700, EASE: 'Back.easeOut' }, // l'étoile apparaît au centre de la carte en grossissant, avec un petit rebond
 };

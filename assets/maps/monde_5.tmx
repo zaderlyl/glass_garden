@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.0" orientation="orthogonal" renderorder="right-down" width="40" height="22" tilewidth="32" tileheight="32" infinite="0" nextlayerid="8" nextobjectid="56">
+<map version="1.10" tiledversion="1.12.0" orientation="orthogonal" renderorder="right-down" width="40" height="22" tilewidth="32" tileheight="32" infinite="0" nextlayerid="8" nextobjectid="19">
  <editorsettings>
   <export target="monde_5.json" format="json"/>
  </editorsettings>
@@ -73,124 +73,22 @@
   <object id="6" name="star" type="star" x="578.702" y="134.012">
    <point/>
   </object>
-  <object id="16" type="bubble" x="438.4" y="278.5">
+  <object id="16" type="bubble" x="496" y="240">
+   <properties>
+    <property name="size" value="large"/>
+   </properties>
    <point/>
   </object>
-  <object id="17" type="bubble" x="395.4" y="318.6">
+  <object id="17" type="bubble" x="368" y="464">
+   <properties>
+    <property name="size" value="large"/>
+   </properties>
    <point/>
   </object>
-  <object id="18" type="bubble" x="437.1" y="231.0">
-   <point/>
-  </object>
-  <object id="19" type="bubble" x="404.7" y="278.6">
-   <point/>
-  </object>
-  <object id="20" type="bubble" x="467.7" y="221.5">
-   <point/>
-  </object>
-  <object id="21" type="bubble" x="410.4" y="357.4">
-   <point/>
-  </object>
-  <object id="22" type="bubble" x="494.8" y="241.0">
-   <point/>
-  </object>
-  <object id="23" type="bubble" x="481.9" y="291.9">
-   <point/>
-  </object>
-  <object id="24" type="bubble" x="361.4" y="507.8">
-   <point/>
-  </object>
-  <object id="25" type="bubble" x="343.9" y="479.6">
-   <point/>
-  </object>
-  <object id="26" type="bubble" x="381.6" y="450.3">
-   <point/>
-  </object>
-  <object id="27" type="bubble" x="312.3" y="468.4">
-   <point/>
-  </object>
-  <object id="28" type="bubble" x="334.5" y="438.3">
-   <point/>
-  </object>
-  <object id="29" type="bubble" x="398.4" y="498.5">
-   <point/>
-  </object>
-  <object id="30" type="bubble" x="315.3" y="512.2">
-   <point/>
-  </object>
-  <object id="31" type="bubble" x="137.1" y="348.3">
-   <point/>
-  </object>
-  <object id="32" type="bubble" x="161.6" y="385.5">
-   <point/>
-  </object>
-  <object id="33" type="bubble" x="107.0" y="391.7">
-   <point/>
-  </object>
-  <object id="34" type="bubble" x="176.1" y="358.0">
-   <point/>
-  </object>
-  <object id="35" type="bubble" x="66.5" y="339.5">
-   <point/>
-  </object>
-  <object id="36" type="bubble" x="107.0" y="343.2">
-   <point/>
-  </object>
-  <object id="37" type="bubble" x="67.6" y="377.6">
-   <point/>
-  </object>
-  <object id="38" type="bubble" x="900.4" y="289.1">
-   <point/>
-  </object>
-  <object id="39" type="bubble" x="869.7" y="283.7">
-   <point/>
-  </object>
-  <object id="40" type="bubble" x="966.3" y="292.2">
-   <point/>
-  </object>
-  <object id="41" type="bubble" x="934.0" y="302.9">
-   <point/>
-  </object>
-  <object id="42" type="bubble" x="866.7" y="242.7">
-   <point/>
-  </object>
-  <object id="43" type="bubble" x="999.4" y="295.6">
-   <point/>
-  </object>
-  <object id="44" type="bubble" x="774.2" y="350.3">
-   <point/>
-  </object>
-  <object id="45" type="bubble" x="791.9" y="413.4">
-   <point/>
-  </object>
-  <object id="46" type="bubble" x="761.7" y="400.6">
-   <point/>
-  </object>
-  <object id="47" type="bubble" x="798.8" y="475.2">
-   <point/>
-  </object>
-  <object id="48" type="bubble" x="778.3" y="448.9">
-   <point/>
-  </object>
-  <object id="49" type="bubble" x="773.5" y="500.7">
-   <point/>
-  </object>
-  <object id="50" type="bubble" x="25.7" y="93.6">
-   <point/>
-  </object>
-  <object id="51" type="bubble" x="21.5" y="43.2">
-   <point/>
-  </object>
-  <object id="52" type="bubble" x="59.2" y="52.8">
-   <point/>
-  </object>
-  <object id="53" type="bubble" x="57.7" y="15.2">
-   <point/>
-  </object>
-  <object id="54" type="bubble" x="129.5" y="30.3">
-   <point/>
-  </object>
-  <object id="55" type="bubble" x="62.1" y="95.8">
+  <object id="18" type="bubble" x="784" y="432">
+   <properties>
+    <property name="size" value="large"/>
+   </properties>
    <point/>
   </object>
  </objectgroup>
