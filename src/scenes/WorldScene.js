@@ -6,7 +6,7 @@ import { areAllStarsCollected } from '../systems/StarSystem.js';
 import { createBulletAnimations, explodeBullet, shoot } from '../systems/fonctionTir.js';
 import { preloadCrate, createCrates } from '../systems/CrateSystem.js';
 import { preloadDeco, createDeco } from '../systems/DecoSystem.js';
-import { isMirrorUsed, markMirrorUsed, shouldMirrorDisappear, getMirrorFacing } from '../systems/MirrorSystem.js';
+import { isMirrorUsed, markMirrorUsed, shouldMirrorDisappear, getMirrorFacing, preloadMirrorLocks, createMirrorLocks } from '../systems/MirrorSystem.js';
 import { applyTint } from '../systems/TintSystem.js';
 import { irisClose, irisOpen } from '../systems/TransitionSystem.js';
 import { preloadNpcs, createNpcs } from '../systems/NpcSystem.js';
@@ -19,6 +19,7 @@ import { DIALOGUES } from '../data/dialogues.js';
 import { pickVariant } from '../utils/helpers.js';
 import { loadSecondPlayer, createSecondPlayer, updateSecondPlayer } from '../systems/SecondPlayer.js';
 import { getControlMode } from '../systems/ControlMode.js';
+import { ABILITIES, isUnlocked, notifyLocked, isMirrorLocked, getMirrorUnlocker } from '../systems/ProgressSystem.js';
 import {
   GAME_WIDTH,
   SCENES,
@@ -43,6 +44,7 @@ import {
   SMOKE,
   WORLD_ART,
   DIALOGUE,
+  PROGRESS,
   CONTROL_MODES,
   STAR_BOUNCE,
   BUBBLES,
@@ -94,6 +96,7 @@ export default class WorldScene extends Phaser.Scene {
     this.load.image('etoile', 'assets/images/sprites/Etoile.png');
     preloadCrate(this);
     preloadDeco(this);
+    preloadMirrorLocks(this);
     this.load.image(ASSETS.TILESET_DECO, 'assets/images/tilesets/tileset_deco.png');
 
     // * Les balles : balle.png est une bande de 33 images de 16 x 16 pixels, chargée comme un spritesheet
@@ -350,6 +353,9 @@ export default class WorldScene extends Phaser.Scene {
 
         this.mirrors.push(mirror);
       });
+    // * Un cadenas sur chaque miroir encore verrouillé du jardin (et son animation d'ouverture pour ceux qui viennent de s'ouvrir)
+    if (this.isNormalWorld()) createMirrorLocks(this, this.mirrors);
+
 
     // * Texte d'aide, affiché en haut de l'écran quand on est près d'un miroir
     this.hint = this.add
@@ -756,7 +762,8 @@ export default class WorldScene extends Phaser.Scene {
 
     // * Tir : une balle par appui, dans la direction regardée
     if (this.input1.justPressed('shoot')) {
-      shoot(this, this.bullets, this.player, this.facing);
+      if (isUnlocked(ABILITIES.SHOOT)) shoot(this, this.bullets, this.player, this.facing);
+      else notifyLocked(this, ABILITIES.SHOOT); // verrouillé : un message bref, pas de tir
     }
 
     // * On donne une vitesse (en pixels par seconde) : c'est la physique Phaser qui déplace
@@ -796,12 +803,16 @@ export default class WorldScene extends Phaser.Scene {
         DIALOGUE.INTERACT_DISTANCE,
     );
 
+    // * Un miroir du jardin verrouillé (voir ProgressSystem.js) ne s'utilise pas : on dit pourquoi, à la place de l'aide habituelle
+    const mirrorLocked = Boolean(nearMirror) && this.isNormalWorld() && isMirrorLocked(nearMirror.world);
+    const lockedText = mirrorLocked ? PROGRESS.LOCKED_MIRROR_HINT + (PROGRESS.WORLD_LABELS[getMirrorUnlocker(nearMirror.world)] ?? 'le monde précédent') : '';
+
     // On ne réécrit pas le texte pendant l'affichage du message d'interaction
     // ? Les touches sont provisoires : à changer avec les boutons de la borne (voir BINDINGS dans InputManager)
     if (showHint && !this.messageActive) {
       // * La touche affichée suit le mode de contrôle (I en arcade, E en pc) : l'aide ne ment jamais
       const key = input.getKeyLabel('interact');
-      this.hint.setText(nearMirror ? `${key} : entrer dans le miroir` : nearNpc ? `${key} : parler` : '');
+      this.hint.setText(mirrorLocked ? lockedText : nearMirror ? `${key} : entrer dans le miroir` : nearNpc ? `${key} : parler` : '');
     }
 
     // * Parler à un personnage proche (un miroir proche passe avant)
@@ -811,6 +822,8 @@ export default class WorldScene extends Phaser.Scene {
       this.dialogue.open(nearNpc.npcName, DIALOGUES[nearNpc.npcName], () => this.revealWorldStar(nearNpc));
       return true;
     }
+
+    if (mirrorLocked) return this.transitioning; // verrouillé : le message est affiché, rien d'autre
 
     if (nearMirror && input.justPressed('interact')) {
       // * Le nom du miroir dans Tiled donne le monde visé, la table WORLDS donne sa scène

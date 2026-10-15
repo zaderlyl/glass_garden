@@ -618,6 +618,52 @@ export const DECO = {
   ],
 };
 
+// * Le cadenas posé sur un miroir verrouillé (voir MirrorSystem.js) : 16 x 16 px, agrandi ×2. Quand le miroir s'ouvre, il s'ouvre, monte et s'efface.
+export const MIRROR_LOCK = {
+  CLOSED: { KEY: 'mirror_lock_closed', PATH: 'assets/images/ui/cadenas_ferme.png' },
+  OPEN: { KEY: 'mirror_lock_open', PATH: 'assets/images/ui/cadenas_ouvert.png' },
+  SCALE: 2,
+  DEPTH: 9, // devant les personnages, derrière le décor du dessus
+  TINT: 0x9a9a9a, // un miroir verrouillé est un peu assombri
+  OPEN_DELAY_MS: 1000, // le temps de laisser l'iris s'ouvrir avant que le cadenas ne s'ouvre
+  OPEN_ANIM: { RISE_PX: 22, DURATION_MS: 700 }, // il s'ouvre, puis monte et s'efface
+};
+
+// * La progression (voir ProgressSystem.js) : le tir et le dash sont verrouillés au départ. Le message bref affiché quand on appuie dessus.
+export const PROGRESS = {
+  // * Ce que gagne le joueur en ramassant l'étoile d'un monde (le nom du monde est celui de WORLDS) : la nuit donne le tir, le monde
+  // post-apocalyptique donne le dash. Les autres étoiles ne donnent rien de plus.
+  STAR_UNLOCKS: { world_1: ['shoot'], world_4: ['dash'] },
+  // * Les miroirs du jardin (le nom d'un miroir est le monde qu'il ouvre) : seuls ceux de MIRRORS_OPEN_AT_START sont ouverts au départ.
+  // Ramasser l'étoile d'un monde ouvre les miroirs de MIRROR_UNLOCKS : la nuit ouvre le monde post-apocalyptique, qui ouvre tous les autres.
+  // Après ça, plus aucun ordre.
+  MIRRORS_OPEN_AT_START: ['world_1'],
+  MIRROR_UNLOCKS: { world_1: ['world_4'], world_4: ['world_2', 'world_3', 'world_5'] },
+  // * Le message sur un miroir verrouillé : « Verrouillé : ramasse l'étoile de la nuit » (le monde dont l'étoile ouvre ce miroir)
+  WORLD_LABELS: { world_1: 'la nuit', world_4: "l'apocalypse" },
+  LOCKED_MIRROR_HINT: "Verrouillé : ramasse l'étoile de ",
+  // * La bannière qui annonce une capacité gagnée : compacte, en haut de l'écran, elle n'arrête PAS le jeu et disparaît seule
+  UNLOCK_BANNER: {
+    Y: 130, // son centre, en pixels depuis le haut (sous le texte d'aide des miroirs)
+    WIDTH: 560,
+    HEIGHT: 96,
+    SHOW_MS: 3500, // la durée pendant laquelle elle reste affichée
+    SLIDE_MS: 350, // la durée de l'arrivée et du départ
+    SLIDE_PX: 24, // elle descend de ce nombre de pixels en arrivant
+    NAMES: { shoot: 'Tir', dash: 'Dash' },
+    TITLE: 'débloqué !',
+    BUTTON_SCALE: 2, // 20 px x 2 = 40 px
+  },
+  LOCKED_TOAST: {
+    LABELS: { shoot: 'Tir', dash: 'Dash' }, // devant « pas encore débloqué »
+    TEXT: 'pas encore débloqué',
+    DURATION_MS: 1300,
+    COOLDOWN_MS: 900, // pas de message tant que le précédent n'est pas passé (on ne spamme pas l'écran)
+    Y_RATIO: 0.84, // la hauteur du message, en part de la hauteur de l'écran
+    SIZE: '34px',
+  },
+};
+
 // * Les bombes cachées dans certaines caisses (voir BombSystem.js). Dans Tiled : propriété « hasBomb » (booléen) sur la caisse.
 export const BOMB = {
   KEY: 'bomb',

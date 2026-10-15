@@ -4,9 +4,11 @@ import { getGameMode } from '../systems/GameMode.js';
 import { getCollectedStars, getTotalStars } from '../systems/StarSystem.js';
 import { getBubbleState } from '../systems/BubbleSystem.js';
 import { getEnemyState } from '../systems/EnemySystem.js';
+import { ABILITY_LOCKED_EVENT, ABILITY_UNLOCKED_EVENT } from '../systems/ProgressSystem.js';
+import { BINDINGS } from '../systems/InputManager.js';
 import { getControlMode, toggleControlMode } from '../systems/ControlMode.js';
 import { formatTime } from '../utils/helpers.js';
-import { SCENES, COLORS, FONT_FAMILY, FONT_SIZE, UI_MARGIN, UI_IMAGES, DEPTH, VICTORY_TIME, VICTORY_BEST, VICTORY_REPLAY, CONTROL_MODE_SHORTCUT, CONTROL_MODES } from '../utils/constants.js';
+import { SCENES, COLORS, FONT_FAMILY, FONT_SIZE, UI_MARGIN, UI_IMAGES, DEPTH, PROGRESS, DIALOGUE, CONTROLS_PAGE, GAME_MODES, VICTORY_TIME, VICTORY_BEST, VICTORY_REPLAY, CONTROL_MODE_SHORTCUT, CONTROL_MODES } from '../utils/constants.js';
 
 /**
  * * Scène d'interface : affiche le chronomètre et le compteur d'étoiles par-dessus le monde en cours.
@@ -22,6 +24,7 @@ export default class UIScene extends Phaser.Scene {
 
   preload() {
     this.load.image(UI_IMAGES.WIN.KEY, UI_IMAGES.WIN.PATH);
+    ['ARCADE_RED', 'ARCADE_YELLOW'].forEach((name) => this.load.image(UI_IMAGES[name].KEY, UI_IMAGES[name].PATH)); // les boutons de la bannière
   }
 
   create() {
@@ -64,6 +67,30 @@ export default class UIScene extends Phaser.Scene {
       .setAlpha(0.7);
 
     this.setupControlModeShortcut();
+
+    // * Le message bref quand le joueur essaie une action verrouillée (tir, dash), voir ProgressSystem.js
+    this.lockedToast = this.add
+      .text(this.scale.width / 2, this.scale.height * PROGRESS.LOCKED_TOAST.Y_RATIO, '', {
+        fontFamily: FONT_FAMILY,
+        fontSize: PROGRESS.LOCKED_TOAST.SIZE,
+        fontStyle: 'bold',
+        color: COLORS.TEXT,
+        stroke: '#2a2236',
+        strokeThickness: 6,
+      })
+      .setOrigin(0.5)
+      .setAlpha(0)
+      .setDepth(DEPTH.UI);
+    this.lockedToastUntil = 0;
+    this.game.events.on(ABILITY_LOCKED_EVENT, (ability) => this.showLockedToast(ability));
+
+    // * La bannière « Tir débloqué ! » : elle se met en file si deux capacités arrivent en même temps
+    this.bannerQueue = [];
+    this.bannerOn = false;
+    this.game.events.on(ABILITY_UNLOCKED_EVENT, (ability) => {
+      this.bannerQueue.push(ability);
+      this.showNextBanner();
+    });
   }
 
   // Le texte du mode : « Mode : arcade »
@@ -120,6 +147,62 @@ export default class UIScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setDepth(DEPTH.VICTORY + 1);
     this.input.keyboard.once('keydown-ENTER', () => window.location.reload());
+  }
+
+  // Affiche la bannière de la prochaine capacité gagnée, s'il y en a une et qu'aucune n'est déjà à l'écran
+  showNextBanner() {
+    if (this.bannerOn || this.bannerQueue.length === 0) return;
+    this.bannerOn = true;
+    const ability = this.bannerQueue.shift();
+    const { Y, WIDTH, HEIGHT, SHOW_MS, SLIDE_MS, SLIDE_PX, NAMES, TITLE, BUTTON_SCALE } = PROGRESS.UNLOCK_BANNER;
+    const cx = this.scale.width / 2;
+
+    // * Le cadre en parchemin (les couleurs de la boîte de dialogue), en haut de l'écran
+    const frame = this.add.graphics();
+    frame.fillStyle(DIALOGUE.COLORS.PAPER, 1).fillRoundedRect(-WIDTH / 2, -HEIGHT / 2, WIDTH, HEIGHT, 18);
+    frame.lineStyle(4, DIALOGUE.COLORS.BORDER, 1).strokeRoundedRect(-WIDTH / 2, -HEIGHT / 2, WIDTH, HEIGHT, 18);
+    const title = this.add
+      .text(0, -16, `${NAMES[ability] ?? ability} ${TITLE}`, { fontFamily: FONT_FAMILY, fontSize: '34px', fontStyle: 'bold', color: DIALOGUE.COLORS.TEXT })
+      .setOrigin(0.5);
+
+    // * Les touches : un bouton d'arcade de la couleur de l'action pour chaque joueur (le joueur 2 seulement en multi)
+    const button = UI_IMAGES[CONTROLS_PAGE.ARCADE_BUTTONS[ability]];
+    this.textures.get(button.KEY).setFilter(Phaser.Textures.FilterMode.NEAREST);
+    const keys = [BINDINGS.arcade[1][ability], ...(getGameMode() === GAME_MODES.MULTI ? [BINDINGS.arcade[2][ability]] : [])];
+    const spacing = 56;
+    const items = keys.flatMap((key, i) => {
+      const x = (i - (keys.length - 1) / 2) * spacing;
+      const image = this.add.image(x, 22, button.KEY).setScale(BUTTON_SCALE);
+      const letter = this.add
+        .text(x, 20, key, { fontFamily: FONT_FAMILY, fontSize: '24px', fontStyle: 'bold', color: '#ffffff', stroke: '#2a2236', strokeThickness: 4 })
+        .setOrigin(0.5);
+      return [image, letter];
+    });
+
+    // * Elle descend en s'estompant à l'arrivée, reste un moment, puis s'efface : le jeu ne s'arrête jamais
+    const banner = this.add.container(cx, Y - SLIDE_PX, [frame, title, ...items]).setDepth(DEPTH.UI).setAlpha(0);
+    this.tweens.add({ targets: banner, y: Y, alpha: 1, duration: SLIDE_MS, ease: 'Quad.easeOut' });
+    this.tweens.add({
+      targets: banner,
+      alpha: 0,
+      delay: SLIDE_MS + SHOW_MS,
+      duration: SLIDE_MS,
+      onComplete: () => {
+        banner.destroy();
+        this.bannerOn = false;
+        this.showNextBanner();
+      },
+    });
+  }
+
+  // Affiche « Tir pas encore débloqué » un instant (sans empiler les messages si le joueur appuie en boucle)
+  showLockedToast(ability) {
+    const { LABELS, TEXT, DURATION_MS, COOLDOWN_MS } = PROGRESS.LOCKED_TOAST;
+    if (this.time.now < this.lockedToastUntil) return;
+    this.lockedToastUntil = this.time.now + COOLDOWN_MS;
+    this.lockedToast.setText(`${LABELS[ability] ?? ability} ${TEXT}`).setAlpha(1);
+    this.tweens.killTweensOf(this.lockedToast);
+    this.tweens.add({ targets: this.lockedToast, alpha: 0, delay: DURATION_MS - 400, duration: 400 });
   }
 
   // Le texte du compteur : « Étoiles : 2 / 5 »

@@ -16,6 +16,8 @@
 // =====================================================================================
 
 import { isWorldStarCollected } from './StarSystem.js';
+import { isMirrorLocked, takePendingMirrorAnimations } from './ProgressSystem.js';
+import { MIRROR_LOCK } from '../utils/constants.js';
 
 const usedMirrors = [];
 
@@ -56,4 +58,41 @@ export function getMirrorFacing(object, mapWidth) {
   const property = (object.properties ?? []).find((p) => p.name === 'facing');
   if (property && (property.value === 'left' || property.value === 'right')) return property.value;
   return object.x + (object.width ?? 0) / 2 < mapWidth / 2 ? 'left' : 'right';
+}
+
+/** Charge les images du cadenas. À appeler dans preload(). */
+export function preloadMirrorLocks(scene) {
+  scene.load.image(MIRROR_LOCK.CLOSED.KEY, MIRROR_LOCK.CLOSED.PATH);
+  scene.load.image(MIRROR_LOCK.OPEN.KEY, MIRROR_LOCK.OPEN.PATH);
+}
+
+/**
+ * Pose un cadenas sur chaque miroir verrouillé du jardin (le miroir est aussi un peu assombri). Un miroir qui vient de s'ouvrir
+ * (voir ProgressSystem.takePendingMirrorAnimations) montre d'abord son cadenas, qui s'ouvre, monte et s'efface.
+ * @param {Phaser.Scene} scene
+ * @param {Phaser.GameObjects.Sprite[]} mirrors  Les miroirs de la scène (chacun a `world`)
+ */
+export function createMirrorLocks(scene, mirrors) {
+  const opening = takePendingMirrorAnimations();
+  const { CLOSED, OPEN, SCALE, DEPTH, TINT, OPEN_DELAY_MS, OPEN_ANIM } = MIRROR_LOCK;
+  [CLOSED, OPEN].forEach(({ KEY }) => scene.textures.get(KEY).setFilter(Phaser.Textures.FilterMode.NEAREST));
+
+  mirrors.forEach((mirror) => {
+    const locked = isMirrorLocked(mirror.world);
+    if (!locked && !opening.includes(mirror.world)) return;
+
+    const padlock = scene.add.image(mirror.x, mirror.y, CLOSED.KEY).setScale(SCALE).setDepth(DEPTH);
+    if (locked) {
+      mirror.setTint(TINT);
+      return;
+    }
+
+    // * Il vient de s'ouvrir : le miroir est sombre, le cadenas se déverrouille, monte et s'efface, le miroir retrouve ses couleurs
+    mirror.setTint(TINT);
+    scene.time.delayedCall(OPEN_DELAY_MS, () => {
+      padlock.setTexture(OPEN.KEY);
+      mirror.clearTint();
+      scene.tweens.add({ targets: padlock, y: padlock.y - OPEN_ANIM.RISE_PX, alpha: 0, duration: OPEN_ANIM.DURATION_MS, ease: 'Quad.easeOut', onComplete: () => padlock.destroy() });
+    });
+  });
 }
