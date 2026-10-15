@@ -60,13 +60,15 @@ export default class MenuScene extends Phaser.Scene {
     });
   }
 
-  /** Choisit le bouton n° index (en bouclant) : il devient plus grand et plus clair, les autres reprennent leur taille. */
+  /** Choisit le bouton n° index (en bouclant) : il devient plus grand (le texte aussi) et plus clair, les autres reprennent leur taille. */
   select(index) {
     this.selected = (index + this.buttons.length) % this.buttons.length;
-    this.buttons.forEach(({ image }, i) => {
+    this.buttons.forEach(({ image, text }, i) => {
       const chosen = i === this.selected;
       image.setScale(chosen ? MENU_BUTTONS.SELECTED_SCALE : MENU_BUTTONS.SCALE);
       image.setTint(chosen ? 0xffffff : MENU_BUTTONS.TINT);
+      // * Le texte grandit dans la même proportion que le bouton
+      text.setScale(chosen ? MENU_BUTTONS.SELECTED_SCALE / MENU_BUTTONS.SCALE : 1);
     });
   }
 }
