@@ -19,7 +19,7 @@ import { DIALOGUES } from '../data/dialogues.js';
 import { pickVariant } from '../utils/helpers.js';
 import { loadSecondPlayer, createSecondPlayer, updateSecondPlayer } from '../systems/SecondPlayer.js';
 import { getControlMode } from '../systems/ControlMode.js';
-import { ABILITIES, isUnlocked, notifyLocked } from '../systems/ProgressSystem.js';
+import { ABILITIES, isUnlocked, notifyLocked, isMirrorLocked, getMirrorUnlocker } from '../systems/ProgressSystem.js';
 import {
   GAME_WIDTH,
   SCENES,
@@ -44,6 +44,7 @@ import {
   SMOKE,
   WORLD_ART,
   DIALOGUE,
+  PROGRESS,
   CONTROL_MODES,
   STAR_BOUNCE,
   BUBBLES,
@@ -798,12 +799,16 @@ export default class WorldScene extends Phaser.Scene {
         DIALOGUE.INTERACT_DISTANCE,
     );
 
+    // * Un miroir du jardin verrouillé (voir ProgressSystem.js) ne s'utilise pas : on dit pourquoi, à la place de l'aide habituelle
+    const mirrorLocked = Boolean(nearMirror) && this.isNormalWorld() && isMirrorLocked(nearMirror.world);
+    const lockedText = mirrorLocked ? PROGRESS.LOCKED_MIRROR_HINT + (PROGRESS.WORLD_LABELS[getMirrorUnlocker(nearMirror.world)] ?? 'le monde précédent') : '';
+
     // On ne réécrit pas le texte pendant l'affichage du message d'interaction
     // ? Les touches sont provisoires : à changer avec les boutons de la borne (voir BINDINGS dans InputManager)
     if (showHint && !this.messageActive) {
       // * La touche affichée suit le mode de contrôle (I en arcade, E en pc) : l'aide ne ment jamais
       const key = input.getKeyLabel('interact');
-      this.hint.setText(nearMirror ? `${key} : entrer dans le miroir` : nearNpc ? `${key} : parler` : '');
+      this.hint.setText(mirrorLocked ? lockedText : nearMirror ? `${key} : entrer dans le miroir` : nearNpc ? `${key} : parler` : '');
     }
 
     // * Parler à un personnage proche (un miroir proche passe avant)
@@ -813,6 +818,8 @@ export default class WorldScene extends Phaser.Scene {
       this.dialogue.open(nearNpc.npcName, DIALOGUES[nearNpc.npcName], () => this.revealWorldStar(nearNpc));
       return true;
     }
+
+    if (mirrorLocked) return this.transitioning; // verrouillé : le message est affiché, rien d'autre
 
     if (nearMirror && input.justPressed('interact')) {
       // * Le nom du miroir dans Tiled donne le monde visé, la table WORLDS donne sa scène

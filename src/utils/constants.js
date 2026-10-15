@@ -623,6 +623,14 @@ export const PROGRESS = {
   // * Ce que gagne le joueur en ramassant l'étoile d'un monde (le nom du monde est celui de WORLDS) : la nuit donne le tir, le monde
   // post-apocalyptique donne le dash. Les autres étoiles ne donnent rien de plus.
   STAR_UNLOCKS: { world_1: ['shoot'], world_4: ['dash'] },
+  // * Les miroirs du jardin (le nom d'un miroir est le monde qu'il ouvre) : seuls ceux de MIRRORS_OPEN_AT_START sont ouverts au départ.
+  // Ramasser l'étoile d'un monde ouvre les miroirs de MIRROR_UNLOCKS : la nuit ouvre le monde post-apocalyptique, qui ouvre tous les autres.
+  // Après ça, plus aucun ordre.
+  MIRRORS_OPEN_AT_START: ['world_1'],
+  MIRROR_UNLOCKS: { world_1: ['world_4'], world_4: ['world_2', 'world_3', 'world_5'] },
+  // * Le message sur un miroir verrouillé : « Verrouillé : ramasse l'étoile de la nuit » (le monde dont l'étoile ouvre ce miroir)
+  WORLD_LABELS: { world_1: 'la nuit', world_4: "l'apocalypse" },
+  LOCKED_MIRROR_HINT: "Verrouillé : ramasse l'étoile de ",
   // * La bannière qui annonce une capacité gagnée : compacte, en haut de l'écran, elle n'arrête PAS le jeu et disparaît seule
   UNLOCK_BANNER: {
     Y: 130, // son centre, en pixels depuis le haut (sous le texte d'aide des miroirs)

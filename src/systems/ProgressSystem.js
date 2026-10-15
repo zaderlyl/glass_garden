@@ -34,7 +34,11 @@ export const isUnlocked = (ability) => unlocked.has(ability);
 export const unlock = (ability) => unlocked.add(ability);
 
 /** Remet tout en place : à appeler au début d'une nouvelle partie. */
-export const resetProgress = () => unlocked.clear();
+export const resetProgress = () => {
+  unlocked.clear();
+  openMirrors.clear();
+  PROGRESS.MIRRORS_OPEN_AT_START.forEach((mirror) => openMirrors.add(mirror));
+};
 
 /** Prévient l'interface que le joueur a essayé une action verrouillée (elle affiche un message bref). */
 export const notifyLocked = (scene, ability) => scene.game.events.emit(ABILITY_LOCKED_EVENT, ability);
@@ -48,4 +52,26 @@ export function unlockForStar(world) {
   const gained = (PROGRESS.STAR_UNLOCKS[world] ?? []).filter((ability) => !isUnlocked(ability));
   gained.forEach(unlock);
   return gained;
+}
+
+// --- LES MIROIRS ---------------------------------------------------------------------------------------------------------------
+// Tous les miroirs du jardin sont verrouillés au départ, sauf ceux de PROGRESS.MIRRORS_OPEN_AT_START. Ramasser une étoile en ouvre d'autres.
+
+const lockableMirrors = new Set([...PROGRESS.MIRRORS_OPEN_AT_START, ...Object.values(PROGRESS.MIRROR_UNLOCKS).flat()]);
+const openMirrors = new Set(PROGRESS.MIRRORS_OPEN_AT_START);
+
+/** Ce miroir (de ce monde) est-il verrouillé ? Un miroir qui n'est pas dans la progression (celui de retour dans un monde) ne l'est jamais. */
+export const isMirrorLocked = (world) => lockableMirrors.has(world) && !openMirrors.has(world);
+
+/** Le monde dont il faut ramasser l'étoile pour ouvrir le miroir de ce monde (pour le message), ou undefined. */
+export const getMirrorUnlocker = (world) => Object.keys(PROGRESS.MIRROR_UNLOCKS).find((key) => PROGRESS.MIRROR_UNLOCKS[key].includes(world));
+
+/**
+ * Appelée quand l'étoile d'un monde est ramassée : ouvre les miroirs que ce monde ouvre (voir PROGRESS.MIRROR_UNLOCKS).
+ * @returns {string[]} les miroirs qui viennent de s'ouvrir
+ */
+export function unlockMirrorsForStar(world) {
+  const opened = (PROGRESS.MIRROR_UNLOCKS[world] ?? []).filter((mirror) => !openMirrors.has(mirror));
+  opened.forEach((mirror) => openMirrors.add(mirror));
+  return opened;
 }
