@@ -3,6 +3,7 @@ import { getBestTime, saveBestTime } from '../systems/SaveSystem.js';
 import { getGameMode } from '../systems/GameMode.js';
 import { getCollectedStars, getTotalStars } from '../systems/StarSystem.js';
 import { getBubbleState } from '../systems/BubbleSystem.js';
+import { getEnemyState } from '../systems/EnemySystem.js';
 import { getControlMode, toggleControlMode } from '../systems/ControlMode.js';
 import { formatTime } from '../utils/helpers.js';
 import { SCENES, COLORS, FONT_FAMILY, FONT_SIZE, UI_MARGIN, UI_IMAGES, DEPTH, VICTORY_TIME, VICTORY_BEST, VICTORY_REPLAY, CONTROL_MODE_SHORTCUT } from '../utils/constants.js';
@@ -127,6 +128,12 @@ export default class UIScene extends Phaser.Scene {
   }
 
   // Le texte du compteur de bulles : « Bulles : 2 / 6 », ou rien dans un monde sans bulles
+  // Le texte du compteur d'ennemis : « Ennemis : 2 / 4 », ou rien dans un monde sans ennemis
+  getEnemiesLabel() {
+    const state = getEnemyState();
+    return state ? `Ennemis : ${state.killed} / ${state.total}` : '';
+  }
+
   getBubblesLabel() {
     const state = getBubbleState();
     return state ? `Bulles : ${state.burst} / ${state.total}` : '';
@@ -136,7 +143,7 @@ export default class UIScene extends Phaser.Scene {
   update() {
     this.timerText.setText(formatTime(timer.elapsed()));
     this.starsText.setText(this.getStarsLabel());
-    this.bubblesText.setText(this.getBubblesLabel());
+    this.bubblesText.setText(this.getBubblesLabel() || this.getEnemiesLabel()); // un monde a des bulles OU des ennemis : même place
     this.controlModeText.setText(this.getControlModeLabel());
   }
 }

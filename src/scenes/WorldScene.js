@@ -14,7 +14,7 @@ import DialogueBox, { isRiddleSolved } from '../systems/DialogueSystem.js';
 import { bounceStar } from '../systems/StarBounce.js';
 import Dash from '../systems/DashSystem.js';
 import { preloadBubbles, createBubbles } from '../systems/BubbleSystem.js';
-import { preloadEnemies, createEnemies, updateEnemies, resetEnemies } from '../systems/EnemySystem.js';
+import { preloadEnemies, createEnemies, updateEnemies, resetEnemies, isEnemiesCleared, markEnemiesCleared, startEnemyCounter } from '../systems/EnemySystem.js';
 import { DIALOGUES } from '../data/dialogues.js';
 import { pickVariant } from '../utils/helpers.js';
 import { loadSecondPlayer, createSecondPlayer, updateSecondPlayer } from '../systems/SecondPlayer.js';
@@ -413,7 +413,9 @@ export default class WorldScene extends Phaser.Scene {
     // * Les ennemis, posés dans Tiled
     this.enemies = createEnemies(this, map, this.bullets);
     // * Un monde avec des ennemis cache son étoile : elle apparaît (en sautant de l'endroit où meurt le dernier ennemi) quand ils sont tous morts
+    if (isEnemiesCleared(this.mapKey)) this.enemies.clear(true, true); // déjà tous tués lors d'une visite précédente : ils ne reviennent pas
     this.enemiesTotal = this.enemies.getChildren().length;
+    startEnemyCounter(this.enemiesTotal); // « Ennemis : x / total » dans l'interface
     this.enemiesCleared = false;
     this.lastEnemyDeath = null;
     if (this.enemiesTotal > 0) this.stars.forEach((star) => star.disableBody(true, true));
@@ -714,6 +716,7 @@ export default class WorldScene extends Phaser.Scene {
     updateEnemies(this, this.enemies, this.getEnemyTargets(), this.dialogue.isOpen || this.transitioning);
     if (this.enemiesTotal > 0 && !this.enemiesCleared && this.enemies.countActive(true) === 0) {
       this.enemiesCleared = true;
+      markEnemiesCleared(this.mapKey); // retenu pour les prochaines visites
       this.onAllEnemiesKilled();
     }
 
