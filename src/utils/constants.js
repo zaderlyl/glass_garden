@@ -593,6 +593,7 @@ export const DECO = {
   // (0xffffff = aucune teinte). Un monde absent garde les couleurs d'origine des images.
   WORLD_TINTS: {
     world_1: 0x8f9cd4, // la nuit : des bleus, le vert des buissons s'assombrit
+    world_2: 0xf0b8e8, // le rêve : des buissons qui virent au rose
     world_3: 0xf2d0a0, // l'automne : une lumière chaude
     world_5: 0xc4b0ff, // la magie : des buissons et des fleurs qui virent au violet
   },
