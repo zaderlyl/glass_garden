@@ -185,6 +185,7 @@ export default class WorldScene extends Phaser.Scene {
     // * Une même scène est réutilisée à chaque visite : on remet l'état à zéro
     // ! Sinon un message encore affiché au moment de partir bloquerait le texte d'aide au retour
     this.messageActive = false;
+    this.vanishingMirror = null;
     this.gameWon = false;
     this.waterSprites = []; // les sprites de l'eau animée de CETTE visite (remplis par createAnimatedTiles)
 
@@ -289,6 +290,7 @@ export default class WorldScene extends Phaser.Scene {
           // * Il joue son animation de disparition. Il n'est PAS ajouté à this.mirrors : on ne peut plus l'utiliser.
           // Quand l'animation est finie, on détruit le miroir et sa collision pour de bon.
           mirror.play(MIRROR_VANISH.KEY);
+          this.vanishingMirror = mirror; // le joueur 2 doit aussi être bloqué par lui pendant l'animation
           mirror.once('animationcomplete', () => {
             collider.destroy();
             mirror.destroy();
@@ -337,6 +339,10 @@ export default class WorldScene extends Phaser.Scene {
     [walls, waterBlockers, this.crates, ...this.mirrors].filter(Boolean).forEach((obstacle) => {
       this.physics.add.collider(this.player2, obstacle);
     });
+    if (this.vanishingMirror?.active) {
+      const collider = this.physics.add.collider(this.player2, this.vanishingMirror);
+      this.vanishingMirror.once('destroy', () => collider.destroy());
+    }
   }
 
   /**
