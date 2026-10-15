@@ -3,7 +3,7 @@ import { SCENES, UI_IMAGES, MENU_BUTTONS, FONT_FAMILY } from '../utils/constants
 /**
  * * L'écran d'accueil : une image plein écran (le titre est dessiné dedans).
  * Elle a 4 boutons (Jouer, Réglages, Commandes, Crédits). Haut et bas changent le bouton choisi (plus grand et plus clair).
- * Entrée sur « Jouer » mène au choix du mode (ModeScene).
+ * Entrée sur « Jouer » mène au choix du mode (ModeScene), sur « Commandes » à la page des touches (ControlsScene).
  */
 export default class MenuScene extends Phaser.Scene {
   constructor() {
@@ -47,12 +47,14 @@ export default class MenuScene extends Phaser.Scene {
     this.input.keyboard.on('keydown-UP', () => this.select(this.selected - 1));
     this.input.keyboard.on('keydown-DOWN', () => this.select(this.selected + 1));
 
-    // * Entrée valide le bouton choisi. Pour l'instant seul « Jouer » fait quelque chose : le choix du mode.
-    // (Réglages, Commandes et Crédits n'ont pas encore leur page : Entrée ne fait rien sur eux.)
+    // * Entrée valide le bouton choisi : « Jouer » mène au choix du mode, « Commandes » à la page des touches.
+    
     this.input.keyboard.on('keydown-ENTER', () => {
-      if (this.selected === 0 && !this.leaving) {
+      const scenes = { 0: SCENES.MODE, 2: SCENES.CONTROLS }; // les boutons qui ont une page (Réglages et Crédits : pas encore)
+      const target = scenes[this.selected];
+      if (target && !this.leaving) {
         this.leaving = true; // une touche maintenue répète l'événement : on ne lance la scène qu'une fois
-        this.scene.start(SCENES.MODE);
+        this.scene.start(target);
       }
     });
   }

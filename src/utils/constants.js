@@ -10,6 +10,7 @@ export const SCENES = {
   PRELOAD: 'PreloadScene',
   MENU: 'MenuScene',
   MODE: 'ModeScene',
+  CONTROLS: 'ControlsScene',
   HUB: 'HubScene',
   WORLD_1: 'World1Scene',
   WORLD_2: 'World2Scene',
@@ -335,6 +336,27 @@ export const MENU_BUTTONS = {
   FIRST_Y: 395, // le centre du premier bouton
   SPACING: 58, // la distance entre les centres de deux boutons
   TEXT: { SIZE: '22px', COLOR: '#ffffff', STROKE: '#1f4d1a', STROKE_THICKNESS: 4 },
+};
+
+// * La page « Commandes » : les touches du mode arcade des deux joueurs, sur un cadre en parchemin (couleurs de DIALOGUE.COLORS)
+export const CONTROLS_PAGE = {
+  DIM_ALPHA: 0.55, // l'image d'accueil est assombrie derrière le cadre
+  FRAME: { X: 130, Y: 70, WIDTH: 1020, HEIGHT: 580, RADIUS: 26, BORDER: 5 },
+  TITLE: { Y: 125, SIZE: '56px' },
+  COLUMNS_X: [380, 900], // le centre de la colonne du joueur 1 et de celle du joueur 2
+  PLAYER_Y: 215, // le nom du joueur
+  PLAYER_SIZE: '38px',
+  FIRST_ROW_Y: 300,
+  ROW_SPACING: 80,
+  ACTION_SIZE: '26px', // « Déplacer »
+  KEY_SIZE: '36px', // la touche
+  // Les lignes : [libellé, action de BINDINGS]. « move » est le joystick (haut, bas, gauche, droite).
+  ROWS: [
+    ['Déplacer', 'move'],
+    ['Interagir', 'interact'],
+    ['Tirer', 'shoot'],
+    ['Dash', 'dash'],
+  ],
 };
 
 // * Le chrono final sur l'écran de victoire : centré sous le titre « YOU WIN! » de l'image, en blanc cerclé de bleu nuit (comme le titre)
