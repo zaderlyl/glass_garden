@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.0" orientation="orthogonal" renderorder="right-down" width="40" height="22" tilewidth="32" tileheight="32" infinite="0" nextlayerid="9" nextobjectid="20">
+<map version="1.10" tiledversion="1.12.0" orientation="orthogonal" renderorder="right-down" width="40" height="22" tilewidth="32" tileheight="32" infinite="0" nextlayerid="9" nextobjectid="67">
  <editorsettings>
   <export target="hub_test.json" format="json"/>
  </editorsettings>
@@ -96,28 +96,145 @@
     <property name="type" value=""/>
    </properties>
   </object>
-  <object id="12" name="fleur_1" type="deco" x="304" y="348">
+  <object id="20" name="fleur_4" type="deco" x="834" y="195">
    <point/>
   </object>
-  <object id="13" name="fleur_2" type="deco" x="368" y="348">
+  <object id="21" name="fleur_4" type="deco" x="828" y="221">
    <point/>
   </object>
-  <object id="14" name="fleur_3" type="deco" x="336" y="316">
+  <object id="22" name="fleur_6" type="deco" x="859" y="190">
    <point/>
   </object>
-  <object id="15" name="fleur_5" type="deco" x="400" y="316">
+  <object id="23" name="fleur_6" type="deco" x="814" y="162">
    <point/>
   </object>
-  <object id="16" name="buisson" type="deco" x="528" y="412">
+  <object id="24" name="fleur_5" type="deco" x="793" y="210">
    <point/>
   </object>
-  <object id="17" name="trefle" type="deco" x="560" y="444">
+  <object id="25" name="fleur_6" type="deco" x="813" y="259">
    <point/>
   </object>
-  <object id="18" name="herbe" type="deco" x="656" y="316">
+  <object id="26" name="fleur_3" type="deco" x="1034" y="206">
    <point/>
   </object>
-  <object id="19" name="panneau" type="deco" x="720" y="348">
+  <object id="27" name="fleur_5" type="deco" x="1075" y="228">
+   <point/>
+  </object>
+  <object id="28" name="fleur_1" type="deco" x="1014" y="218">
+   <point/>
+  </object>
+  <object id="29" name="fleur_6" type="deco" x="1003" y="174">
+   <point/>
+  </object>
+  <object id="30" name="fleur_6" type="deco" x="1044" y="172">
+   <point/>
+  </object>
+  <object id="31" name="fleur_6" type="deco" x="406" y="458">
+   <point/>
+  </object>
+  <object id="32" name="fleur_2" type="deco" x="419" y="413">
+   <point/>
+  </object>
+  <object id="33" name="fleur_6" type="deco" x="433" y="435">
+   <point/>
+  </object>
+  <object id="34" name="fleur_5" type="deco" x="333" y="436">
+   <point/>
+  </object>
+  <object id="35" name="fleur_2" type="deco" x="480" y="429">
+   <point/>
+  </object>
+  <object id="36" name="fleur_5" type="deco" x="305" y="475">
+   <point/>
+  </object>
+  <object id="37" name="fleur_3" type="deco" x="37" y="48">
+   <point/>
+  </object>
+  <object id="38" name="fleur_3" type="deco" x="54" y="31">
+   <point/>
+  </object>
+  <object id="39" name="fleur_3" type="deco" x="13" y="12">
+   <point/>
+  </object>
+  <object id="40" name="fleur_3" type="deco" x="16" y="80">
+   <point/>
+  </object>
+  <object id="41" name="fleur_2" type="deco" x="16" y="55">
+   <point/>
+  </object>
+  <object id="42" name="fleur_1" type="deco" x="1227" y="409">
+   <point/>
+  </object>
+  <object id="43" name="fleur_3" type="deco" x="1210" y="438">
+   <point/>
+  </object>
+  <object id="44" name="fleur_1" type="deco" x="1260" y="417">
+   <point/>
+  </object>
+  <object id="45" name="fleur_6" type="deco" x="1231" y="459">
+   <point/>
+  </object>
+  <object id="46" name="buisson" type="deco" x="592" y="542">
+   <point/>
+  </object>
+  <object id="47" name="buisson" type="deco" x="336" y="542">
+   <point/>
+  </object>
+  <object id="48" name="buisson" type="deco" x="784" y="318">
+   <point/>
+  </object>
+  <object id="49" name="buisson" type="deco" x="1136" y="446">
+   <point/>
+  </object>
+  <object id="50" name="buisson" type="deco" x="1264" y="510">
+   <point/>
+  </object>
+  <object id="51" name="trefle" type="deco" x="848" y="382">
+   <point/>
+  </object>
+  <object id="52" name="trefle" type="deco" x="496" y="318">
+   <point/>
+  </object>
+  <object id="53" name="trefle" type="deco" x="752" y="510">
+   <point/>
+  </object>
+  <object id="54" name="trefle" type="deco" x="272" y="542">
+   <point/>
+  </object>
+  <object id="55" name="trefle" type="deco" x="688" y="542">
+   <point/>
+  </object>
+  <object id="56" name="trefle" type="deco" x="144" y="62">
+   <point/>
+  </object>
+  <object id="57" name="herbe" type="deco" x="816" y="606">
+   <point/>
+  </object>
+  <object id="58" name="herbe" type="deco" x="208" y="350">
+   <point/>
+  </object>
+  <object id="59" name="herbe" type="deco" x="848" y="446">
+   <point/>
+  </object>
+  <object id="60" name="herbe" type="deco" x="784" y="702">
+   <point/>
+  </object>
+  <object id="61" name="herbe" type="deco" x="1168" y="286">
+   <point/>
+  </object>
+  <object id="62" name="herbe" type="deco" x="720" y="574">
+   <point/>
+  </object>
+  <object id="63" name="plante_verte" type="deco" x="1136" y="318">
+   <point/>
+  </object>
+  <object id="64" name="plante_verte" type="deco" x="752" y="350">
+   <point/>
+  </object>
+  <object id="65" name="plante_verte" type="deco" x="784" y="542">
+   <point/>
+  </object>
+  <object id="66" name="panneau" type="deco" x="16" y="350">
    <point/>
   </object>
  </objectgroup>

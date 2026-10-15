@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.0" orientation="orthogonal" renderorder="right-down" width="40" height="22" tilewidth="32" tileheight="32" infinite="0" nextlayerid="9" nextobjectid="13">
+<map version="1.10" tiledversion="1.12.0" orientation="orthogonal" renderorder="right-down" width="40" height="22" tilewidth="32" tileheight="32" infinite="0" nextlayerid="9" nextobjectid="45">
  <editorsettings>
   <export target="monde_1.json" format="json"/>
  </editorsettings>
@@ -77,6 +77,102 @@
    <properties>
     <property name="hitPoints" type="int" value="3"/>
    </properties>
+   <point/>
+  </object>
+  <object id="13" name="cristal_bleu" type="deco" x="476" y="322">
+   <point/>
+  </object>
+  <object id="14" name="cristal_bleu" type="deco" x="501" y="322">
+   <point/>
+  </object>
+  <object id="15" name="cristal_bleu" type="deco" x="460" y="341">
+   <point/>
+  </object>
+  <object id="16" name="cristal_bleu" type="deco" x="880" y="490">
+   <point/>
+  </object>
+  <object id="17" name="cristal_bleu" type="deco" x="815" y="507">
+   <point/>
+  </object>
+  <object id="18" name="cristal_bleu" type="deco" x="853" y="494">
+   <point/>
+  </object>
+  <object id="19" name="champignon_3" type="deco" x="19" y="77">
+   <point/>
+  </object>
+  <object id="20" name="champignon_1" type="deco" x="34" y="20">
+   <point/>
+  </object>
+  <object id="21" name="champignon_1" type="deco" x="22" y="47">
+   <point/>
+  </object>
+  <object id="22" name="champignon_3" type="deco" x="49" y="45">
+   <point/>
+  </object>
+  <object id="23" name="champignon_1" type="deco" x="1032" y="219">
+   <point/>
+  </object>
+  <object id="24" name="champignon_3" type="deco" x="1041" y="252">
+   <point/>
+  </object>
+  <object id="25" name="champignon_1" type="deco" x="1055" y="217">
+   <point/>
+  </object>
+  <object id="26" name="champignon_1" type="deco" x="1016" y="256">
+   <point/>
+  </object>
+  <object id="27" name="champignon_3" type="deco" x="1259" y="421">
+   <point/>
+  </object>
+  <object id="28" name="champignon_3" type="deco" x="1253" y="400">
+   <point/>
+  </object>
+  <object id="29" name="champignon_3" type="deco" x="1232" y="417">
+   <point/>
+  </object>
+  <object id="30" name="champignon_3" type="deco" x="1201" y="432">
+   <point/>
+  </object>
+  <object id="31" name="bougie_1" type="deco" x="340" y="420">
+   <point/>
+  </object>
+  <object id="32" name="bougie_1" type="deco" x="330" y="474">
+   <point/>
+  </object>
+  <object id="33" name="bougie_3" type="deco" x="324" y="440">
+   <point/>
+  </object>
+  <object id="34" name="bougie_1" type="deco" x="769" y="253">
+   <point/>
+  </object>
+  <object id="35" name="bougie_3" type="deco" x="754" y="231">
+   <point/>
+  </object>
+  <object id="36" name="bougie_3" type="deco" x="737" y="265">
+   <point/>
+  </object>
+  <object id="37" name="lanterne_bleue" type="deco" x="144" y="414">
+   <point/>
+  </object>
+  <object id="38" name="lanterne_bleue" type="deco" x="1168" y="286">
+   <point/>
+  </object>
+  <object id="39" name="lanterne_bleue" type="deco" x="1008" y="446">
+   <point/>
+  </object>
+  <object id="40" name="lanterne_bleue" type="deco" x="816" y="638">
+   <point/>
+  </object>
+  <object id="41" name="lanterne_bleue" type="deco" x="816" y="126">
+   <point/>
+  </object>
+  <object id="42" name="lanterne_bleue" type="deco" x="176" y="94">
+   <point/>
+  </object>
+  <object id="43" name="plante_verte" type="deco" x="464" y="190">
+   <point/>
+  </object>
+  <object id="44" name="plante_verte" type="deco" x="720" y="510">
    <point/>
   </object>
  </objectgroup>
