@@ -7,7 +7,8 @@
 // Une carte sans objet « bubble » n'en a pas.
 // Selon la version de Tiled, la classe s'appelle « class » ou « type » : on lit les deux.
 //
-// Une bulle a une taille (propriété Tiled « size » : large, medium ou small ; sans elle, small).
+// Une bulle a une taille (propriété Tiled « size » : large, medium ou small ; sans elle, small). Elle peut se diviser en un autre
+// nombre de filles que d'habitude avec la propriété « splitCount » (entier).
 // Une bulle flotte et dérive doucement autour de son point. Quand le joueur la touche, elle éclate (animation) puis disparaît.
 //
 // * COMMENT L'UTILISER
@@ -71,12 +72,13 @@ export function createBubbles(scene, map, player, onAllBurst) {
     return { total: 0, burst: 0, done: true };
   }
   // * Une bulle et toutes celles qui naîtront d'elle comptent chacune : le total est fixé dès le départ
-  const countTree = (size) => 1 + (BUBBLES.SPLIT[size] ? BUBBLES.SPLIT[size].COUNT * countTree(BUBBLES.SPLIT[size].INTO) : 0);
+  // (splitCount : une bulle posée dans Tiled peut se diviser en un autre nombre de filles que BUBBLES.SPLIT, via la propriété « splitCount »)
+  const countTree = (size, splitCount) => 1 + (BUBBLES.SPLIT[size] ? (splitCount ?? BUBBLES.SPLIT[size].COUNT) * countTree(BUBBLES.SPLIT[size].INTO) : 0);
   const sizeOf = (object) => {
     const size = getTiledProperty(object, 'size', BUBBLES.DEFAULT_SIZE);
     return BUBBLES.SIZES[size] ? size : BUBBLES.DEFAULT_SIZE;
   };
-  const state = { total: objects.reduce((sum, object) => sum + countTree(sizeOf(object)), 0), burst: 0, done: false };
+  const state = { total: objects.reduce((sum, object) => sum + countTree(sizeOf(object), getTiledProperty(object, 'splitCount', undefined)), 0), burst: 0, done: false };
   currentState = objects.length > 0 ? state : null; // pas de compteur dans un monde sans bulles
 
   // * Où vont s'écarter les bulles filles : autour de la bulle mère, à SPREAD.DISTANCE, en évitant les murs, l'eau, les caisses.
@@ -95,7 +97,7 @@ export function createBubbles(scene, map, player, onAllBurst) {
 
   // * Crée une bulle de cette taille (large, medium ou small) centrée sur (x, y).
   // from : si on la donne, c'est une bulle fille : elle naît à ce point (la bulle mère) en grossissant, et s'écarte jusqu'en (x, y).
-  const spawnBubble = (x, y, size, from) => {
+  const spawnBubble = (x, y, size, from, splitCount) => {
     const { SCALE } = BUBBLES.SIZES[size];
     const bubble = scene.physics.add.sprite(from ? from.x : x, from ? from.y : y, BUBBLES.KEY, 0).setDepth(BUBBLES.DEPTH).setScale(from ? 0 : SCALE);
     bubble.body.setCircle(BUBBLES.HITBOX_RADIUS, BUBBLES.FRAME_SIZE / 2 - BUBBLES.HITBOX_RADIUS, BUBBLES.FRAME_SIZE / 2 - BUBBLES.HITBOX_RADIUS);
@@ -130,7 +132,7 @@ export function createBubbles(scene, map, player, onAllBurst) {
       // * Elle se divise : ses filles naissent à sa place (avant de la compter, pour que la partie ne finisse pas trop tôt)
       const split = BUBBLES.SPLIT[size];
       if (split) {
-        childTargets(bubble.x, bubble.y, split.COUNT).forEach((target) => spawnBubble(target.x, target.y, split.INTO, { x: bubble.x, y: bubble.y }));
+        childTargets(bubble.x, bubble.y, splitCount ?? split.COUNT).forEach((target) => spawnBubble(target.x, target.y, split.INTO, { x: bubble.x, y: bubble.y }));
       }
 
       state.burst += 1;
@@ -142,7 +144,7 @@ export function createBubbles(scene, map, player, onAllBurst) {
     return bubble;
   };
 
-  objects.forEach((object) => spawnBubble(object.x, object.y, sizeOf(object)));
+  objects.forEach((object) => spawnBubble(object.x, object.y, sizeOf(object), undefined, getTiledProperty(object, 'splitCount', undefined)));
 
   return state;
 }

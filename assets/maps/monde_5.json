@@ -166,6 +166,11 @@
                          "name":"size",
                          "type":"string",
                          "value":"large"
+                        },
+                        {
+                         "name":"splitCount",
+                         "type":"int",
+                         "value":3
                         }],
                  "rotation":0,
                  "type":"bubble",

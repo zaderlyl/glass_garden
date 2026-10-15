@@ -88,6 +88,7 @@
   <object id="18" type="bubble" x="784" y="432">
    <properties>
     <property name="size" value="large"/>
+    <property name="splitCount" type="int" value="3"/>
    </properties>
    <point/>
   </object>
