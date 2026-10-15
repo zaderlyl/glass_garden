@@ -620,6 +620,9 @@ export const DECO = {
 
 // * La progression (voir ProgressSystem.js) : le tir et le dash sont verrouillés au départ. Le message bref affiché quand on appuie dessus.
 export const PROGRESS = {
+  // * Ce que gagne le joueur en ramassant l'étoile d'un monde (le nom du monde est celui de WORLDS) : la nuit donne le tir, le monde
+  // post-apocalyptique donne le dash. Les autres étoiles ne donnent rien de plus.
+  STAR_UNLOCKS: { world_1: ['shoot'], world_4: ['dash'] },
   LOCKED_TOAST: {
     LABELS: { shoot: 'Tir', dash: 'Dash' }, // devant « pas encore débloqué »
     TEXT: 'pas encore débloqué',
