@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.0" orientation="orthogonal" renderorder="right-down" width="40" height="22" tilewidth="32" tileheight="32" infinite="0" nextlayerid="8" nextobjectid="25">
+<map version="1.10" tiledversion="1.12.0" orientation="orthogonal" renderorder="right-down" width="40" height="22" tilewidth="32" tileheight="32" infinite="0" nextlayerid="8" nextobjectid="57">
  <editorsettings>
   <export target="monde_4.json" format="json"/>
  </editorsettings>
@@ -122,6 +122,102 @@
    <point/>
   </object>
   <object id="24" name="caisse" type="crate" x="1168" y="304">
+   <point/>
+  </object>
+  <object id="25" name="caisse" type="crate" x="880" y="432">
+   <point/>
+  </object>
+  <object id="26" name="caisse" type="crate" x="720" y="560">
+   <point/>
+  </object>
+  <object id="27" name="caisse" type="crate" x="432" y="208">
+   <point/>
+  </object>
+  <object id="28" name="caisse" type="crate" x="656" y="528">
+   <point/>
+  </object>
+  <object id="29" name="caisse" type="crate" x="368" y="176">
+   <point/>
+  </object>
+  <object id="30" name="caisse" type="crate" x="560" y="240">
+   <point/>
+  </object>
+  <object id="31" name="caisse" type="crate" x="1040" y="208">
+   <point/>
+  </object>
+  <object id="32" name="caisse" type="crate" x="400" y="336">
+   <point/>
+  </object>
+  <object id="33" name="caisse" type="crate" x="848" y="496">
+   <point/>
+  </object>
+  <object id="34" name="caisse" type="crate" x="816" y="240">
+   <point/>
+  </object>
+  <object id="35" name="caisse" type="crate" x="944" y="496">
+   <point/>
+  </object>
+  <object id="36" name="caisse" type="crate" x="336" y="464">
+   <point/>
+  </object>
+  <object id="37" name="caisse" type="crate" x="80" y="400">
+   <point/>
+  </object>
+  <object id="38" name="caisse" type="crate" x="560" y="528">
+   <point/>
+  </object>
+  <object id="39" name="caisse" type="crate" x="816" y="368">
+   <point/>
+  </object>
+  <object id="40" name="caisse" type="crate" x="816" y="304">
+   <point/>
+  </object>
+  <object id="41" name="caisse" type="crate" x="272" y="528">
+   <point/>
+  </object>
+  <object id="42" name="caisse" type="crate" x="816" y="144">
+   <point/>
+  </object>
+  <object id="43" name="caisse" type="crate" x="1104" y="240">
+   <point/>
+  </object>
+  <object id="44" name="caisse" type="crate" x="304" y="400">
+   <point/>
+  </object>
+  <object id="45" name="caisse" type="crate" x="1040" y="272">
+   <point/>
+  </object>
+  <object id="46" name="caisse" type="crate" x="400" y="464">
+   <point/>
+  </object>
+  <object id="47" name="caisse" type="crate" x="880" y="560">
+   <point/>
+  </object>
+  <object id="48" name="caisse" type="crate" x="880" y="240">
+   <point/>
+  </object>
+  <object id="49" name="caisse" type="crate" x="1104" y="400">
+   <point/>
+  </object>
+  <object id="50" name="caisse" type="crate" x="240" y="336">
+   <point/>
+  </object>
+  <object id="51" name="caisse" type="crate" x="464" y="368">
+   <point/>
+  </object>
+  <object id="52" name="caisse" type="crate" x="720" y="496">
+   <point/>
+  </object>
+  <object id="53" name="caisse" type="crate" x="496" y="208">
+   <point/>
+  </object>
+  <object id="54" name="caisse" type="crate" x="336" y="240">
+   <point/>
+  </object>
+  <object id="55" name="caisse" type="crate" x="784" y="528">
+   <point/>
+  </object>
+  <object id="56" name="caisse" type="crate" x="1232" y="272">
    <point/>
   </object>
  </objectgroup>
