@@ -474,7 +474,7 @@ export default class WorldScene extends Phaser.Scene {
 
   /** Un ennemi touche le joueur : sauf s'il vient déjà d'être renvoyé (invincible), ou en plein dialogue ou transition. */
   onEnemyTouch() {
-    if (this.time.now < this.invulnerableUntil || this.dialogue.isOpen || this.transitioning) return;
+    if (this.time.now < this.invulnerableUntil || this.time.now < this.dash.endsAt || this.dialogue.isOpen || this.transitioning) return;
     this.respawnPlayer();
   }
 
