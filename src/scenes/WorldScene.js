@@ -6,7 +6,7 @@ import { areAllStarsCollected } from '../systems/StarSystem.js';
 import { createBulletAnimations, explodeBullet, shoot } from '../systems/fonctionTir.js';
 import { preloadCrate, createCrates } from '../systems/CrateSystem.js';
 import { preloadDeco, createDeco } from '../systems/DecoSystem.js';
-import { isMirrorUsed, markMirrorUsed, shouldMirrorDisappear, getMirrorFacing } from '../systems/MirrorSystem.js';
+import { isMirrorUsed, markMirrorUsed, shouldMirrorDisappear, getMirrorFacing, preloadMirrorLocks, createMirrorLocks } from '../systems/MirrorSystem.js';
 import { applyTint } from '../systems/TintSystem.js';
 import { irisClose, irisOpen } from '../systems/TransitionSystem.js';
 import { preloadNpcs, createNpcs } from '../systems/NpcSystem.js';
@@ -96,6 +96,7 @@ export default class WorldScene extends Phaser.Scene {
     this.load.image('etoile', 'assets/images/sprites/Etoile.png');
     preloadCrate(this);
     preloadDeco(this);
+    preloadMirrorLocks(this);
     this.load.image(ASSETS.TILESET_DECO, 'assets/images/tilesets/tileset_deco.png');
 
     // * Les balles : balle.png est une bande de 33 images de 16 x 16 pixels, chargée comme un spritesheet
@@ -352,6 +353,9 @@ export default class WorldScene extends Phaser.Scene {
 
         this.mirrors.push(mirror);
       });
+    // * Un cadenas sur chaque miroir encore verrouillé du jardin (et son animation d'ouverture pour ceux qui viennent de s'ouvrir)
+    if (this.isNormalWorld()) createMirrorLocks(this, this.mirrors);
+
 
     // * Texte d'aide, affiché en haut de l'écran quand on est près d'un miroir
     this.hint = this.add

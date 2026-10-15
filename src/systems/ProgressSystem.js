@@ -37,6 +37,7 @@ export const unlock = (ability) => unlocked.add(ability);
 export const resetProgress = () => {
   unlocked.clear();
   openMirrors.clear();
+  pendingOpenAnimations.clear();
   PROGRESS.MIRRORS_OPEN_AT_START.forEach((mirror) => openMirrors.add(mirror));
 };
 
@@ -59,6 +60,8 @@ export function unlockForStar(world) {
 
 const lockableMirrors = new Set([...PROGRESS.MIRRORS_OPEN_AT_START, ...Object.values(PROGRESS.MIRROR_UNLOCKS).flat()]);
 const openMirrors = new Set(PROGRESS.MIRRORS_OPEN_AT_START);
+// Les miroirs qui viennent de s'ouvrir et dont le cadenas n'a pas encore été vu s'ouvrir (le jardin joue l'animation à la prochaine visite)
+const pendingOpenAnimations = new Set();
 
 /** Ce miroir (de ce monde) est-il verrouillé ? Un miroir qui n'est pas dans la progression (celui de retour dans un monde) ne l'est jamais. */
 export const isMirrorLocked = (world) => lockableMirrors.has(world) && !openMirrors.has(world);
@@ -72,6 +75,16 @@ export const getMirrorUnlocker = (world) => Object.keys(PROGRESS.MIRROR_UNLOCKS)
  */
 export function unlockMirrorsForStar(world) {
   const opened = (PROGRESS.MIRROR_UNLOCKS[world] ?? []).filter((mirror) => !openMirrors.has(mirror));
-  opened.forEach((mirror) => openMirrors.add(mirror));
+  opened.forEach((mirror) => {
+    openMirrors.add(mirror);
+    pendingOpenAnimations.add(mirror);
+  });
   return opened;
+}
+
+/** Les miroirs dont le cadenas doit s'ouvrir à cette visite du jardin (puis la liste est vidée : l'animation ne se rejoue pas). */
+export function takePendingMirrorAnimations() {
+  const pending = [...pendingOpenAnimations];
+  pendingOpenAnimations.clear();
+  return pending;
 }

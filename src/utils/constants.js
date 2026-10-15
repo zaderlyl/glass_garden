@@ -618,6 +618,17 @@ export const DECO = {
   ],
 };
 
+// * Le cadenas posé sur un miroir verrouillé (voir MirrorSystem.js) : 16 x 16 px, agrandi ×2. Quand le miroir s'ouvre, il s'ouvre, monte et s'efface.
+export const MIRROR_LOCK = {
+  CLOSED: { KEY: 'mirror_lock_closed', PATH: 'assets/images/ui/cadenas_ferme.png' },
+  OPEN: { KEY: 'mirror_lock_open', PATH: 'assets/images/ui/cadenas_ouvert.png' },
+  SCALE: 2,
+  DEPTH: 9, // devant les personnages, derrière le décor du dessus
+  TINT: 0x9a9a9a, // un miroir verrouillé est un peu assombri
+  OPEN_DELAY_MS: 1000, // le temps de laisser l'iris s'ouvrir avant que le cadenas ne s'ouvre
+  OPEN_ANIM: { RISE_PX: 22, DURATION_MS: 700 }, // il s'ouvre, puis monte et s'efface
+};
+
 // * La progression (voir ProgressSystem.js) : le tir et le dash sont verrouillés au départ. Le message bref affiché quand on appuie dessus.
 export const PROGRESS = {
   // * Ce que gagne le joueur en ramassant l'étoile d'un monde (le nom du monde est celui de WORLDS) : la nuit donne le tir, le monde
