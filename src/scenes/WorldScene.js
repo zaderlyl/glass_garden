@@ -5,6 +5,7 @@ import { RecolteEtoiles, recolterEtoile } from '../systems/RecolteEtoiles.js';
 import { areAllStarsCollected } from '../systems/StarSystem.js';
 import { createBulletAnimations, explodeBullet, shoot } from '../systems/fonctionTir.js';
 import { preloadCrate, createCrates } from '../systems/CrateSystem.js';
+import { preloadDeco, createDeco } from '../systems/DecoSystem.js';
 import { isMirrorUsed, markMirrorUsed, shouldMirrorDisappear } from '../systems/MirrorSystem.js';
 import { applyTint } from '../systems/TintSystem.js';
 import { irisClose, irisOpen } from '../systems/TransitionSystem.js';
@@ -92,6 +93,7 @@ export default class WorldScene extends Phaser.Scene {
     }
     this.load.image('etoile', 'assets/images/sprites/Etoile.png');
     preloadCrate(this);
+    preloadDeco(this);
     this.load.image(ASSETS.TILESET_DECO, 'assets/images/tilesets/tileset_deco.png');
 
     // * Les balles : balle.png est une bande de 33 images de 16 x 16 pixels, chargée comme un spritesheet
@@ -376,6 +378,7 @@ export default class WorldScene extends Phaser.Scene {
 
     // * Les caisses de ce monde, posées dans Tiled (le joueur et le groupe de balles existent déjà)
     this.crates = createCrates(this, map, this.player, this.bullets);
+    this.deco = createDeco(this, map); // le décor (fleurs, lanternes...), trié en profondeur avec les personnages (voir sortByDepth)
 
     // * La fumée des cheminées, posée dans Tiled
     this.createSmokes(map);
@@ -561,9 +564,11 @@ export default class WorldScene extends Phaser.Scene {
   sortByDepth() {
     const { SORTED_MIN, SORTED_MAX } = DEPTH;
     const height = this.map.heightInPixels;
-    [this.player, this.player2, ...this.enemies.getChildren(), ...this.crates.getChildren(), ...this.npcs, ...this.mirrors].forEach((sprite) => {
-      if (!sprite?.active || !sprite.body) return;
-      sprite.setDepth(SORTED_MIN + (SORTED_MAX - SORTED_MIN) * Phaser.Math.Clamp(sprite.body.bottom / height, 0, 1));
+    [this.player, this.player2, ...this.enemies.getChildren(), ...this.crates.getChildren(), ...this.npcs, ...this.mirrors, ...this.deco].forEach((sprite) => {
+      if (!sprite?.active) return;
+      // * Les pieds : le bas du corps physique, ou le point où l'image est posée (le décor n'a pas de corps)
+      const feet = sprite.body ? sprite.body.bottom : sprite.y;
+      sprite.setDepth(SORTED_MIN + (SORTED_MAX - SORTED_MIN) * Phaser.Math.Clamp(feet / height, 0, 1));
     });
   }
 

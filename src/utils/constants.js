@@ -584,6 +584,24 @@ export const CRATE = {
     SHAKE: { DURATION_MS: 90, INTENSITY: 0.004 }, // léger tremblement de l'écran quand la caisse casse
   },
 };
+// * Le décor posé dans les cartes (voir DecoSystem.js) : de petites images (fleurs, lanternes, cristaux, champignons...).
+// Dans Tiled : un objet « point » de classe « deco », dont le NOM est une des images ci-dessous. Le point marque les pieds de l'image.
+export const DECO = {
+  TILED_CLASS: 'deco',
+  PATH: 'assets/images/deco/', // le dossier des images (un fichier par nom : « fleur_1.png »)
+  KEY_PREFIX: 'deco_', // la clé Phaser d'une image est ce préfixe suivi de son nom
+  SMALL_SIZE: 16, // une image de cette taille (ou moins) est agrandie ×2 pour aller avec les tuiles de 32 px
+  IMAGES: [
+    'fleur_1', 'fleur_2', 'fleur_3', 'fleur_4', 'fleur_5', 'fleur_6',
+    'buisson', 'buisson_automne', 'trefle', 'herbe', 'plante_verte', 'panneau',
+    'champignon_1', 'champignon_2', 'champignon_3', 'champignon_4',
+    'lanterne_bleue', 'lanterne_orange', 'lanterne_noire', 'lanterne_rose', 'lanterne_verte', 'lanterne_violette',
+    'bougie_1', 'bougie_2', 'bougie_3',
+    'cristal_bleu', 'cristal_jaune', 'cristal_orange', 'cristal_rose', 'cristal_vert', 'cristal_violet',
+    'citrouilles', 'citrouilles_halloween', 'crane', 'livres', 'sac_1', 'sac_2', 'sac_3', 'puits',
+  ],
+};
+
 // * Les bombes cachées dans certaines caisses (voir BombSystem.js). Dans Tiled : propriété « hasBomb » (booléen) sur la caisse.
 export const BOMB = {
   KEY: 'bomb',
