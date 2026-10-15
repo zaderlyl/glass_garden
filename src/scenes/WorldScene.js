@@ -761,7 +761,6 @@ export default class WorldScene extends Phaser.Scene {
 
     // On ne réécrit pas le texte pendant l'affichage du message d'interaction
     // ? Les touches sont provisoires : à changer avec les boutons de la borne (voir BINDINGS dans InputManager)
-    // TODO(équipe): changer le message d'interaction (utiliser une icône de touche au-dessus des miroirs)
     if (showHint && !this.messageActive) {
       // * La touche affichée suit le mode de contrôle (I en arcade, E en pc) : l'aide ne ment jamais
       const key = input.getKeyLabel('interact');
@@ -781,7 +780,6 @@ export default class WorldScene extends Phaser.Scene {
       const targetScene = WORLDS[nearMirror.world];
 
       if (targetScene) {
-        // TODO(équipe): SFX du passage par le miroir, à ajouter au plus vite
         // * On quitte cette scène et on lance celle du monde visé, en lui disant d'où l'on vient.
         // Le nom de ce monde est la clé de WORLDS dont la valeur est notre scène.
         const currentWorld = this.getWorldName();
