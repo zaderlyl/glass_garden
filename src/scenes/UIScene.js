@@ -4,9 +4,10 @@ import { getGameMode } from '../systems/GameMode.js';
 import { getCollectedStars, getTotalStars } from '../systems/StarSystem.js';
 import { getBubbleState } from '../systems/BubbleSystem.js';
 import { getEnemyState } from '../systems/EnemySystem.js';
+import { ABILITY_LOCKED_EVENT } from '../systems/ProgressSystem.js';
 import { getControlMode, toggleControlMode } from '../systems/ControlMode.js';
 import { formatTime } from '../utils/helpers.js';
-import { SCENES, COLORS, FONT_FAMILY, FONT_SIZE, UI_MARGIN, UI_IMAGES, DEPTH, VICTORY_TIME, VICTORY_BEST, VICTORY_REPLAY, CONTROL_MODE_SHORTCUT, CONTROL_MODES } from '../utils/constants.js';
+import { SCENES, COLORS, FONT_FAMILY, FONT_SIZE, UI_MARGIN, UI_IMAGES, DEPTH, PROGRESS, VICTORY_TIME, VICTORY_BEST, VICTORY_REPLAY, CONTROL_MODE_SHORTCUT, CONTROL_MODES } from '../utils/constants.js';
 
 /**
  * * Scène d'interface : affiche le chronomètre et le compteur d'étoiles par-dessus le monde en cours.
@@ -64,6 +65,22 @@ export default class UIScene extends Phaser.Scene {
       .setAlpha(0.7);
 
     this.setupControlModeShortcut();
+
+    // * Le message bref quand le joueur essaie une action verrouillée (tir, dash), voir ProgressSystem.js
+    this.lockedToast = this.add
+      .text(this.scale.width / 2, this.scale.height * PROGRESS.LOCKED_TOAST.Y_RATIO, '', {
+        fontFamily: FONT_FAMILY,
+        fontSize: PROGRESS.LOCKED_TOAST.SIZE,
+        fontStyle: 'bold',
+        color: COLORS.TEXT,
+        stroke: '#2a2236',
+        strokeThickness: 6,
+      })
+      .setOrigin(0.5)
+      .setAlpha(0)
+      .setDepth(DEPTH.UI);
+    this.lockedToastUntil = 0;
+    this.game.events.on(ABILITY_LOCKED_EVENT, (ability) => this.showLockedToast(ability));
   }
 
   // Le texte du mode : « Mode : arcade »
@@ -120,6 +137,16 @@ export default class UIScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setDepth(DEPTH.VICTORY + 1);
     this.input.keyboard.once('keydown-ENTER', () => window.location.reload());
+  }
+
+  // Affiche « Tir pas encore débloqué » un instant (sans empiler les messages si le joueur appuie en boucle)
+  showLockedToast(ability) {
+    const { LABELS, TEXT, DURATION_MS, COOLDOWN_MS } = PROGRESS.LOCKED_TOAST;
+    if (this.time.now < this.lockedToastUntil) return;
+    this.lockedToastUntil = this.time.now + COOLDOWN_MS;
+    this.lockedToast.setText(`${LABELS[ability] ?? ability} ${TEXT}`).setAlpha(1);
+    this.tweens.killTweensOf(this.lockedToast);
+    this.tweens.add({ targets: this.lockedToast, alpha: 0, delay: DURATION_MS - 400, duration: 400 });
   }
 
   // Le texte du compteur : « Étoiles : 2 / 5 »

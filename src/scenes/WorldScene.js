@@ -19,6 +19,7 @@ import { DIALOGUES } from '../data/dialogues.js';
 import { pickVariant } from '../utils/helpers.js';
 import { loadSecondPlayer, createSecondPlayer, updateSecondPlayer } from '../systems/SecondPlayer.js';
 import { getControlMode } from '../systems/ControlMode.js';
+import { ABILITIES, isUnlocked, notifyLocked } from '../systems/ProgressSystem.js';
 import {
   GAME_WIDTH,
   SCENES,
@@ -756,7 +757,8 @@ export default class WorldScene extends Phaser.Scene {
 
     // * Tir : une balle par appui, dans la direction regardée
     if (this.input1.justPressed('shoot')) {
-      shoot(this, this.bullets, this.player, this.facing);
+      if (isUnlocked(ABILITIES.SHOOT)) shoot(this, this.bullets, this.player, this.facing);
+      else notifyLocked(this, ABILITIES.SHOOT); // verrouillé : un message bref, pas de tir
     }
 
     // * On donne une vitesse (en pixels par seconde) : c'est la physique Phaser qui déplace

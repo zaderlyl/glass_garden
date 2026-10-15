@@ -618,6 +618,18 @@ export const DECO = {
   ],
 };
 
+// * La progression (voir ProgressSystem.js) : le tir et le dash sont verrouillés au départ. Le message bref affiché quand on appuie dessus.
+export const PROGRESS = {
+  LOCKED_TOAST: {
+    LABELS: { shoot: 'Tir', dash: 'Dash' }, // devant « pas encore débloqué »
+    TEXT: 'pas encore débloqué',
+    DURATION_MS: 1300,
+    COOLDOWN_MS: 900, // pas de message tant que le précédent n'est pas passé (on ne spamme pas l'écran)
+    Y_RATIO: 0.84, // la hauteur du message, en part de la hauteur de l'écran
+    SIZE: '34px',
+  },
+};
+
 // * Les bombes cachées dans certaines caisses (voir BombSystem.js). Dans Tiled : propriété « hasBomb » (booléen) sur la caisse.
 export const BOMB = {
   KEY: 'bomb',

@@ -4,6 +4,7 @@ import { getControlMode } from './ControlMode.js';
 import { getGameMode } from './GameMode.js';
 import Dash from './DashSystem.js';
 import { shoot } from './fonctionTir.js';
+import { ABILITIES, isUnlocked, notifyLocked } from './ProgressSystem.js';
 
 const FRAME_HAUT   = 0; // dos
 const FRAME_DROITE = 1;
@@ -82,7 +83,10 @@ export function updateSecondPlayer(scene, p2) {
   }
 
   // * Tir : une balle par appui, dans la direction regardée
-  if (p2.input2.justPressed('shoot')) shoot(scene, scene.bullets, p2, p2.facing);
+  if (p2.input2.justPressed('shoot')) {
+    if (isUnlocked(ABILITIES.SHOOT)) shoot(scene, scene.bullets, p2, p2.facing);
+    else notifyLocked(scene, ABILITIES.SHOOT);
+  }
 
   // * Le dash impose sa propre vitesse tant qu'il dure ; sinon la vitesse normale
   if (!p2.dash.update(p2.input2, { x, y }, p2.facing)) p2.setVelocity(x * P2_SPEED, y * P2_SPEED);
