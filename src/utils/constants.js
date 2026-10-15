@@ -26,6 +26,8 @@ export const UI_IMAGES = {
   MODE_SOLO: { KEY: 'ui_mode_solo', PATH: 'assets/images/ui/mode_solo.png' }, // choix du mode, la carte Solo surlignée
   MODE_MULTI: { KEY: 'ui_mode_multi', PATH: 'assets/images/ui/mode_multi.png' }, // la carte Multi surlignée
   BUTTON: { KEY: 'ui_bouton', PATH: 'assets/images/ui/bouton.png' }, // le bouton vert du menu (42 x 12 px, rogné au contenu)
+  JOYSTICK_1: { KEY: 'ui_joystick_1', PATH: 'assets/images/ui/joystick_1.png' }, // le joystick du joueur 1 (boule violette), 24 x 24 px
+  JOYSTICK_2: { KEY: 'ui_joystick_2', PATH: 'assets/images/ui/joystick_2.png' }, // celui du joueur 2 (boule bleue)
   WIN: { KEY: 'ui_victoire', PATH: 'assets/images/ui/victoire.png' }, // l'écran de victoire (« You win! »)
 };
 
@@ -349,8 +351,10 @@ export const CONTROLS_PAGE = {
   PLAYER_Y: 215, // le nom du joueur
   PLAYER_SIZE: '38px',
   FIRST_ROW_Y: 300,
-  ROW_SPACING: 80,
-  BACK: { Y: 620, SIZE: '26px', TEXT: 'O : retour' }, // l'indication en bas du cadre (O est le bouton de retour de la borne)
+  ROW_SPACING: 74,
+  MOVE_EXTRA: 34, // la ligne « Déplacer » montre un joystick (plus haut qu'une touche) : les lignes suivantes descendent d'autant
+  JOYSTICK_SCALE: 3, // 24 px x 3 = 72 px (entier, pour des pixels nets)
+  BACK: { Y: 625, SIZE: '26px', TEXT: 'O : retour' }, // l'indication en bas du cadre (O est le bouton de retour de la borne)
   ACTION_SIZE: '26px', // « Déplacer »
   KEY_SIZE: '36px', // la touche
   // Les lignes : [libellé, action de BINDINGS]. « move » est le joystick (haut, bas, gauche, droite).

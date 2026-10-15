@@ -16,6 +16,8 @@ export default class ControlsScene extends Phaser.Scene {
 
   preload() {
     this.load.image(UI_IMAGES.HOME.KEY, UI_IMAGES.HOME.PATH);
+    this.load.image(UI_IMAGES.JOYSTICK_1.KEY, UI_IMAGES.JOYSTICK_1.PATH);
+    this.load.image(UI_IMAGES.JOYSTICK_2.KEY, UI_IMAGES.JOYSTICK_2.PATH);
   }
 
   create() {
@@ -42,10 +44,16 @@ export default class ControlsScene extends Phaser.Scene {
       const x = COLUMNS_X[column];
       text(x, PLAYER_Y, `Joueur ${player}`, CONTROLS_PAGE.PLAYER_SIZE, true);
       ROWS.forEach(([label, action], row) => {
-        const y = FIRST_ROW_Y + row * ROW_SPACING;
+        const y = FIRST_ROW_Y + row * ROW_SPACING + (row > 0 ? CONTROLS_PAGE.MOVE_EXTRA : 0);
         text(x, y - 18, label, CONTROLS_PAGE.ACTION_SIZE);
-        // * Le déplacement se fait au joystick (sur la borne, chaque joueur a le sien) : on n'affiche pas ses touches
-        text(x, y + 16, action === 'move' ? 'Joystick' : keyLabel(keys[action]), CONTROLS_PAGE.KEY_SIZE, true);
+        if (action === 'move') {
+          // * Le déplacement se fait au joystick (chacun a le sien sur la borne) : on le dessine, de la couleur du joueur
+          const key = player === 1 ? UI_IMAGES.JOYSTICK_1.KEY : UI_IMAGES.JOYSTICK_2.KEY;
+          this.textures.get(key).setFilter(Phaser.Textures.FilterMode.NEAREST);
+          this.add.image(x, y + 34, key).setScale(CONTROLS_PAGE.JOYSTICK_SCALE);
+        } else {
+          text(x, y + 16, keyLabel(keys[action]), CONTROLS_PAGE.KEY_SIZE, true);
+        }
       });
     });
 
