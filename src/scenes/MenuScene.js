@@ -1,25 +1,23 @@
-import { SCENES, COLORS, FONT_FAMILY, FONT_SIZE } from '../utils/constants.js';
+import { SCENES, UI_IMAGES } from '../utils/constants.js';
 
 /**
- * * Première scène du jeu : pour l'instant elle affiche seulement le titre.
- * Elle deviendra l'écran d'accueil (jouer, contrôles...).
+ * * L'écran d'accueil : une image plein écran (le titre est dessiné dedans).
+ * Prochaines étapes : l'image à la bonne taille, puis Entrée pour lancer le jeu.
  */
 export default class MenuScene extends Phaser.Scene {
   constructor() {
     super(SCENES.MENU);
   }
 
+  preload() {
+    this.load.image(UI_IMAGES.HOME.KEY, UI_IMAGES.HOME.PATH);
+  }
+
   // create() est appelée une fois, quand la scène démarre
   create() {
     const { width, height } = this.scale;
 
-    // TODO(équipe): remplacer ce texte par les éléments d'interface (UI) de l'écran d'accueil
-    this.add
-      .text(width / 2, height / 2, 'GLASS GARDEN', {
-        fontFamily: FONT_FAMILY,
-        fontSize: FONT_SIZE.TITLE,
-        color: COLORS.TEXT,
-      })
-      .setOrigin(0.5); // * on centre le texte sur son point de placement
+    // * L'image est centrée et étirée aux dimensions de l'écran (elle est au même format 16:9)
+    this.add.image(width / 2, height / 2, UI_IMAGES.HOME.KEY).setDisplaySize(width, height);
   }
 }

@@ -18,6 +18,11 @@ export const SCENES = {
   UI: 'UIScene',
 };
 
+// * Les images des écrans d'interface (accueil, choix du mode, victoire) : une image plein écran chacune
+export const UI_IMAGES = {
+  HOME: { KEY: 'ui_accueil', PATH: 'assets/images/ui/accueil.webp' },
+};
+
 // * Le monde normal (le jardin), tel qu'il est nommé dans la table WORLDS ci-dessous.
 // C'est là que les miroirs utilisés disparaissent.
 export const NORMAL_WORLD = 'hub';
