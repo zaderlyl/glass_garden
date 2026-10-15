@@ -22,6 +22,9 @@ export const ABILITIES = { SHOOT: 'shoot', DASH: 'dash' };
 // * L'événement envoyé quand le joueur appuie sur une action encore verrouillée (l'interface l'écoute, voir UIScene)
 export const ABILITY_LOCKED_EVENT = 'ability-locked';
 
+// * L'événement envoyé quand le joueur vient de gagner une capacité (l'interface affiche une bannière, voir UIScene)
+export const ABILITY_UNLOCKED_EVENT = 'ability-unlocked';
+
 const unlocked = new Set();
 
 /** Cette capacité est-elle débloquée ? */

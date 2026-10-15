@@ -1,5 +1,5 @@
 import { markStarCollected } from './StarSystem.js';
-import { unlockForStar } from './ProgressSystem.js';
+import { unlockForStar, ABILITY_UNLOCKED_EVENT } from './ProgressSystem.js';
 
 var nombreEtoiles = 0;
 var etoilesPrises = [];
@@ -31,6 +31,7 @@ export function recolterEtoile(scene, etoile) {
   etoilesPrises.push(etoile.starId);
   nombreEtoiles += 1;
   markStarCollected(scene.getWorldName(), etoile.starId); // compteur global du jeu (StarSystem)
-  unlockForStar(scene.getWorldName()); // ce que cette étoile fait gagner (le tir au monde 1, le dash au monde 4)
+  // * Ce que cette étoile fait gagner (le tir au monde 1, le dash au monde 4) : l'interface l'annonce par une bannière
+  unlockForStar(scene.getWorldName()).forEach((ability) => scene.game.events.emit(ABILITY_UNLOCKED_EVENT, ability));
   etoile.disableBody(true, true);
 }

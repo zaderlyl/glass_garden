@@ -623,6 +623,18 @@ export const PROGRESS = {
   // * Ce que gagne le joueur en ramassant l'étoile d'un monde (le nom du monde est celui de WORLDS) : la nuit donne le tir, le monde
   // post-apocalyptique donne le dash. Les autres étoiles ne donnent rien de plus.
   STAR_UNLOCKS: { world_1: ['shoot'], world_4: ['dash'] },
+  // * La bannière qui annonce une capacité gagnée : compacte, en haut de l'écran, elle n'arrête PAS le jeu et disparaît seule
+  UNLOCK_BANNER: {
+    Y: 130, // son centre, en pixels depuis le haut (sous le texte d'aide des miroirs)
+    WIDTH: 560,
+    HEIGHT: 96,
+    SHOW_MS: 3500, // la durée pendant laquelle elle reste affichée
+    SLIDE_MS: 350, // la durée de l'arrivée et du départ
+    SLIDE_PX: 24, // elle descend de ce nombre de pixels en arrivant
+    NAMES: { shoot: 'Tir', dash: 'Dash' },
+    TITLE: 'débloqué !',
+    BUTTON_SCALE: 2, // 20 px x 2 = 40 px
+  },
   LOCKED_TOAST: {
     LABELS: { shoot: 'Tir', dash: 'Dash' }, // devant « pas encore débloqué »
     TEXT: 'pas encore débloqué',
