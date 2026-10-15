@@ -28,6 +28,10 @@ export const UI_IMAGES = {
   BUTTON: { KEY: 'ui_bouton', PATH: 'assets/images/ui/bouton.png' }, // le bouton vert du menu (42 x 12 px, rogné au contenu)
   JOYSTICK_1: { KEY: 'ui_joystick_1', PATH: 'assets/images/ui/joystick_1.png' }, // le joystick du joueur 1 (boule violette), 24 x 24 px
   JOYSTICK_2: { KEY: 'ui_joystick_2', PATH: 'assets/images/ui/joystick_2.png' }, // celui du joueur 2 (boule bleue)
+  // Les boutons d'arcade de la page Commandes (20 x 20 px, une couleur par action)
+  ARCADE_GREEN: { KEY: 'ui_arcade_vert', PATH: 'assets/images/ui/bouton_arcade_vert.png' },
+  ARCADE_RED: { KEY: 'ui_arcade_rouge', PATH: 'assets/images/ui/bouton_arcade_rouge.png' },
+  ARCADE_YELLOW: { KEY: 'ui_arcade_jaune', PATH: 'assets/images/ui/bouton_arcade_jaune.png' },
   WIN: { KEY: 'ui_victoire', PATH: 'assets/images/ui/victoire.png' }, // l'écran de victoire (« You win! »)
 };
 
@@ -351,11 +355,16 @@ export const CONTROLS_PAGE = {
   PLAYER_Y: 215, // le nom du joueur
   PLAYER_SIZE: '38px',
   FIRST_ROW_Y: 300,
-  ROW_SPACING: 74,
-  MOVE_EXTRA: 34, // la ligne « Déplacer » montre un joystick (plus haut qu'une touche) : les lignes suivantes descendent d'autant
+  ROW_SPACING: 90,
+  LABEL_GAP: 24, // l'espace entre le libellé (aligné à droite) et le centre de la colonne
+  ICON_OFFSET: 64, // le centre de l'icône (joystick ou bouton), à droite du centre de la colonne
   JOYSTICK_SCALE: 3, // 24 px x 3 = 72 px (entier, pour des pixels nets)
+  ARCADE_SCALE: 3, // 20 px x 3 = 60 px
+  ARCADE_LETTER_SIZE: '30px', // la lettre posée sur le bouton
+  // Quel bouton d'arcade pour quelle action (les deux joueurs ont les mêmes couleurs)
+  ARCADE_BUTTONS: { interact: 'ARCADE_GREEN', shoot: 'ARCADE_RED', dash: 'ARCADE_YELLOW' },
   BACK: { Y: 625, SIZE: '26px', TEXT: 'O : retour' }, // l'indication en bas du cadre (O est le bouton de retour de la borne)
-  ACTION_SIZE: '26px', // « Déplacer »
+  ACTION_SIZE: '32px', // « Déplacer »
   KEY_SIZE: '36px', // la touche
   // Les lignes : [libellé, action de BINDINGS]. « move » est le joystick (haut, bas, gauche, droite).
   ROWS: [

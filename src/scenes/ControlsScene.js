@@ -18,6 +18,7 @@ export default class ControlsScene extends Phaser.Scene {
     this.load.image(UI_IMAGES.HOME.KEY, UI_IMAGES.HOME.PATH);
     this.load.image(UI_IMAGES.JOYSTICK_1.KEY, UI_IMAGES.JOYSTICK_1.PATH);
     this.load.image(UI_IMAGES.JOYSTICK_2.KEY, UI_IMAGES.JOYSTICK_2.PATH);
+    ['ARCADE_GREEN', 'ARCADE_RED', 'ARCADE_YELLOW'].forEach((name) => this.load.image(UI_IMAGES[name].KEY, UI_IMAGES[name].PATH));
   }
 
   create() {
@@ -43,16 +44,31 @@ export default class ControlsScene extends Phaser.Scene {
       const keys = BINDINGS[CONTROL_MODES.ARCADE][player];
       const x = COLUMNS_X[column];
       text(x, PLAYER_Y, `Joueur ${player}`, CONTROLS_PAGE.PLAYER_SIZE, true);
+      // * Une ligne par action : le libellé à gauche (aligné à droite), l'icône à droite
       ROWS.forEach(([label, action], row) => {
-        const y = FIRST_ROW_Y + row * ROW_SPACING + (row > 0 ? CONTROLS_PAGE.MOVE_EXTRA : 0);
-        text(x, y - 18, label, CONTROLS_PAGE.ACTION_SIZE);
+        const y = FIRST_ROW_Y + row * ROW_SPACING;
+        text(x - CONTROLS_PAGE.LABEL_GAP, y, label, CONTROLS_PAGE.ACTION_SIZE).setOrigin(1, 0.5);
+        const iconX = x + CONTROLS_PAGE.ICON_OFFSET;
         if (action === 'move') {
           // * Le déplacement se fait au joystick (chacun a le sien sur la borne) : on le dessine, de la couleur du joueur
           const key = player === 1 ? UI_IMAGES.JOYSTICK_1.KEY : UI_IMAGES.JOYSTICK_2.KEY;
           this.textures.get(key).setFilter(Phaser.Textures.FilterMode.NEAREST);
-          this.add.image(x, y + 34, key).setScale(CONTROLS_PAGE.JOYSTICK_SCALE);
+          this.add.image(iconX, y, key).setScale(CONTROLS_PAGE.JOYSTICK_SCALE);
         } else {
-          text(x, y + 16, keyLabel(keys[action]), CONTROLS_PAGE.KEY_SIZE, true);
+          // * Un bouton d'arcade de la couleur de l'action, avec la lettre de la touche posée dessus
+          const button = UI_IMAGES[CONTROLS_PAGE.ARCADE_BUTTONS[action]];
+          this.textures.get(button.KEY).setFilter(Phaser.Textures.FilterMode.NEAREST);
+          this.add.image(iconX, y, button.KEY).setScale(CONTROLS_PAGE.ARCADE_SCALE);
+          this.add
+            .text(iconX, y - 2, keyLabel(keys[action]), {
+              fontFamily: FONT_FAMILY,
+              fontSize: CONTROLS_PAGE.ARCADE_LETTER_SIZE,
+              fontStyle: 'bold',
+              color: '#ffffff',
+              stroke: '#2a2236',
+              strokeThickness: 5,
+            })
+            .setOrigin(0.5);
         }
       });
     });
