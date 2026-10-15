@@ -16,6 +16,7 @@ import { preloadEnemies, createEnemies, updateEnemies, resetEnemies } from '../s
 import { DIALOGUES } from '../data/dialogues.js';
 import { pickVariant } from '../utils/helpers.js';
 import { loadSecondPlayer, createSecondPlayer, updateSecondPlayer } from '../systems/SecondPlayer.js';
+import { getControlMode } from '../systems/ControlMode.js';
 import {
   GAME_WIDTH,
   SCENES,
@@ -40,6 +41,7 @@ import {
   SMOKE,
   WORLD_ART,
   DIALOGUE,
+  CONTROL_MODES,
   STAR_BOUNCE,
   BUBBLES,
   ENEMY_AI,
@@ -217,6 +219,7 @@ export default class WorldScene extends Phaser.Scene {
     // ! Sinon un message encore affiché au moment de partir bloquerait le texte d'aide au retour
     this.messageActive = false;
     this.vanishingMirror = null;
+    this.dialogueInput = null;
     this.gameWon = false;
     this.transitioning = false; // vrai pendant la FERMETURE de l'iris, quand on prend un miroir : le joueur est figé (voir update)
     this.waterSprites = []; // les sprites de l'eau animée de CETTE visite (remplis par createAnimatedTiles)
@@ -632,13 +635,15 @@ export default class WorldScene extends Phaser.Scene {
     // * Pendant la fermeture de l'iris (on a pris un miroir) : le joueur est figé, on ne lit ni les déplacements, ni le tir, ni l'interaction
     if (this.transitioning) {
       this.player.setVelocity(0, 0);
+      this.player2.setVelocity(0, 0);
       return;
     }
 
     // * Pendant un dialogue : le joueur est figé, les touches servent au dialogue (avancer, choisir une réponse)
     if (this.dialogue.isOpen) {
       this.player.setVelocity(0, 0);
-      this.dialogue.update(this.input1);
+      this.player2.setVelocity(0, 0);
+      this.dialogue.update(this.dialogueInput || this.input1); // les touches du joueur qui a lancé le dialogue
       return;
     }
 
@@ -674,37 +679,54 @@ export default class WorldScene extends Phaser.Scene {
       this.player.setVelocity(x * PLAYER.SPEED, y * PLAYER.SPEED);
     }
 
+    // * Le joueur 2 : déplacement, tir et dash (voir SecondPlayer.js)
+    updateSecondPlayer(this, this.player2);
+
+    // * Chaque joueur peut interagir (miroir, personnage). Le joueur 1 est lu en premier. Le joueur 2 ne le peut pas en mode pc.
+    if (this.interact(this.player, this.input1, true)) return;
+    if (getControlMode() !== CONTROL_MODES.PC) this.interact(this.player2, this.player2.input2, false);
+  }
+
+  /**
+   * Un joueur appuie (ou non) sur sa touche d'interaction : parler à un personnage proche, ou prendre un miroir proche.
+   * @param {Phaser.Physics.Arcade.Sprite} player  Le joueur qui interagit
+   * @param {InputManager} input  Ses touches
+   * @param {boolean} showHint  Vrai pour le joueur 1 : c'est lui qui voit l'aide à l'écran
+   * @returns {boolean} vrai si un dialogue ou un changement de monde vient de commencer
+   */
+  interact(player, input, showHint) {
     // * Y a-t-il un miroir assez proche pour interagir ?
     const nearMirror = this.mirrors.find(
       (mirror) =>
-        Phaser.Math.Distance.Between(this.player.x, this.player.y, mirror.x, mirror.y) <
+        Phaser.Math.Distance.Between(player.x, player.y, mirror.x, mirror.y) <
         INTERACT_DISTANCE,
     );
 
     // * Y a-t-il un personnage assez proche pour lui parler ?
     const nearNpc = this.npcs.find(
       (npc) =>
-        Phaser.Math.Distance.Between(this.player.x, this.player.y, npc.body.center.x, npc.body.center.y) <
+        Phaser.Math.Distance.Between(player.x, player.y, npc.body.center.x, npc.body.center.y) <
         DIALOGUE.INTERACT_DISTANCE,
     );
 
     // On ne réécrit pas le texte pendant l'affichage du message d'interaction
     // ? Les touches sont provisoires : à changer avec les boutons de la borne (voir BINDINGS dans InputManager)
     // TODO(équipe): changer le message d'interaction (utiliser une icône de touche au-dessus des miroirs)
-    if (!this.messageActive) {
+    if (showHint && !this.messageActive) {
       // * La touche affichée suit le mode de contrôle (I en arcade, E en pc) : l'aide ne ment jamais
-      const key = this.input1.getKeyLabel('interact');
+      const key = input.getKeyLabel('interact');
       this.hint.setText(nearMirror ? `${key} : entrer dans le miroir` : nearNpc ? `${key} : parler` : '');
     }
 
     // * Parler à un personnage proche (un miroir proche passe avant)
-    if (nearNpc && !nearMirror && this.input1.justPressed('interact')) {
+    if (nearNpc && !nearMirror && input.justPressed('interact')) {
       this.hint.setText('');
+      this.dialogueInput = input; // c'est ce joueur qui fait avancer le dialogue
       this.dialogue.open(nearNpc.npcName, DIALOGUES[nearNpc.npcName], () => this.revealWorldStar(nearNpc));
-      return;
+      return true;
     }
 
-    if (nearMirror && this.input1.justPressed('interact')) {
+    if (nearMirror && input.justPressed('interact')) {
       // * Le nom du miroir dans Tiled donne le monde visé, la table WORLDS donne sa scène
       const targetScene = WORLDS[nearMirror.world];
 
@@ -729,7 +751,6 @@ export default class WorldScene extends Phaser.Scene {
         });
       }
     }
-
-    updateSecondPlayer(this.player2);
+    return this.transitioning;
   }
 }
