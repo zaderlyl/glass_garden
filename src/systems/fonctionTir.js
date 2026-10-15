@@ -35,7 +35,7 @@
 // TODO(équipe): une animation quand une cible est détruite (pour l'instant elle disparaît simplement)
 // =====================================================================================
 
-import { BULLET, DIRECTION_VECTORS } from '../utils/constants.js';
+import { BULLET, DEPTH, DIRECTION_VECTORS } from '../utils/constants.js';
 
 /**
  * Crée les deux animations de la balle (vol et explosion). Sans effet si elles existent déjà :
@@ -88,6 +88,7 @@ export function shoot(scene, bullets, player, direction) {
   bullet.setRotation(vector.angle);
   bullet.setVelocity(vector.x * BULLET.SPEED, vector.y * BULLET.SPEED);
   bullet.play(BULLET.FLY_ANIM.KEY);
+  bullet.setDepth(DEPTH.BULLET); // devant les personnages triés par profondeur
 
   // * Fin de vie automatique. explodeBullet ne fait rien si la balle a déjà explosé (contre un mur, par exemple).
   scene.time.delayedCall(BULLET.LIFETIME_MS, () => explodeBullet(bullet));

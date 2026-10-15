@@ -1,5 +1,6 @@
 import InputManager from '../systems/InputManager.js';
 import timer from '../systems/TimerSystem.js';
+import { dropBomb } from '../systems/BombSystem.js';
 import { RecolteEtoiles, recolterEtoile } from '../systems/RecolteEtoiles.js';
 import { areAllStarsCollected } from '../systems/StarSystem.js';
 import { createBulletAnimations, explodeBullet, shoot } from '../systems/fonctionTir.js';
@@ -507,6 +508,21 @@ export default class WorldScene extends Phaser.Scene {
     this.respawnPlayer(player);
   }
 
+  /** Un joueur est pris dans une explosion : le niveau recommence (sauf s'il est invincible, en plein dash, ou si le jeu est figé). */
+  onBombHit(player) {
+    const dash = player === this.player ? this.dash : this.player2.dash;
+    if (this.time.now < player.invulnerableUntil || this.time.now < dash.endsAt || this.dialogue.isOpen || this.transitioning) return;
+    this.restartLevel();
+  }
+
+  /** Recommence ce monde à zéro (caisses, ennemis, bombes), comme si on y arrivait par le même miroir. */
+  restartLevel() {
+    const { FLASH } = ENEMY_AI.CONTACT;
+    this.transitioning = true; // tout est figé pendant l'éclair
+    this.cameras.main.flash(FLASH.DURATION_MS, FLASH.RED, FLASH.GREEN, FLASH.BLUE);
+    this.time.delayedCall(FLASH.DURATION_MS + 250, () => this.scene.restart({ from: this.fromWorld }));
+  }
+
   /** Renvoie ce joueur au départ (le joueur 2 à côté du joueur 1), les ennemis reprennent leur place. */
   respawnPlayer(player) {
     const { INVULNERABLE_MS, BLINK_MS, BLINK_ALPHA, FLASH } = ENEMY_AI.CONTACT;
@@ -534,6 +550,24 @@ export default class WorldScene extends Phaser.Scene {
     // Elle part du centre de la caisse (la caisse fait 32 pixels : le sol est 16 sous son centre, l'étoile à 20 au-dessus)
     const from = { x: crate.x, y: crate.y + 16, headHeight: 20 + 16 };
     bounceStar(this, star, from, (x, y) => this.isFreeGround(x, y));
+  }
+
+  /**
+   * Trie l'affichage selon la profondeur du terrain : plus les pieds d'un objet sont bas, plus il passe devant.
+   * Sans ça, l'ordre dépend de la création (les caisses, créées après le joueur, le recouvraient toujours).
+   */
+  sortByDepth() {
+    const { SORTED_MIN, SORTED_MAX } = DEPTH;
+    const height = this.map.heightInPixels;
+    [this.player, this.player2, ...this.enemies.getChildren(), ...this.crates.getChildren(), ...this.npcs, ...this.mirrors].forEach((sprite) => {
+      if (!sprite?.active || !sprite.body) return;
+      sprite.setDepth(SORTED_MIN + (SORTED_MAX - SORTED_MIN) * Phaser.Math.Clamp(sprite.body.bottom / height, 0, 1));
+    });
+  }
+
+  /** Une caisse qui cachait une bombe vient de casser : la bombe saute, se pose et explose (voir BombSystem.js). */
+  onBombCrateBroken(crate) {
+    dropBomb(this, crate);
   }
 
   /** L'étoile du monde apparaît au centre de la carte (récompense des bulles), avec un petit effet de rebond si animated. */
@@ -633,6 +667,8 @@ export default class WorldScene extends Phaser.Scene {
 
   // update() est appelée à chaque image (environ 60 fois par seconde)
   update() {
+    this.sortByDepth();
+
     // * Partie gagnée : tout est figé, on ne lit plus les touches
     if (this.gameWon) return;
 

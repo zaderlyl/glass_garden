@@ -16,6 +16,8 @@
 //   4. Facultatif : une propriété personnalisée « hasStar » (booléen) cochée sur la caisse qui CACHE l'étoile du monde.
 //      L'étoile reste invisible jusque-là ; quand cette caisse casse, elle appelle scene.onStarCrateBroken(caisse)
 //      (WorldScene la fait sauter de la caisse).
+//   5. Facultatif : une propriété personnalisée « hasBomb » (booléen) cochée sur une caisse qui CACHE une bombe : à la casse,
+//      elle appelle scene.onBombCrateBroken(caisse) (voir BombSystem.js).
 //
 // * COMMENT L'UTILISER (dans une scène de monde qui a un joueur et un groupe de balles)
 //   import { preloadCrate, createCrates } from '../systems/CrateSystem.js';
@@ -32,7 +34,7 @@
 // facultative onHit de chaque caisse, appelée par hitTarget (voir fonctionTir.js).
 // =====================================================================================
 
-import { CRATE } from '../utils/constants.js';
+import { CRATE, BOMB } from '../utils/constants.js';
 import { addTargetCollision } from './fonctionTir.js';
 
 /**
@@ -41,6 +43,7 @@ import { addTargetCollision } from './fonctionTir.js';
  */
 export function preloadCrate(scene) {
   scene.load.image(CRATE.KEY, CRATE.PATH);
+  scene.load.image(BOMB.KEY, BOMB.PATH); // la bombe cachée dans certaines caisses (voir BombSystem.js)
 }
 
 /**
@@ -118,6 +121,17 @@ function playHitEffect(scene, crate) {
 
   // * C'était la caisse qui cache l'étoile : la scène la fait apparaître
   if (crate.hasStar) scene.onStarCrateBroken?.(crate);
+
+  // * Elle cachait une bombe : la scène la fait jaillir (voir BombSystem.js)
+  if (crate.hasBomb) scene.onBombCrateBroken?.(crate);
+}
+
+/** Casse cette caisse d'un coup, comme un tir fatal (l'effet est joué avant la destruction). Sert aux explosions. */
+export function breakCrate(crate) {
+  if (!crate.active) return;
+  crate.hitPoints = 0;
+  crate.onHit?.(crate);
+  crate.destroy();
 }
 
 /**
@@ -144,6 +158,7 @@ export function createCrates(scene, map, player, bullets) {
       const crate = crates.create(x, y, CRATE.KEY);
       crate.hitPoints = getTiledProperty(object, 'hitPoints', CRATE.DEFAULT_HIT_POINTS);
       crate.hasStar = getTiledProperty(object, 'hasStar', false);
+      crate.hasBomb = getTiledProperty(object, BOMB.TILED_PROPERTY, false);
       crate.onHit = () => playHitEffect(scene, crate);
 
       // * La teinte de ce monde, s'il en a une (voir CRATE.WORLD_TINTS)

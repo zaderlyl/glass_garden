@@ -271,6 +271,11 @@ export const NPCS = {
 
 // * Ordre d'affichage : plus la valeur est grande, plus l'élément est devant
 export const DEPTH = {
+  // * Les personnages, caisses, miroirs et ennemis se trient selon leur position : plus un objet est BAS à l'écran (ses pieds),
+  // plus il passe devant. Leur profondeur va de SORTED_MIN (haut de la carte) à SORTED_MAX (bas), sous les balles et le décor du dessus.
+  SORTED_MIN: 1,
+  SORTED_MAX: 8,
+  BULLET: 9, // les balles passent devant les personnages (derrière le décor du dessus)
   ABOVE_PLAYER: 10, // calque decor_above
   UI: 20,
   DIALOGUE: 30, // la boîte de dialogue des personnages (devant l'interface)
@@ -465,6 +470,31 @@ export const CRATE = {
     DEBRIS_DEPTH: 15, // devant les calques et le joueur
     HIT_FLASH_MS: 70, // durée de l'éclat blanc
     SHAKE: { DURATION_MS: 90, INTENSITY: 0.004 }, // léger tremblement de l'écran quand la caisse casse
+  },
+};
+// * Les bombes cachées dans certaines caisses (voir BombSystem.js). Dans Tiled : propriété « hasBomb » (booléen) sur la caisse.
+export const BOMB = {
+  KEY: 'bomb',
+  PATH: 'assets/images/sprites/bombe.png',
+  TILED_PROPERTY: 'hasBomb',
+  DISTANCE_SCALE: 0.5, // elle saute comme l'étoile, mais va deux fois moins loin
+  FUSE_MS: 300, // la pause entre l'arrivée au sol et l'explosion : elle clignote (0 = explose dès qu'elle se pose)
+  PULSE: { SCALE: 1.25, MS: 100 }, // le gonflement pendant la mèche
+  RADIUS: 80, // le rayon de l'explosion, en pixels
+  DEPTH: 9, // comme l'étoile : devant le joueur, derrière le décor du dessus
+  // * L'explosion : un disque orange qui grandit, des éclats, un tremblement de l'écran
+  BLAST: {
+    COLOR: 0xffa040,
+    START_ALPHA: 0.85,
+    DURATION_MS: 300,
+    DEPTH: 16,
+    PUFF_KEY: 'bomb_puff', // texture générée par le code (un petit carré blanc)
+    PUFF_SIZE: 6,
+    PUFF_COLORS: [0xffd060, 0xff8030, 0xd04020, 0x302830],
+    PUFF_COUNT: 28,
+    PUFF_SPEED: { MIN: 60, MAX: 220 },
+    PUFF_LIFETIME_MS: { MIN: 300, MAX: 700 },
+    SHAKE: { DURATION_MS: 200, INTENSITY: 0.01 },
   },
 };
 export const P2_SPRITE = {
