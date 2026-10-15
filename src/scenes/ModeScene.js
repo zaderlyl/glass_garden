@@ -3,7 +3,7 @@ import { setGameMode } from '../systems/GameMode.js';
 
 /**
  * * L'écran de choix du mode (Solo ou Multi) : une image plein écran où la carte choisie est surlignée.
- * Gauche choisit Solo, droite choisit Multi, Entrée valide : le mode est retenu (GameMode.js) et le jeu se lance.
+ * Gauche choisit Solo, droite choisit Multi, Entrée ou I valide : le mode est retenu (GameMode.js) et le jeu se lance.
  */
 export default class ModeScene extends Phaser.Scene {
   constructor() {
@@ -26,11 +26,17 @@ export default class ModeScene extends Phaser.Scene {
     this.input.keyboard.on('keydown-LEFT', () => this.choose(GAME_MODES.SOLO));
     this.input.keyboard.on('keydown-RIGHT', () => this.choose(GAME_MODES.MULTI));
 
-    // * Entrée : on retient le mode choisi et on lance le jeu (une seule fois, même si la touche est maintenue)
-    this.input.keyboard.once('keydown-ENTER', () => {
+    // * Entrée (clavier) ou I (bouton d'interaction de la borne) : on retient le mode choisi et on lance le jeu (une seule fois,
+    // même si la touche est maintenue)
+    const validate = () => {
+      if (this.leaving) return;
+      this.leaving = true;
       setGameMode(this.mode);
       this.scene.start(SCENES.HUB);
-    });
+    };
+    this.leaving = false;
+    this.input.keyboard.on('keydown-ENTER', validate);
+    this.input.keyboard.on('keydown-I', validate);
   }
 
   /** Surligne la carte de ce mode (en changeant l'image) et le retient dans this.mode. */
