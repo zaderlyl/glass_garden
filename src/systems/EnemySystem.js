@@ -122,7 +122,9 @@ function playHitEffect(scene, enemy) {
     return;
   }
 
-  // * Il meurt : un nuage de fumée sombre à la place de son centre
+  // * Il meurt : on retient où (c'est de là que sautera l'étoile si c'était le dernier ennemi du monde), puis un nuage de fumée sombre
+  scene.lastEnemyDeath = { x: enemy.x, y: enemy.y };
+  // * Un nuage de fumée sombre à la place de son centre
   const smoke = scene.add.particles(enemy.x, enemy.y - ENEMY_FRAME_SIZE / 2, DEATH.KEY, {
     speed: { min: DEATH.SPEED.MIN, max: DEATH.SPEED.MAX },
     angle: { min: 0, max: 360 },

@@ -412,6 +412,11 @@ export default class WorldScene extends Phaser.Scene {
 
     // * Les ennemis, posés dans Tiled
     this.enemies = createEnemies(this, map, this.bullets);
+    // * Un monde avec des ennemis cache son étoile : elle apparaît (en sautant de l'endroit où meurt le dernier ennemi) quand ils sont tous morts
+    this.enemiesTotal = this.enemies.getChildren().length;
+    this.enemiesCleared = false;
+    this.lastEnemyDeath = null;
+    if (this.enemiesTotal > 0) this.stars.forEach((star) => star.disableBody(true, true));
     // * Les ennemis sont bloqués par les murs, l'eau, les caisses, les personnages, les miroirs et entre eux
     this.enemyObstacles = [this.waterBlockers, this.crates, this.decoBlockers, ...this.npcs, ...this.mirrors].filter(Boolean); // aussi lus par EnemySystem pour contourner
     [this.walls, ...this.enemyObstacles].forEach((obstacle) => {
@@ -580,6 +585,15 @@ export default class WorldScene extends Phaser.Scene {
     });
   }
 
+  /** Le dernier ennemi vient de mourir : l'étoile du monde saute de l'endroit où il est mort, puis le joueur la ramasse. */
+  onAllEnemiesKilled() {
+    const star = this.stars.find((s) => !s.active);
+    if (!star) return;
+    const spot = this.lastEnemyDeath ?? { x: this.map.widthInPixels / 2, y: this.map.heightInPixels / 2 };
+    // * Elle part de l'endroit où l'ennemi avait les pieds, à la hauteur de sa tête (une image de 32 px)
+    bounceStar(this, star, { x: spot.x, y: spot.y, headHeight: 30 }, (x, y) => this.isFreeGround(x, y));
+  }
+
   /** Une caisse qui cachait une bombe vient de casser : la bombe saute, se pose et explose (voir BombSystem.js). */
   onBombCrateBroken(crate) {
     dropBomb(this, crate);
@@ -698,6 +712,10 @@ export default class WorldScene extends Phaser.Scene {
 
     // * Les ennemis vivent à chaque image, sauf pendant un dialogue ou une transition (ils s'arrêtent)
     updateEnemies(this, this.enemies, this.getEnemyTargets(), this.dialogue.isOpen || this.transitioning);
+    if (this.enemiesTotal > 0 && !this.enemiesCleared && this.enemies.countActive(true) === 0) {
+      this.enemiesCleared = true;
+      this.onAllEnemiesKilled();
+    }
 
     // * Pendant la fermeture de l'iris (on a pris un miroir) : le joueur est figé, on ne lit ni les déplacements, ni le tir, ni l'interaction
     if (this.transitioning) {
