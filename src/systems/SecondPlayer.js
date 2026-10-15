@@ -1,6 +1,7 @@
-import { P2_SPRITE, P2_SPAWN_DISTANCE, P2_SPEED, PLAYER, CONTROL_MODES } from '../utils/constants.js';
+import { P2_SPRITE, P2_SPAWN_DISTANCE, P2_SPEED, PLAYER, CONTROL_MODES, GAME_MODES } from '../utils/constants.js';
 import InputManager from './InputManager.js';
 import { getControlMode } from './ControlMode.js';
+import { getGameMode } from './GameMode.js';
 import Dash from './DashSystem.js';
 import { shoot } from './fonctionTir.js';
 
@@ -35,6 +36,9 @@ export function createSecondPlayer(scene, player, walls) {
   p2.input2 = new InputManager(scene, 2); // les touches du joueur 2 (table BINDINGS)
   p2.facing = 'down'; // la direction regardée : sert au tir et au dash à l'arrêt
   p2.dash = new Dash(scene, p2);
+
+  // * En solo, le joueur 2 n'existe pas : on le garde créé (le reste du code l'attend) mais caché et sans corps, il ne fait plus rien
+  if (getGameMode() === GAME_MODES.SOLO) p2.disableBody(true, true);
   return p2;
 }
 
@@ -44,6 +48,8 @@ export function createSecondPlayer(scene, player, walls) {
  * @param {Phaser.Physics.Arcade.Sprite} p2
  */
 export function updateSecondPlayer(scene, p2) {
+  if (!p2.active) return; // solo : il n'existe pas
+
   // * En mode PC, le joueur 2 ne bouge pas (un seul joueur au clavier)
   if (getControlMode() === CONTROL_MODES.PC) {
     p2.setVelocity(0, 0);

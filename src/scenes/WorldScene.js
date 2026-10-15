@@ -498,9 +498,9 @@ export default class WorldScene extends Phaser.Scene {
   }
 
   /** Un ennemi touche le joueur : sauf s'il vient déjà d'être renvoyé (invincible), ou en plein dialogue ou transition. */
-  /** Les joueurs que les ennemis voient et peuvent toucher : le joueur 2 n'existe pas pour eux en mode pc (il ne bouge pas). */
+  /** Les joueurs que les ennemis voient et peuvent toucher : le joueur 2 n'existe pas pour eux en mode pc (il ne bouge pas), ni en solo. */
   getEnemyTargets() {
-    return getControlMode() === CONTROL_MODES.PC ? [this.player] : [this.player, this.player2];
+    return getControlMode() === CONTROL_MODES.PC || !this.player2.active ? [this.player] : [this.player, this.player2];
   }
 
   onEnemyTouch(player) {
@@ -735,7 +735,7 @@ export default class WorldScene extends Phaser.Scene {
 
     // * Chaque joueur peut interagir (miroir, personnage). Le joueur 1 est lu en premier. Le joueur 2 ne le peut pas en mode pc.
     if (this.interact(this.player, this.input1, true)) return;
-    if (getControlMode() !== CONTROL_MODES.PC) this.interact(this.player2, this.player2.input2, false);
+    if (this.player2.active && getControlMode() !== CONTROL_MODES.PC) this.interact(this.player2, this.player2.input2, false);
   }
 
   /**
