@@ -49,9 +49,9 @@ export default class MenuScene extends Phaser.Scene {
     this.input.keyboard.on('keydown-DOWN', () => this.select(this.selected + 1));
 
     // * Entrée (clavier) ou I (bouton d'interaction de la borne) valide le bouton choisi : « Jouer » mène au choix du mode,
-    // « Commandes » à la page des touches. (Réglages et Crédits : pas encore de page.)
+    // « Commandes » à la page des touches, « Crédits » à la page de l'équipe. (Réglages : pas encore de page.)
     const validate = () => {
-      const scenes = { 0: SCENES.MODE, 2: SCENES.CONTROLS };
+      const scenes = { 0: SCENES.MODE, 2: SCENES.CONTROLS, 3: SCENES.CREDITS };
       const target = scenes[this.selected];
       if (target && !this.leaving) {
         this.leaving = true; // une touche maintenue répète l'événement : on ne lance la scène qu'une fois

@@ -11,6 +11,7 @@ export const SCENES = {
   MENU: 'MenuScene',
   MODE: 'ModeScene',
   CONTROLS: 'ControlsScene',
+  CREDITS: 'CreditsScene',
   HUB: 'HubScene',
   WORLD_1: 'World1Scene',
   WORLD_2: 'World2Scene',
@@ -26,8 +27,11 @@ export const UI_IMAGES = {
   MODE_SOLO: { KEY: 'ui_mode_solo', PATH: 'assets/images/ui/mode_solo.png' }, // choix du mode, la carte Solo surlignée
   MODE_MULTI: { KEY: 'ui_mode_multi', PATH: 'assets/images/ui/mode_multi.png' }, // la carte Multi surlignée
   BUTTON: { KEY: 'ui_bouton', PATH: 'assets/images/ui/bouton.png' }, // le bouton vert du menu (42 x 12 px, rogné au contenu)
-  JOYSTICK_1: { KEY: 'ui_joystick_1', PATH: 'assets/images/ui/joystick_1.png' }, // le joystick du joueur 1 (boule violette), 24 x 24 px
-  JOYSTICK_2: { KEY: 'ui_joystick_2', PATH: 'assets/images/ui/joystick_2.png' }, // celui du joueur 2 (boule bleue)
+  // Le joystick de la page Commandes, en deux morceaux de 24 x 24 px pour que le manche puisse s'incliner sur son socle :
+  // le socle (fixe) et le manche avec sa boule (violet pour le joueur 1, bleu pour le joueur 2)
+  JOYSTICK_BASE: { KEY: 'ui_joystick_socle', PATH: 'assets/images/ui/joystick_base.png' },
+  JOYSTICK_STICK_1: { KEY: 'ui_joystick_manche_1', PATH: 'assets/images/ui/joystick_baton_1.png' },
+  JOYSTICK_STICK_2: { KEY: 'ui_joystick_manche_2', PATH: 'assets/images/ui/joystick_baton_2.png' },
   // Les boutons d'arcade de la page Commandes (20 x 20 px, une couleur par action)
   ARCADE_GREEN: { KEY: 'ui_arcade_vert', PATH: 'assets/images/ui/bouton_arcade_vert.png' },
   ARCADE_RED: { KEY: 'ui_arcade_rouge', PATH: 'assets/images/ui/bouton_arcade_rouge.png' },
@@ -346,11 +350,16 @@ export const MENU_BUTTONS = {
 
 export const MENU_COMMANDS_INDEX = 2; // la place du bouton « Commandes » dans MENU_BUTTONS.LABELS (pour y revenir depuis la page)
 
-// * La page « Commandes » : les touches du mode arcade des deux joueurs, sur un cadre en parchemin (couleurs de DIALOGUE.COLORS)
-export const CONTROLS_PAGE = {
+// * Les pages sur un cadre en parchemin (Commandes, Crédits) : l'image d'accueil assombrie, un cadre aux couleurs de la boîte de
+// dialogue (DIALOGUE.COLORS), et un titre en haut. Voir ParchmentPage.js.
+export const PARCHMENT_PAGE = {
   DIM_ALPHA: 0.55, // l'image d'accueil est assombrie derrière le cadre
   FRAME: { X: 130, Y: 70, WIDTH: 1020, HEIGHT: 580, RADIUS: 26, BORDER: 5 },
   TITLE: { Y: 125, SIZE: '56px' },
+};
+
+// * La page « Commandes » : les touches du mode arcade des deux joueurs, sur un cadre en parchemin (voir PARCHMENT_PAGE)
+export const CONTROLS_PAGE = {
   COLUMNS_X: [380, 900], // le centre de la colonne du joueur 1 et de celle du joueur 2
   PLAYER_Y: 215, // le nom du joueur
   PLAYER_SIZE: '38px',
@@ -361,6 +370,8 @@ export const CONTROLS_PAGE = {
   LABEL_GAP: 24, // l'espace entre le libellé (aligné à droite) et le centre de la colonne
   ICON_OFFSET: 64, // le centre de l'icône (joystick ou bouton), à droite du centre de la colonne
   JOYSTICK_SCALE: 3, // 24 px x 3 = 72 px (entier, pour des pixels nets)
+  // * Le manche s'incline autour de son pied (un point de l'image de 24 x 24 px), de -ANGLE à +ANGLE degrés, en va-et-vient
+  JOYSTICK_TILT: { PIVOT: { X: 11.5, Y: 17.5 }, ANGLE_DEG: 14, DURATION_MS: 650, EASE: 'Sine.easeInOut', PLAYER_2_DELAY_MS: 325 },
   ARCADE_SCALE: 3, // 20 px x 3 = 60 px
   ARCADE_LETTER_SIZE: '30px', // la lettre posée sur le bouton
   // Quel bouton d'arcade pour quelle action (les deux joueurs ont les mêmes couleurs)
@@ -374,6 +385,19 @@ export const CONTROLS_PAGE = {
     ['Interagir', 'interact'],
     ['Tirer', 'shoot'],
     ['Dash', 'dash'],
+  ],
+};
+
+// * La page « Crédits » : le cadre du développement et l'équipe. Chaque ligne : le texte, sa hauteur (Y), sa taille, en gras ou non.
+export const CREDITS_PAGE = {
+  LINES: [
+    { TEXT: 'Glass Garden', Y: 215, SIZE: '64px', BOLD: true },
+    { TEXT: 'Projet de SAE · BUT MMI · 2026', Y: 295, SIZE: '34px' },
+    { TEXT: 'IUT de Béziers', Y: 340, SIZE: '34px' },
+    { TEXT: 'Thème « Monde onirique »', Y: 400, SIZE: '30px' },
+    { TEXT: "Jeu pour borne d'arcade, réalisé avec Phaser", Y: 444, SIZE: '30px' },
+    { TEXT: 'Équipe', Y: 510, SIZE: '36px', BOLD: true },
+    { TEXT: 'Lilian · Léa · Hina', Y: 560, SIZE: '42px', BOLD: true },
   ],
 };
 

@@ -1,5 +1,6 @@
-import { SCENES, UI_IMAGES, FONT_FAMILY, DIALOGUE, CONTROL_MODES, CONTROLS_PAGE, MENU_COMMANDS_INDEX, ASSETS, PLAYER, P2_SPRITE } from '../utils/constants.js';
+import { SCENES, UI_IMAGES, FONT_FAMILY, CONTROL_MODES, CONTROLS_PAGE, MENU_COMMANDS_INDEX, ASSETS, PLAYER, P2_SPRITE } from '../utils/constants.js';
 import { BINDINGS } from '../systems/InputManager.js';
+import { createParchmentPage } from '../systems/ParchmentPage.js';
 
 /** Le nom d'une touche tel qu'on l'affiche : « ENTER » devient « Entrée » (les lettres restent telles quelles). */
 const keyLabel = (key) => ({ ENTER: 'Entrée', SPACE: 'Espace', SHIFT: 'Maj' }[key] ?? key);
@@ -19,28 +20,16 @@ export default class ControlsScene extends Phaser.Scene {
     // * Les personnages des deux joueurs (les mêmes feuilles que dans le jeu : Phaser ne les recharge pas deux fois)
     this.load.spritesheet(ASSETS.PLAYER_1, 'assets/images/sprites/player_1_spritesheet.png', { frameWidth: PLAYER.FRAME_SIZE, frameHeight: PLAYER.FRAME_SIZE });
     this.load.spritesheet(P2_SPRITE.key, P2_SPRITE.path, { frameWidth: P2_SPRITE.frameWidth, frameHeight: P2_SPRITE.frameHeight });
-    this.load.image(UI_IMAGES.JOYSTICK_1.KEY, UI_IMAGES.JOYSTICK_1.PATH);
-    this.load.image(UI_IMAGES.JOYSTICK_2.KEY, UI_IMAGES.JOYSTICK_2.PATH);
+    ['JOYSTICK_BASE', 'JOYSTICK_STICK_1', 'JOYSTICK_STICK_2'].forEach((name) => this.load.image(UI_IMAGES[name].KEY, UI_IMAGES[name].PATH));
     ['ARCADE_GREEN', 'ARCADE_RED', 'ARCADE_YELLOW'].forEach((name) => this.load.image(UI_IMAGES[name].KEY, UI_IMAGES[name].PATH));
   }
 
   create() {
-    const { width, height } = this.scale;
-    const { FRAME, TITLE, COLUMNS_X, PLAYER_Y, FIRST_ROW_Y, ROW_SPACING, ROWS, BACK } = CONTROLS_PAGE;
+    const { width } = this.scale;
+    const { COLUMNS_X, PLAYER_Y, FIRST_ROW_Y, ROW_SPACING, ROWS, BACK } = CONTROLS_PAGE;
 
-    // * Le fond : l'image d'accueil, assombrie
-    this.add.image(width / 2, height / 2, UI_IMAGES.HOME.KEY);
-    this.add.rectangle(width / 2, height / 2, width, height, 0x000000, CONTROLS_PAGE.DIM_ALPHA);
-
-    // * Le cadre en parchemin (les couleurs de la boîte de dialogue)
-    const frame = this.add.graphics();
-    frame.fillStyle(DIALOGUE.COLORS.PAPER, 1).fillRoundedRect(FRAME.X, FRAME.Y, FRAME.WIDTH, FRAME.HEIGHT, FRAME.RADIUS);
-    frame.lineStyle(FRAME.BORDER, DIALOGUE.COLORS.BORDER, 1).strokeRoundedRect(FRAME.X, FRAME.Y, FRAME.WIDTH, FRAME.HEIGHT, FRAME.RADIUS);
-
-    const text = (x, y, content, size, bold = false) =>
-      this.add.text(x, y, content, { fontFamily: FONT_FAMILY, fontSize: size, fontStyle: bold ? 'bold' : 'normal', color: DIALOGUE.COLORS.TEXT }).setOrigin(0.5);
-
-    text(width / 2, TITLE.Y, 'Commandes', TITLE.SIZE, true);
+    // * Le fond, le cadre en parchemin et le titre (voir ParchmentPage.js)
+    const text = createParchmentPage(this, 'Commandes');
 
     // * Une colonne par joueur : son nom, puis une ligne par action (le libellé, et dessous la touche)
     [1, 2].forEach((player, column) => {
@@ -58,10 +47,29 @@ export default class ControlsScene extends Phaser.Scene {
         text(x - CONTROLS_PAGE.LABEL_GAP, y, label, CONTROLS_PAGE.ACTION_SIZE).setOrigin(1, 0.5);
         const iconX = x + CONTROLS_PAGE.ICON_OFFSET;
         if (action === 'move') {
-          // * Le déplacement se fait au joystick (chacun a le sien sur la borne) : on le dessine, de la couleur du joueur
-          const key = player === 1 ? UI_IMAGES.JOYSTICK_1.KEY : UI_IMAGES.JOYSTICK_2.KEY;
-          this.textures.get(key).setFilter(Phaser.Textures.FilterMode.NEAREST);
-          this.add.image(iconX, y, key).setScale(CONTROLS_PAGE.JOYSTICK_SCALE);
+          // * Le déplacement se fait au joystick (chacun a le sien sur la borne) : on le dessine, de la couleur du joueur.
+          // Le socle est fixe, le manche s'incline en va-et-vient autour de son pied. Le joueur 2 est un peu en décalage.
+          const { PIVOT, ANGLE_DEG, DURATION_MS, EASE, PLAYER_2_DELAY_MS } = CONTROLS_PAGE.JOYSTICK_TILT;
+          const stickKey = player === 1 ? UI_IMAGES.JOYSTICK_STICK_1.KEY : UI_IMAGES.JOYSTICK_STICK_2.KEY;
+          [UI_IMAGES.JOYSTICK_BASE.KEY, stickKey].forEach((key) => this.textures.get(key).setFilter(Phaser.Textures.FilterMode.NEAREST));
+          const size = this.textures.get(stickKey).getSourceImage().width; // 24 px
+          const scale = CONTROLS_PAGE.JOYSTICK_SCALE;
+          this.add.image(iconX, y, UI_IMAGES.JOYSTICK_BASE.KEY).setScale(scale);
+          // * L'origine du manche est son pied : on le place là où est ce point sur le socle, et il tourne autour
+          const stick = this.add
+            .image(iconX + (PIVOT.X - size / 2) * scale, y + (PIVOT.Y - size / 2) * scale, stickKey)
+            .setOrigin(PIVOT.X / size, PIVOT.Y / size)
+            .setScale(scale)
+            .setAngle(-ANGLE_DEG);
+          this.tweens.add({
+            targets: stick,
+            angle: ANGLE_DEG,
+            duration: DURATION_MS,
+            ease: EASE,
+            yoyo: true,
+            repeat: -1,
+            delay: player === 1 ? 0 : PLAYER_2_DELAY_MS,
+          });
         } else {
           // * Un bouton d'arcade de la couleur de l'action, avec la lettre de la touche posée dessus
           const button = UI_IMAGES[CONTROLS_PAGE.ARCADE_BUTTONS[action]];
