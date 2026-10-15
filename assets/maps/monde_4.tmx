@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.0" orientation="orthogonal" renderorder="right-down" width="40" height="22" tilewidth="32" tileheight="32" infinite="0" nextlayerid="8" nextobjectid="105">
+<map version="1.10" tiledversion="1.12.0" orientation="orthogonal" renderorder="right-down" width="40" height="22" tilewidth="32" tileheight="32" infinite="0" nextlayerid="8" nextobjectid="113">
  <editorsettings>
   <export target="monde_4.json" format="json"/>
  </editorsettings>
@@ -254,6 +254,30 @@
    <point/>
   </object>
   <object id="104" name="caisse" type="crate" x="240" y="80">
+   <point/>
+  </object>
+  <object id="105" name="lanterne_noire" type="deco" x="816" y="190">
+   <point/>
+  </object>
+  <object id="106" name="lanterne_noire" type="deco" x="848" y="190">
+   <point/>
+  </object>
+  <object id="107" name="lanterne_noire" type="deco" x="880" y="190">
+   <point/>
+  </object>
+  <object id="108" name="sac_1" type="deco" x="784" y="222">
+   <point/>
+  </object>
+  <object id="109" name="puits" type="deco" x="816" y="222">
+   <point/>
+  </object>
+  <object id="110" name="sac_2" type="deco" x="848" y="222">
+   <point/>
+  </object>
+  <object id="111" name="crane" type="deco" x="912" y="286">
+   <point/>
+  </object>
+  <object id="112" name="crane" type="deco" x="1136" y="446">
    <point/>
   </object>
  </objectgroup>

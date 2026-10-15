@@ -593,9 +593,6 @@ export const DECO = {
   // (0xffffff = aucune teinte). Un monde absent garde les couleurs d'origine des images.
   WORLD_TINTS: {
     world_1: 0x8f9cd4, // la nuit : des bleus, le vert des buissons s'assombrit
-    world_2: 0xf0b8e8, // le rêve : des buissons qui virent au rose
-    world_3: 0xf2d0a0, // l'automne : une lumière chaude
-    world_5: 0xc4b0ff, // la magie : des buissons et des fleurs qui virent au violet
   },
   // * Les sources de lumière ne sont jamais teintées : une lanterne, une bougie ou un cristal reste lumineux, même la nuit
   UNTINTED: ['lanterne_', 'bougie_', 'cristal_'], // les noms d'images qui commencent ainsi
@@ -614,7 +611,7 @@ export const DECO = {
   ],
   IMAGES: [
     'fleur_1', 'fleur_2', 'fleur_3', 'fleur_4', 'fleur_5', 'fleur_6',
-    'buisson', 'buisson_automne', 'trefle', 'herbe', 'plante_verte', 'panneau',
+    'buisson', 'buisson_automne', 'buisson_reve', 'buisson_magie', 'trefle', 'herbe', 'plante_verte', 'panneau',
     'champignon_1', 'champignon_2', 'champignon_3', 'champignon_4',
     'lanterne_bleue', 'lanterne_orange', 'lanterne_noire', 'lanterne_rose', 'lanterne_verte', 'lanterne_violette',
     'bougie_1', 'bougie_2', 'bougie_3',

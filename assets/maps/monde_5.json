@@ -195,7 +195,7 @@
                 {
                  "height":0,
                  "id":20,
-                 "name":"buisson",
+                 "name":"buisson_magie",
                  "opacity":1,
                  "point":true,
                  "rotation":0,
@@ -208,7 +208,7 @@
                 {
                  "height":0,
                  "id":21,
-                 "name":"buisson",
+                 "name":"buisson_magie",
                  "opacity":1,
                  "point":true,
                  "rotation":0,
@@ -221,7 +221,7 @@
                 {
                  "height":0,
                  "id":22,
-                 "name":"buisson",
+                 "name":"buisson_magie",
                  "opacity":1,
                  "point":true,
                  "rotation":0,
@@ -234,7 +234,7 @@
                 {
                  "height":0,
                  "id":23,
-                 "name":"buisson",
+                 "name":"buisson_magie",
                  "opacity":1,
                  "point":true,
                  "rotation":0,
@@ -247,7 +247,7 @@
                 {
                  "height":0,
                  "id":24,
-                 "name":"buisson",
+                 "name":"buisson_magie",
                  "opacity":1,
                  "point":true,
                  "rotation":0,
@@ -403,7 +403,7 @@
                 {
                  "height":0,
                  "id":36,
-                 "name":"buisson",
+                 "name":"buisson_magie",
                  "opacity":1,
                  "point":true,
                  "rotation":0,
@@ -416,7 +416,7 @@
                 {
                  "height":0,
                  "id":37,
-                 "name":"buisson",
+                 "name":"buisson_magie",
                  "opacity":1,
                  "point":true,
                  "rotation":0,
@@ -429,7 +429,7 @@
                 {
                  "height":0,
                  "id":38,
-                 "name":"buisson",
+                 "name":"buisson_magie",
                  "opacity":1,
                  "point":true,
                  "rotation":0,
@@ -442,7 +442,7 @@
                 {
                  "height":0,
                  "id":39,
-                 "name":"buisson",
+                 "name":"buisson_magie",
                  "opacity":1,
                  "point":true,
                  "rotation":0,
@@ -455,7 +455,7 @@
                 {
                  "height":0,
                  "id":40,
-                 "name":"buisson",
+                 "name":"buisson_magie",
                  "opacity":1,
                  "point":true,
                  "rotation":0,
@@ -468,7 +468,7 @@
                 {
                  "height":0,
                  "id":41,
-                 "name":"buisson",
+                 "name":"buisson_magie",
                  "opacity":1,
                  "point":true,
                  "rotation":0,
@@ -481,7 +481,7 @@
                 {
                  "height":0,
                  "id":42,
-                 "name":"buisson",
+                 "name":"buisson_magie",
                  "opacity":1,
                  "point":true,
                  "rotation":0,
@@ -494,7 +494,7 @@
                 {
                  "height":0,
                  "id":43,
-                 "name":"buisson",
+                 "name":"buisson_magie",
                  "opacity":1,
                  "point":true,
                  "rotation":0,
@@ -507,7 +507,7 @@
                 {
                  "height":0,
                  "id":44,
-                 "name":"buisson",
+                 "name":"buisson_magie",
                  "opacity":1,
                  "point":true,
                  "rotation":0,
@@ -520,7 +520,7 @@
                 {
                  "height":0,
                  "id":45,
-                 "name":"buisson",
+                 "name":"buisson_magie",
                  "opacity":1,
                  "point":true,
                  "rotation":0,
@@ -533,7 +533,7 @@
                 {
                  "height":0,
                  "id":46,
-                 "name":"buisson",
+                 "name":"buisson_magie",
                  "opacity":1,
                  "point":true,
                  "rotation":0,
@@ -546,7 +546,7 @@
                 {
                  "height":0,
                  "id":47,
-                 "name":"buisson",
+                 "name":"buisson_magie",
                  "opacity":1,
                  "point":true,
                  "rotation":0,
@@ -559,7 +559,7 @@
                 {
                  "height":0,
                  "id":48,
-                 "name":"buisson",
+                 "name":"buisson_magie",
                  "opacity":1,
                  "point":true,
                  "rotation":0,
@@ -624,7 +624,7 @@
                 {
                  "height":0,
                  "id":53,
-                 "name":"buisson",
+                 "name":"buisson_magie",
                  "opacity":1,
                  "point":true,
                  "rotation":0,
@@ -637,7 +637,7 @@
                 {
                  "height":0,
                  "id":54,
-                 "name":"buisson",
+                 "name":"buisson_magie",
                  "opacity":1,
                  "point":true,
                  "rotation":0,
@@ -754,7 +754,7 @@
                 {
                  "height":0,
                  "id":63,
-                 "name":"buisson",
+                 "name":"buisson_magie",
                  "opacity":1,
                  "point":true,
                  "rotation":0,
@@ -767,7 +767,7 @@
                 {
                  "height":0,
                  "id":64,
-                 "name":"buisson",
+                 "name":"buisson_magie",
                  "opacity":1,
                  "point":true,
                  "rotation":0,
@@ -884,7 +884,7 @@
                 {
                  "height":0,
                  "id":73,
-                 "name":"buisson",
+                 "name":"buisson_magie",
                  "opacity":1,
                  "point":true,
                  "rotation":0,
@@ -897,7 +897,7 @@
                 {
                  "height":0,
                  "id":74,
-                 "name":"buisson",
+                 "name":"buisson_magie",
                  "opacity":1,
                  "point":true,
                  "rotation":0,
@@ -910,7 +910,7 @@
                 {
                  "height":0,
                  "id":75,
-                 "name":"buisson",
+                 "name":"buisson_magie",
                  "opacity":1,
                  "point":true,
                  "rotation":0,
@@ -923,7 +923,7 @@
                 {
                  "height":0,
                  "id":76,
-                 "name":"buisson",
+                 "name":"buisson_magie",
                  "opacity":1,
                  "point":true,
                  "rotation":0,
@@ -936,7 +936,7 @@
                 {
                  "height":0,
                  "id":77,
-                 "name":"buisson",
+                 "name":"buisson_magie",
                  "opacity":1,
                  "point":true,
                  "rotation":0,
@@ -949,7 +949,7 @@
                 {
                  "height":0,
                  "id":78,
-                 "name":"buisson",
+                 "name":"buisson_magie",
                  "opacity":1,
                  "point":true,
                  "rotation":0,
@@ -962,7 +962,7 @@
                 {
                  "height":0,
                  "id":79,
-                 "name":"buisson",
+                 "name":"buisson_magie",
                  "opacity":1,
                  "point":true,
                  "rotation":0,
@@ -975,7 +975,7 @@
                 {
                  "height":0,
                  "id":80,
-                 "name":"buisson",
+                 "name":"buisson_magie",
                  "opacity":1,
                  "point":true,
                  "rotation":0,
@@ -988,7 +988,7 @@
                 {
                  "height":0,
                  "id":81,
-                 "name":"buisson",
+                 "name":"buisson_magie",
                  "opacity":1,
                  "point":true,
                  "rotation":0,
@@ -1001,7 +1001,7 @@
                 {
                  "height":0,
                  "id":82,
-                 "name":"buisson",
+                 "name":"buisson_magie",
                  "opacity":1,
                  "point":true,
                  "rotation":0,
@@ -1014,7 +1014,7 @@
                 {
                  "height":0,
                  "id":83,
-                 "name":"buisson",
+                 "name":"buisson_magie",
                  "opacity":1,
                  "point":true,
                  "rotation":0,
@@ -1079,7 +1079,7 @@
                 {
                  "height":0,
                  "id":88,
-                 "name":"buisson",
+                 "name":"buisson_magie",
                  "opacity":1,
                  "point":true,
                  "rotation":0,
@@ -1092,7 +1092,7 @@
                 {
                  "height":0,
                  "id":89,
-                 "name":"buisson",
+                 "name":"buisson_magie",
                  "opacity":1,
                  "point":true,
                  "rotation":0,
@@ -1105,7 +1105,7 @@
                 {
                  "height":0,
                  "id":90,
-                 "name":"buisson",
+                 "name":"buisson_magie",
                  "opacity":1,
                  "point":true,
                  "rotation":0,
@@ -1118,7 +1118,7 @@
                 {
                  "height":0,
                  "id":91,
-                 "name":"buisson",
+                 "name":"buisson_magie",
                  "opacity":1,
                  "point":true,
                  "rotation":0,
