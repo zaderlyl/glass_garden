@@ -53,4 +53,7 @@ export function updateSecondPlayer(p2) {
     p2.setVelocityY(P2_SPEED);
     p2.setFrame(FRAME_BAS);
   }
+
+  // * En diagonale, on garde la même vitesse qu'en ligne droite (sinon il irait environ 41 % plus vite)
+  p2.body.velocity.normalize().scale(P2_SPEED);
 }
