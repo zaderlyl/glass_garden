@@ -83,12 +83,12 @@ export function createBubbles(scene, map, player, onAllBurst) {
 
   // * Où vont s'écarter les bulles filles : autour de la bulle mère, à SPREAD.DISTANCE, en évitant les murs, l'eau, les caisses.
   // Si une direction est bloquée on raccourcit (60 %, puis 30 %), sinon la fille reste sur place.
-  const childTargets = (x, y, count) => {
+  const childTargets = (x, y, count, distance = BUBBLES.SPREAD.DISTANCE) => {
     const offset = Math.random() * Math.PI * 2;
     return Array.from({ length: count }, (_, i) => {
       const angle = offset + (i * Math.PI * 2) / count;
       for (const scale of [1, 0.6, 0.3]) {
-        const target = { x: x + Math.cos(angle) * BUBBLES.SPREAD.DISTANCE * scale, y: y + Math.sin(angle) * BUBBLES.SPREAD.DISTANCE * scale };
+        const target = { x: x + Math.cos(angle) * distance * scale, y: y + Math.sin(angle) * distance * scale };
         if (!scene.isFreeGround || scene.isFreeGround(target.x, target.y)) return target;
       }
       return { x, y };
@@ -132,7 +132,7 @@ export function createBubbles(scene, map, player, onAllBurst) {
       // * Elle se divise : ses filles naissent à sa place (avant de la compter, pour que la partie ne finisse pas trop tôt)
       const split = BUBBLES.SPLIT[size];
       if (split) {
-        childTargets(bubble.x, bubble.y, splitCount ?? split.COUNT).forEach((target) => spawnBubble(target.x, target.y, split.INTO, { x: bubble.x, y: bubble.y }));
+        childTargets(bubble.x, bubble.y, splitCount ?? split.COUNT, split.DISTANCE).forEach((target) => spawnBubble(target.x, target.y, split.INTO, { x: bubble.x, y: bubble.y }));
       }
 
       state.burst += 1;
