@@ -117,7 +117,7 @@ export const TINTS = {
 export const WORLD_TINTS = {
 };
 
-// * Images recolorées d'un monde (fabriquées par outils/recolorer.py) : le tileset de construction et l'eau animée
+// * Images recolorées d'un monde (déjà fabriquées, le script n'est plus dans le dépôt) : le tileset de construction et l'eau animée
 // remplacent les originaux dans ce monde. Un monde absent de cette table garde les images d'origine.
 // Pas de teinte (WORLD_TINTS) en plus : elle multiplierait une seconde fois les couleurs.
 export const WORLD_ART = {
