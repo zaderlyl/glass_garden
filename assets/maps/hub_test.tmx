@@ -65,7 +65,7 @@
   <object id="1" name="spawn" type="spawn" x="621.685" y="374.19">
    <point/>
   </object>
-  <object id="2" name="world_1" type="mirror" x="352.485" y="255.649" width="32" height="64">
+  <object id="2" name="world_1" type="mirror" x="320" y="224" width="32" height="64">
    <properties>
     <property name="type" value=""/>
    </properties>
@@ -76,22 +76,22 @@
   <object id="7" name="cheminee" type="smoke" x="232" y="138">
    <point/>
   </object>
-  <object id="8" name="world_2" type="mirror" x="448.485" y="255.649" width="32" height="64">
+  <object id="8" name="world_2" type="mirror" x="160" y="320" width="32" height="64">
    <properties>
     <property name="type" value=""/>
    </properties>
   </object>
-  <object id="9" name="world_3" type="mirror" x="544.485" y="255.649" width="32" height="64">
+  <object id="9" name="world_3" type="mirror" x="224" y="480" width="32" height="64">
    <properties>
     <property name="type" value=""/>
    </properties>
   </object>
-  <object id="10" name="world_4" type="mirror" x="640.485" y="255.649" width="32" height="64">
+  <object id="10" name="world_4" type="mirror" x="928" y="416" width="32" height="64">
    <properties>
     <property name="type" value=""/>
    </properties>
   </object>
-  <object id="11" name="world_5" type="mirror" x="736.485" y="255.649" width="32" height="64">
+  <object id="11" name="world_5" type="mirror" x="608" y="224" width="32" height="64">
    <properties>
     <property name="type" value=""/>
    </properties>
