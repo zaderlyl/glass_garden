@@ -322,6 +322,22 @@ export const TRANSITION = {
   COLOR: 0x000000,
 };
 
+// * La musique des mondes (voir MusicSystem.js) : un fichier par monde (le nom du monde est celui de WORLDS), jouée en boucle.
+// Un monde absent de TRACKS n'a pas de musique (le monde 3, l'automne, attend la sienne : il suffit d'ajouter une ligne ici).
+export const MUSIC = {
+  PATH: 'assets/audio/music/',
+  KEY_PREFIX: 'music_', // la clé Phaser d'une musique est ce préfixe suivi du nom du monde
+  VOLUME: 0.5, // le volume de la musique (0 à 1)
+  FADE_MS: 600, // le fondu à chaque passage de miroir, comme l'ouverture et la fermeture du cercle (TRANSITION)
+  TRACKS: {
+    hub: 'jardin.mp3',
+    world_1: 'nuit.mp3',
+    world_2: 'reve.mp3',
+    world_4: 'post_apo.mp3',
+    world_5: 'magie.mp3',
+  },
+};
+
 // * L'intro du jardin, jouée au début d'une nouvelle partie (voir WorldScene.playIntro)
 export const INTRO = {
   FADE_MS: 2500, // le fondu depuis le blanc, pendant lequel le joueur est figé
@@ -339,6 +355,20 @@ export const INTRO = {
   UNLOCK_DELAY_MS: 500, // après la note : le temps avant que le cadenas du premier miroir ne s'ouvre
   END_PAUSE_MS: 600, // la pause entre l'ouverture du cadenas et la reprise du jeu
   MIRRORS: { START_DELAY_MS: 400, DELAY_MS: 650, POP_MS: 450, POP_FROM_SCALE: 0.4 },
+};
+
+// * L'outro, après la dernière phrase de l'ancien (voir WorldScene.playOutro) : les 5 étoiles sortent des miroirs, montent vers lui et
+// tournent autour de lui, puis le blanc recouvre l'écran avant la victoire.
+export const OUTRO = {
+  STAR_DEPTH: 11, // devant les personnages (le décor du dessus est à 10)
+  STAR_SCALE: 1.5,
+  RING_RADIUS: 56, // la distance des étoiles à l'ancien, en pixels
+  RING_HEIGHT: 24, // le centre du cercle est à cette hauteur au-dessus de ses pieds
+  RISE_MS: 1500, // le temps que met chaque étoile à monter de son miroir
+  STAGGER_MS: 250, // le décalage entre le départ de deux étoiles
+  ORBIT_MS: 2000, // le tour complet des étoiles autour de lui
+  FADE_MS: 1600, // le fondu vers le blanc
+  SKIP_AFTER_MS: 500, // avant ce délai, on ne peut pas passer l'outro
 };
 
 // * Fumée de cheminée : des objets de classe « smoke » posés dans Tiled (point = le haut de la cheminée)

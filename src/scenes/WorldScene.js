@@ -9,6 +9,7 @@ import { isMirrorUsed, markMirrorUsed, shouldMirrorDisappear, getMirrorFacing, p
 import { applyTint } from '../systems/TintSystem.js';
 import { irisClose, irisOpen } from '../systems/TransitionSystem.js';
 import { consumeIntro } from '../systems/IntroSystem.js';
+import { preloadMusic, playMusic, fadeOutMusic } from '../systems/MusicSystem.js';
 import { preloadNpcs, createNpcs } from '../systems/NpcSystem.js';
 import DialogueBox, { isRiddleSolved } from '../systems/DialogueSystem.js';
 import { bounceStar } from '../systems/StarBounce.js';
@@ -50,6 +51,8 @@ import {
   BUBBLES,
   ENEMY_AI,
   INTRO,
+  OUTRO,
+  TRANSITION,
   MIRROR_LOCK,
 } from '../utils/constants.js';
 
@@ -109,6 +112,9 @@ export default class WorldScene extends Phaser.Scene {
 
     // * Les images des personnages non joueurs (voir NPCS dans constants.js)
     preloadNpcs(this);
+
+    // * La musique de ce monde (voir MUSIC dans constants.js)
+    preloadMusic(this, this.getWorldName());
 
     // * L'image des bulles du monde magique (voir BUBBLES dans constants.js)
     preloadBubbles(this);
@@ -229,8 +235,10 @@ export default class WorldScene extends Phaser.Scene {
     this.vanishingMirror = null;
     this.dialogueInput = null;
     this.gameWon = false;
+    this.outroPlaying = false; // vrai pendant l'outro, après le dialogue de l'ancien (voir playOutro)
     this.transitioning = false; // vrai pendant la FERMETURE de l'iris, quand on prend un miroir : le joueur est figé (voir update)
     this.introPlaying = this.isNormalWorld() && consumeIntro(); // vrai au tout début d'une partie : le jardin joue son intro (voir playIntro)
+    playMusic(this, this.getWorldName(), this.introPlaying ? INTRO.FADE_MS : undefined); // pendant l'intro, la musique monte avec le fondu blanc
     this.mirrorLocks = []; // les cadenas des miroirs du jardin (créés plus bas)
     this.waterSprites = []; // les sprites de l'eau animée de CETTE visite (remplis par createAnimatedTiles)
 
@@ -857,6 +865,86 @@ export default class WorldScene extends Phaser.Scene {
   }
 
   /**
+   * * L'outro : après la dernière phrase de l'ancien, le joueur est figé. Les 5 étoiles sortent des miroirs (leurs places dans la carte, même si
+   * un miroir a disparu), montent vers l'ancien et tournent autour de lui, puis l'écran passe au blanc et la victoire s'affiche.
+   * O ou Échap la passent. Le chronomètre s'arrête dès le début : l'outro ne compte pas dans le temps.
+   */
+  playOutro() {
+    const ancien = this.npcs.find((npc) => npc.npcName === 'ancien');
+    if (!ancien) return this.winGame();
+    this.outroPlaying = true;
+    this.outroStartedAt = this.time.now;
+    this.transitioning = true;
+    timer.stop();
+    this.hint.setText(''); // « I : parler » ne reste pas affiché pendant l'outro
+    this.outroKeys = ['keydown-O', 'keydown-ESC'];
+    this.outroKeys.forEach((event) => this.input.keyboard.on(event, this.skipOutro, this));
+
+    const center = { x: ancien.x, y: ancien.y - OUTRO.RING_HEIGHT };
+    const mirrorPlaces = this.map
+      .getObjectLayer('objects')
+      .objects.filter((object) => (object.class || object.type) === 'mirror')
+      .map((object) => ({ x: object.x + object.width / 2, y: object.y + object.height / 2 }));
+
+    // * Chaque étoile part de son miroir (elle apparaît) et monte à sa place sur le cercle autour de l'ancien
+    const angleStep = (Math.PI * 2) / mirrorPlaces.length;
+    this.outroStars = mirrorPlaces.map((place, i) => {
+      const angle = -Math.PI / 2 + i * angleStep;
+      const star = this.add.image(place.x, place.y, 'etoile').setDepth(OUTRO.STAR_DEPTH).setScale(OUTRO.STAR_SCALE).setAlpha(0);
+      star.angle0 = angle;
+      this.tweens.add({ targets: star, alpha: 1, duration: 400, delay: i * OUTRO.STAGGER_MS });
+      this.tweens.add({
+        targets: star,
+        x: center.x + Math.cos(angle) * OUTRO.RING_RADIUS,
+        y: center.y + Math.sin(angle) * OUTRO.RING_RADIUS,
+        duration: OUTRO.RISE_MS,
+        delay: i * OUTRO.STAGGER_MS,
+        ease: 'Sine.easeInOut',
+      });
+      return star;
+    });
+
+    // * Quand la dernière est arrivée, tout le cercle fait un tour, puis le blanc recouvre l'écran
+    const risen = (mirrorPlaces.length - 1) * OUTRO.STAGGER_MS + OUTRO.RISE_MS;
+    this.time.delayedCall(risen, () => {
+      if (!this.outroPlaying) return;
+      const turn = { value: 0 };
+      this.tweens.add({
+        targets: turn,
+        value: Math.PI * 2,
+        duration: OUTRO.ORBIT_MS,
+        onUpdate: () =>
+          this.outroStars.forEach((star) => {
+            const angle = star.angle0 + turn.value;
+            star.setPosition(center.x + Math.cos(angle) * OUTRO.RING_RADIUS, center.y + Math.sin(angle) * OUTRO.RING_RADIUS);
+          }),
+        onComplete: () => {
+          if (!this.outroPlaying) return;
+          this.cameras.main.fadeOut(OUTRO.FADE_MS, 255, 255, 255);
+          this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => this.endOutro());
+        },
+      });
+    });
+  }
+
+  /** Passe l'outro (O ou Échap), sauf pendant la première demi-seconde. */
+  skipOutro() {
+    if (!this.outroPlaying || this.time.now - this.outroStartedAt < OUTRO.SKIP_AFTER_MS) return;
+    this.cameras.main.fadeEffect.reset();
+    this.endOutro();
+  }
+
+  /** Fin de l'outro : les étoiles disparaissent et la victoire s'affiche. */
+  endOutro() {
+    if (!this.outroPlaying) return;
+    this.outroPlaying = false;
+    this.outroKeys.forEach((event) => this.input.keyboard.off(event, this.skipOutro, this));
+    this.tweens.killTweensOf(this.outroStars);
+    this.outroStars.forEach((star) => star.destroy());
+    this.winGame();
+  }
+
+  /**
    * * Fin de la partie : on arrête le chronomètre, on fige le joueur et la physique, et l'interface affiche l'écran de victoire.
    */
   winGame() {
@@ -982,7 +1070,7 @@ export default class WorldScene extends Phaser.Scene {
       this.dialogueInput = input; // c'est ce joueur qui fait avancer le dialogue
       // * L'ancien gardien termine le jeu : la victoire vient quand sa dernière phrase est lue. Les autres PNJ donnent l'étoile du monde.
       const isAncien = nearNpc.npcName === 'ancien';
-      this.dialogue.open(nearNpc.npcName, DIALOGUES[nearNpc.npcName], () => this.revealWorldStar(nearNpc), isAncien ? () => this.winGame() : undefined);
+      this.dialogue.open(nearNpc.npcName, DIALOGUES[nearNpc.npcName], () => this.revealWorldStar(nearNpc), isAncien ? () => this.playOutro() : undefined);
       return true;
     }
 
@@ -999,6 +1087,7 @@ export default class WorldScene extends Phaser.Scene {
 
         // * Transition : le cercle noir se referme SUR LE MIROIR pris, puis on change de scène
         this.transitioning = true;
+        fadeOutMusic(this, TRANSITION.IRIS_CLOSE_MS); // la musique s'estompe en même temps que le cercle se referme
         irisClose(this, nearMirror.x, nearMirror.y, () => {
           this.scene.start(targetScene, { from: currentWorld });
         });
