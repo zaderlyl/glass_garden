@@ -26,6 +26,15 @@ export const DIALOGUES = {
       "« Réunis-les, et tu sauras où je suis. »",
     ],
   },
+  // * L'ancien gardien, retrouvé dans le jardin quand les 5 étoiles sont réunies : l'écran de victoire vient après (voir WorldScene.interact)
+  ancien: {
+    name: 'Le gardien',
+    lines: [
+      'Je suis là.',
+      "Tu as retrouvé mes 5 étoiles. Le jardin n'a jamais été aussi beau.",
+      "Merci d'avoir pris soin de lui.",
+    ],
+  },
   // * La note au dos de la lettre, lue quand les miroirs sont apparus (voir WorldScene.playIntro) : elle explique les cadenas
   note: {
     name: 'Lettre',

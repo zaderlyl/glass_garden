@@ -2,7 +2,6 @@ import InputManager from '../systems/InputManager.js';
 import timer from '../systems/TimerSystem.js';
 import { dropBomb } from '../systems/BombSystem.js';
 import { RecolteEtoiles, recolterEtoile } from '../systems/RecolteEtoiles.js';
-import { areAllStarsCollected } from '../systems/StarSystem.js';
 import { createBulletAnimations, explodeBullet, shoot } from '../systems/fonctionTir.js';
 import { preloadCrate, createCrates } from '../systems/CrateSystem.js';
 import { preloadDeco, createDeco } from '../systems/DecoSystem.js';
@@ -875,12 +874,6 @@ export default class WorldScene extends Phaser.Scene {
     // * Partie gagnée : tout est figé, on ne lit plus les touches
     if (this.gameWon) return;
 
-    // * Victoire : toutes les étoiles du jeu sont ramassées ET le joueur est de retour dans le jardin
-    if (this.isNormalWorld() && areAllStarsCollected()) {
-      this.winGame();
-      return;
-    }
-
     // * Les ennemis vivent à chaque image, sauf pendant un dialogue ou une transition (ils s'arrêtent)
     updateEnemies(this, this.enemies, this.getEnemyTargets(), this.dialogue.isOpen || this.transitioning);
     if (this.enemiesTotal > 0 && !this.enemiesCleared && this.enemies.countActive(true) === 0) {
@@ -987,7 +980,9 @@ export default class WorldScene extends Phaser.Scene {
     if (nearNpc && !nearMirror && input.justPressed('interact')) {
       this.hint.setText('');
       this.dialogueInput = input; // c'est ce joueur qui fait avancer le dialogue
-      this.dialogue.open(nearNpc.npcName, DIALOGUES[nearNpc.npcName], () => this.revealWorldStar(nearNpc));
+      // * L'ancien gardien termine le jeu : la victoire vient quand sa dernière phrase est lue. Les autres PNJ donnent l'étoile du monde.
+      const isAncien = nearNpc.npcName === 'ancien';
+      this.dialogue.open(nearNpc.npcName, DIALOGUES[nearNpc.npcName], () => this.revealWorldStar(nearNpc), isAncien ? () => this.winGame() : undefined);
       return true;
     }
 

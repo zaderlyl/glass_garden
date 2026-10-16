@@ -162,6 +162,7 @@ export const ASSETS = {
   WATER: 'water',
   MIRROR: 'mirror',
   NPC_ENIGME: 'pnj_enigme', // le personnage de l'énigme (voir NPCS)
+  NPC_ANCIEN: 'pnj_ancien', // l'ancien gardien, à la fin du jeu (voir NPCS)
   BUBBLE: 'bulle', // les bulles du monde magique (voir BUBBLES)
   ENEMY_FAUCHEUR: 'ennemi_faucheur', // les ennemis du monde du rêve (voir ENEMIES)
   ENEMY_CAPUCHE: 'ennemi_capuche',
@@ -285,6 +286,16 @@ export const NPCS = {
     key: ASSETS.NPC_ENIGME,
     image: 'assets/images/sprites/pnj_enigme.png',
     hitbox: { WIDTH: 36, HEIGHT: 14 }, // la zone qui bloque le joueur, en pixels
+  },
+  // * L'ancien gardien : il attend dans le jardin quand les 5 étoiles sont réunies (requiresAllStars), et la victoire vient après son dialogue.
+  // Son image est une feuille de 4 images de 32 x 32 (dos, droite, gauche, face) : il regarde le joueur, donc l'image de face (frame 3).
+  ancien: {
+    key: ASSETS.NPC_ANCIEN,
+    image: 'assets/images/sprites/pnj_ancien.png',
+    frameSize: 32,
+    frame: 3,
+    hitbox: { WIDTH: 20, HEIGHT: 12 },
+    requiresAllStars: true,
   },
 };
 
